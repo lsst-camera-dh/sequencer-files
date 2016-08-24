@@ -143,6 +143,7 @@
         RTS
 
     WindowLine:  # Line readout
+        CALL    TransferLine
         CALL    SerialFlush     repeat(@PreCols)
         CALL    ReadPixel       repeat(@ReadCols)
         CALL    SerialFlush     repeat(@PostCols)
