@@ -177,12 +177,12 @@
          100 ns      = 0,0,0,0,0,1,0,0,0,0  #           S2
          150 ns      = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
          RampDelay   = 1,0,0,0,1,1,0,0,0,0  # RU     S1 S2
-         10 ns       = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
+         20 ns       = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
          400 ns      = 0,0,0,0,1,0,0,0,0,0  #        S1 (S2 falls)
          RampDelay   = 0,1,0,0,1,0,0,0,0,0  # RD     S1
          120 ns      = 0,0,0,0,1,0,0,0,0,0  #        S1
          20 ns       = 0,0,0,0,1,0,0,0,1,0  # TRG    S1
-         20 ns       = 0,0,0,0,1,0,0,0,0,0  #        S1
+         30 ns       = 0,0,0,0,1,0,0,0,0,0  #        S1
        constants: P1=0,P2=1,P3=0
 
 #    Bin1_Pixel_Reverse:  # Clocks in reverse direction and reads as usual
@@ -438,16 +438,16 @@
         CALL  Parallel_Shift_Forward  repeat(@BinPar)
         RTS
 
-    SingleRowBackward:
-        CALL  Parallel_Shift_Reverse  repeat(@BinPar)
-        RTS
+#    SingleRowBackward:
+#        CALL  Parallel_Shift_Reverse  repeat(@BinPar)
+#        RTS
 
-    SingleTDIRow:
-        #CALL  Sync
-        CALL  TDI_Parallel_Shift
-        CALL  TDI_Pixel_Readout   repeat(@ReadCols)
-        CALL  TDI1us  repeat(@SlopeDelay)
-        RTS
+#    SingleTDIRow:
+#        #CALL  Sync
+#        CALL  TDI_Parallel_Shift
+#        CALL  TDI_Pixel_Readout   repeat(@ReadCols)
+#        CALL  TDI1us  repeat(@SlopeDelay)
+#        RTS
  
     SingleRowClear:  # Flush a single row off the CCD            
         CALL  Parallel_Shift_Forward
@@ -474,13 +474,13 @@
 #        CALL  EndImage
 #        RTS  
         
-    CCDROIRead:
-        JSR   SingleRowClear   repeat(@PreRows)
-        CALL  StartImage
-        JSR   SingleROIRow     repeat(@ReadRows)
-        CALL  EndImage
-        JSR   SingleRowClear   repeat(@PostRows)
-        RTS     
+#    CCDROIRead:
+#        JSR   SingleRowClear   repeat(@PreRows)
+#        CALL  StartImage
+#        JSR   SingleROIRow     repeat(@ReadRows)
+#        CALL  EndImage
+#        JSR   SingleRowClear   repeat(@PostRows)
+#        RTS     
 
 #    CCDFakeRead:  # Readout of a CCD frame (window) with no data output
 #        JSR   SingleRowRead   repeat(@ReadRows)
