@@ -75,7 +75,7 @@
          TimeP       = 1,  0,  0,  1,  1,  0
          TimeP       = 1,  1,  0,  0,  1,  0
          1000 ns     = 0,  1,  1,  0,  0,  0
-         8000 ns     = 0,  1,  1,  0,  0,  1  # made it longer than TimeP to match e2v timing
+         7540 ns     = 0,  1,  1,  0,  0,  1  # made it longer than TimeP to match e2v timing, chose total time to be = 14 * ReadPixel (for FFT)
       constants:     S1=1, S2=1, RST=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
@@ -227,7 +227,7 @@
         CALL    SerialFlushP34   repeat(3)
         CALL    SerialFlushP41   repeat(3)
         CALL    SerialFlushP12   repeat(3)
-        CALL    SerialFlush      repeat(5)
+        CALL    SerialFlush      repeat(4)
         RTS
 
     PixelFlushLine:  # Transfer line and flush it pixel by pixel

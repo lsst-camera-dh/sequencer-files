@@ -1,0 +1,39 @@
+seq-e2v-multiflush.txt
+0x018: JSR       0x098 -> AcquireFrame  repeat(1) = run time: 2199680.64 us  
+__0x098: JSREP     0x090 -> ClearCCD  repeat(4: CleaningNumber -> 2) = run time: 106659.84 us  
+____0x090: JSP     0: CleaningSubr -> MixedFlushLine  repeat(2048) = run time: 53329.92 us  
+______0x040: CALL      func(6 = SerialFlush)  repeat(1) = run time: 1.86 us  
+______0x041: CALL      func(10 = SerialFlushP34)  repeat(3) = run time: 5.58 us  
+______0x042: CALL      func(11 = SerialFlushP41)  repeat(3) = run time: 5.58 us  
+______0x043: CALL      func(12 = SerialFlushP12)  repeat(3) = run time: 5.58 us  
+______0x044: CALL      func(6 = SerialFlush)  repeat(4) = run time: 7.44 us  
+______0x045: RTS      = subtotal: 26.04 us
+____0x091: RTS      = subtotal: 53329.92 us
+__0x099: JSREP     0x088 -> ExposurePulse25ms  repeat(0: ExposureTime -> 80) = run time: 2000020.80 us  
+____0x088: CALL      func(6 = SerialFlush)  repeat(541) = run time: 1006.26 us  
+____0x089: CALLP     func(0: Exposure -> ExposureNoFlush)  repeat(12900) = run time: 23994.00 us  
+____0x08a: RTS      = subtotal: 25000.26 us
+__0x09a: JSR       0x078 -> CloseShutter  repeat(1) = run time: 93000.00 us  
+____0x078: CALLPREP  func(1: ClosingFunc -> DarkNoFlush)  repeat(4: ShutterTime -> 50000) = run time: 93000.00 us  
+____0x079: RTS      = subtotal: 93000.00 us
+__0x09b: RTS      = subtotal: 2199680.64 us
+0x019: JSR       0x068 -> ReadFrame  repeat(1) = run time: 2437288.08 us  
+__0x068: JSREP     0x038 -> FlushLine  repeat(1: PreRows -> 0) = run time: 0.00 us  
+____0x038: CALL      func(2 = ParallelFlush)  repeat(1) = run time: 96.00 us  
+____0x039: RTS      = subtotal: 96.00 us
+__0x069: JSR       0x050 -> FlushRegister  repeat(1) = run time: 186000.00 us  
+____0x050: CALLREP   func(6 = SerialFlush)  repeat(5: FlushTime -> 100000) = run time: 186000.00 us  
+____0x051: RTS      = subtotal: 186000.00 us
+__0x06a: CALL      func(4 = StartOfImage)  repeat(1) = run time: 1.80 us  
+__0x06b: JSREP     0x058 -> WindowLine  repeat(2: ReadRows -> 2048) = run time: 2251284.48 us  
+____0x058: CALL      func(1 = TransferLine)  repeat(1) = run time: 26.04 us  
+____0x059: CALLREP   func(6 = SerialFlush)  repeat(0: PreCols -> 1) = run time: 1.86 us  
+____0x05a: CALLREP   func(3 = ReadPixel)  repeat(1: ReadCols -> 576) = run time: 1071.36 us  
+____0x05b: CALLREP   func(6 = SerialFlush)  repeat(2: PostCols -> 0) = run time: 0.00 us  
+____0x05c: RTS      = subtotal: 1099.26 us
+__0x06c: CALL      func(5 = EndOfImage)  repeat(1) = run time: 1.80 us  
+__0x06d: JSREP     0x038 -> FlushLine  repeat(3: PostRows -> 0) = run time: 0.00 us  
+____0x038: CALL      func(2 = ParallelFlush)  repeat(1) = run time: 96.00 us  
+____0x039: RTS      = subtotal: 96.00 us
+__0x06e: RTS      = subtotal: 2437288.08 us
+0x01a: END      = subtotal: 4636968.72 us
