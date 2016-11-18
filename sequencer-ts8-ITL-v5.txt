@@ -1,6 +1,7 @@
 # REB4 timing for ITL CCD
 # Original file: E2V file for TS8 by Homer Neal
 # 20161116: Modified by Claire Juramy for ITL sensors
+# 20161118: CJ: Added functions to expose without flushing, tweaked timing 
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -8,15 +9,15 @@
     SerCols:         512    # Size of serial register
     DetectorCols:    576    # Total number of columns in a full readout
     DetectorRows:   2048    # Total number of rows in a full readout
-    TimeP:            2100 ns   # Base time element of parallel transfers  TBC: might need to be longer 
-    BufferP:          1000 ns   # Parallel transfer buffer time
-    ISO1:             200 ns    # Time between ASPIC clamp and first ramp
-    ISO2:             400 ns    # Time between ASPIC ramps
-    TimeS:            100 ns    # Base element of serial transfers
-    BufferS:           70 ns    # Buffer for serial clock crossing
-    FlushS:           300 ns    # Base element of serial flush
-    RampTime:         320 ns    # ASPIC ramp time
-    clockperiod:      10 ns     # FPGA clock period (required by the interpreter)
+    TimeP:           7000 ns   # Base time element of parallel transfers  TBC: might need to be longer 
+    BufferP:         1000 ns   # Parallel transfer buffer time
+    ISO1:             200 ns   # Time between ASPIC clamp and first ramp
+    ISO2:             400 ns   # Time between ASPIC ramps
+    TimeS:            100 ns   # Base element of serial transfers
+    BufferS:           90 ns   # Buffer for serial clock crossing
+    FlushS:           710 ns   # Base element of serial flush
+    RampTime:         320 ns   # ASPIC ramp time
+    clockperiod:       10 ns   # FPGA clock period (required by the interpreter)
 
 [clocks]  # clock channels
     P1:   8  # Parallel clock 1
@@ -45,8 +46,7 @@
     REP_SUBR    ReadRows     2048 # Number of rows of the window
     REP_SUBR    PostRows        0 # Number of rows after window (it is up to the user that total lines = 2048)
     REP_SUBR    CleaningNumber  0 # Number of full CCD clears before acquiring a frame
-    PTR_FUNC    Exposure       ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
-    PTR_FUNC    DarkExposure   DExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
+    PTR_FUNC    Exposure       ExposureFlush  # Function to use during exposure (DarkFlush or ExposureFlush or DarkNoFlush or ExposureNoFlush)
 
 [functions]
     Default:  # Default state when not operating
@@ -101,38 +101,51 @@
     SerialFlush:  # Single pixel fast flush
       clocks:          RG, S1, S2, S3
       slices:
+         100 ns      = 0,  1,  0,  0
          BufferS     = 1,  1,  0,  1
-         FlushS      = 1,  0,  0,  1
+         210 ns      = 1,  0,  0,  1
          BufferS     = 1,  0,  1,  1
-         FlushS      = 0,  0,  1,  0
+         210 ns      = 0,  0,  1,  0
          BufferS     = 0,  1,  1,  0
-         FlushS      = 0,  1,  0,  0
-         50 ns       = 0,  1,  0,  0
+         210 ns      = 0,  1,  0,  0
       constants:     P2=1, RST=1
 
-    ExposureFlush:  # Exposure while flushing serial register (testing only)
+    ExposureFlush:  # Exposure while flushing serial register (testing only), 2500 ns duration
       clocks:          RG, S1, S2, S3
       slices:
+         100 ns      = 0,  1,  0,  0
          BufferS     = 1,  1,  0,  1
          FlushS      = 1,  0,  0,  1
          BufferS     = 1,  0,  1,  1
          FlushS      = 0,  0,  1,  0
          BufferS     = 0,  1,  1,  0
          FlushS      = 0,  1,  0,  0
-         50 ns       = 0,  1,  0,  0
       constants:     P2=1, RST=1, SHU=1
 
-    DExposureFlush:  # Shutter closed while flushing serial register (testing only)
-	# CJ: I am keeping it for compatibility but this is identical to SerialFlush
+    DarkFlush:  # Shutter closed while flushing serial register (testing only), 2500 ns duration
       clocks:          RG, S1, S2, S3
       slices:
+         100 ns      = 0,  1,  0,  0
          BufferS     = 1,  1,  0,  1
          FlushS      = 1,  0,  0,  1
          BufferS     = 1,  0,  1,  1
          FlushS      = 0,  0,  1,  0
          BufferS     = 0,  1,  1,  0
          FlushS      = 0,  1,  0,  0
-         50 ns       = 0,  1,  0,  0
+      constants:     P2=1, RST=1, SHU=0
+
+    ExposureNoFlush:  # Shutter open and no flushing (testing only), 2500 ns duration
+      clocks:          RG, S1, S2, S3
+      slices:
+         1250 ns     = 1,  1,  1,  0
+         1250 ns     = 1,  1,  1,  0
+      constants:     P2=1, RST=1, SHU=1
+
+    DarkNoFlush:  # Shutter closed and no flushing (testing only), 2500 ns duration
+      clocks:          RG, S1, S2, S3
+      slices:
+         1250 ns     = 1,  1,  1,  0
+         1250 ns     = 1,  1,  1,  0
       constants:     P2=1, RST=1, SHU=0
 
     SlowFlush:  # Simultaneous serial and parallel flush, slow (waiting pattern)
@@ -161,17 +174,12 @@
     WindowLine:  # Line readout
         CALL    TransferLine
         CALL    SerialFlush     repeat(@PreCols)
-        CALL    SerialFlush                         # because the trigger is at the beginning of ReadPixel
+        CALL    DarkFlush                         # generates first pixel to read with ReadPixel
         CALL    ReadPixel       repeat(@ReadCols)
         CALL    SerialFlush     repeat(@PostCols)
         RTS
 
-    WarmUp:  # Warms up analog electronics and ADCs
-        CALL    ReadPixel       repeat(256)  # any other value will mess up the scanning mode
-        RTS
-
     ReadFrame:  # Readout and acquisition of a CCD frame (window)
-#        JSR     WarmUp
         JSR     FlushLine       repeat(@PreRows)
         CALL    StartOfImage
         JSR     WindowLine      repeat(@ReadRows)
@@ -180,18 +188,13 @@
         RTS
 
     FakeFrame:  # Readout of a CCD frame (window) with no data output
-        JSR     WarmUp
         JSR     FlushLine       repeat(@PreRows)
         JSR     WindowLine      repeat(@ReadRows)
         JSR     FlushLine       repeat(@PostRows)
         RTS
 
     Exposure25ms:  # Repeat exposure function for 25 ms
-        CALL    @Exposure       repeat(20000)
-        RTS
-
-    DarkExposure25ms:  # Repeat exposure function for 25 ms
-        CALL    @DarkExposure   repeat(20000)
+        CALL    @Exposure       repeat(10000)
         RTS
 
     ClearCCD:  # Clear CCD once
@@ -199,7 +202,7 @@
         RTS
 
     CloseShutter:  # Gives time for shutter to close (to be adapted depending on setup)
-        CALL    SerialFlush     repeat(50000)
+        CALL    DarkFlush     repeat(50000)
         RTS
 
     AcquireFrame:  # Operations to expose (or not) a CCD frame
@@ -208,25 +211,14 @@
         JSR     CloseShutter
         RTS
 
-    DarkFrame:  # Operations to expose (or not) a CCD frame
-        JSR     ClearCCD        repeat(@CleaningNumber)
-        JSR     DarkExposure25ms    repeat(@ExposureTime)
-        JSR     CloseShutter
-        RTS
-
 [mains]
-    Bias:  # Bias after clearing and warm-up
+    Bias:  # Bias after clearing 
         JSR     ClearCCD    repeat(@CleaningNumber)
         JSR     ReadFrame
         END
 
     Acquisition:  # One acquisition exposure
         JSR     AcquireFrame
-        JSR     ReadFrame
-        END
-
-    DarkAcquisition:  # One acquisition dark
-        JSR     DarkFrame
         JSR     ReadFrame
         END
 
