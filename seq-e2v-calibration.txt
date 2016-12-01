@@ -246,7 +246,6 @@
         CALL    SerialFlush     repeat(@PostCols)
         RTS
 
-
 #
 # Frame-level readout operations ------------------------------------
 #
@@ -338,11 +337,6 @@
 
     InfiniteWait:  # Slow flushing on infinite loop
         CALL    SlowFlush   repeat(infinity)
-        END
-        
-    Dark:  # copied from Acquisition, for compatibility with previous sequences
-        JSR     AcquireFrame
-        JSR     ReadFrame
         END
 
     Calibration:  # Fake frame with calibration pixels
