@@ -23,8 +23,8 @@
     P2:   9  # Parallel clock 2
     P3:  10  # Parallel clock 3
     P4:  11  # Parallel clock 4
-    S1:   4  # Serial clock 1
-    S2:   5  # Serial clock 2
+    S1:   5  # Serial clock 1
+    S2:   4  # Serial clock 2
     S3:   6  # Serial clock 3
     RG:   7  # Serial reset clock
     CL:   3  # ASPIC clamp
@@ -44,7 +44,7 @@
     REP_SUBR    PreRows        0  # Number of rows to skip before window
     REP_SUBR    ReadRows     2020 # Number of rows of the window
     REP_SUBR    PostRows        0 # Number of rows after window (it is up to the user that total lines = 2048)
-    REP_SUBR    CleaningNumber  0 # Number of full CCD clears before acquiring a frame
+    REP_SUBR    CleaningNumber  1 # Number of full CCD clears before acquiring a frame
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
     PTR_FUNC    Exposure       ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
     PTR_FUNC    EExposure       ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
@@ -221,7 +221,7 @@
         END
 
     Expose:  # One acquisition exposure
-        JSR     ClearCCD        repeat(@CleaningNumber)
+#        JSR     ClearCCD        repeat(@CleaningNumber)
         JSR     ExposeFrame
         END
 
@@ -244,3 +244,6 @@
         CALL    SlowFlush   repeat(infinity)
         END
         
+    Clear:  # Clear
+        JSR     ClearCCD    repeat(@CleaningNumber)
+        END
