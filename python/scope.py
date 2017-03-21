@@ -245,11 +245,11 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     # they are in extensions 1 to 16
     # skip first line (assuming we may have only 4)
     try:
-        dsiscope = get_scandata_fromfile(dsifile, datadir, selectchannels=[c])[1:, :].mean(axis=0)
+        dsiscope = get_scandata_fromfile(dsifile, datadir, selectchannels=[c])[0, 1:, :].mean(axis=1)
     except:
         dsiscope = None
     try:
-        tmscope = get_scandata_fromfile(tmfile, datadir, selectchannels=[c])[1:, :].mean(axis=0)
+        tmscope = get_scandata_fromfile(tmfile, datadir, selectchannels=[c])[0, 1:, :].mean(axis=1)
     except:
         tmscope = None
 
