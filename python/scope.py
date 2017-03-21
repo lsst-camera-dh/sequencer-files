@@ -5,6 +5,9 @@
 #
 # Changelog
 # 20161205: C. Juramy, initialized from LPNHE bench code.
+# 20170316: added more options for plots
+# 20170320: added management for file format: raw or fits
+#
 #
 # Syntax as main:
 # python scope.py [dsi-scan.fits] [tm-scan.fits] [sequencer-file.seq] [Channel] <[Main *or* function used for readout]>
@@ -45,6 +48,53 @@ def set_legend_outside(ax):
     box = ax.get_position()
     ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+
+
+def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
+    """
+    Reads data from the file, sets it straight if raw values, returns 3D array of (scan-)image data.
+    We will look at file extension to guess what it it and how it is organized.
+    :param selectchannels: which REB channel we want to include (numbered 0-15, 0-47 if full REB file). All if None.
+    :param datadir: optional, directory where data is stored
+    :param inputfile: the file where image data is stored. Needs full path if datadir is not provided.
+    :return:
+    """
+    if os.path.splitext(inputfile)[1] in [".fits", ".fz"]:
+        if selectchannels is None:
+            displayamps = range(16)
+        else:
+            displayamps = selectchannels
+
+        hdulist = pyfits.open(os.path.join(datadir, inputfile))
+        imgdata = []
+        for i in displayamps:
+            imgdata.append(hdulist[i + 1].data)
+
+        hdulist.close()
+        del hdulist  # clean-up
+        return np.stack(imgdata)
+
+    else:
+        nchannels = 48
+        if selectchannels is None:
+            displayamps = range(nchannels)
+        else:
+            displayamps = selectchannels
+
+        dt = np.dtype('i4')
+        buff = np.fromfile(os.path.join(datadir, inputfile), dtype=dt)
+        # for 18-bit data:
+        # negative numbers are translated, sign is inverted on all data, also make all values positive
+        # 0 -> 1FFFF, 1FFFF -> 0, 20000 -> 3FFFF, 3FFFF -> 20000
+        # this works by XORing the lowest 17 bits
+        rawdata = np.bitwise_xor(buff, 0x1FFFF)
+        # reshape by channel
+        length = rawdata.shape[0] / nchannels
+        # temporary until fix for missing last pixel
+        rawdata = rawdata[:256 * (length/256) * nchannels]
+        rawdata = rawdata.reshape(length/256, 256, nchannels)  # assumes this is a scan image
+
+        return np.swapaxes(rawdata[:, :, displayamps], 0, 2)
 
 
 def plot_scan_states(ax, seq, readfunction, offset=0, extend=1, marktransitions=True):
@@ -121,36 +171,34 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     plt.show()
 
 
-def scan_scope_display(idsi, itm, displayamps=range(16), append=False):
+def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, datadir=''):
     """
     Separate display of scans, to call it from the script or to do it offline.
     :param idsi: fits file with scan data in normal DSI mode (none is accepted)
     :param itm: fits file with scan data in Transparent Mode (none is accepted but not recommended)
     :param displayamps: list of amplifiers to display
     :param append: if all amplifiers should be displayed stitched together or superimposed (if False)
+    :param datadir: path to image files (optional), also path for output PNG
     """
     fig, ax = plt.subplots(figsize=(16, 8))
     ax.grid(True)
 
     try:
-        dsihdu = pyfits.open(idsi)
+        dsihdu = get_scandata_fromfile(dsifile, datadir, selectchannels=displayamps)
     except:
         dsihdu = None
     try:
-        tmhdu = pyfits.open(itm)
+        tmhdu = get_scandata_fromfile(tmfile, datadir, selectchannels=displayamps)
     except:
         tmhdu = None
 
     if append:
-        dsiscope = np.array([])
-        tmscope = np.array([])
+        # skips first scan line
         if dsihdu is not None:
-            for c in displayamps:
-                dsiscope = np.append(dsiscope, dsihdu[c + 1].data[:, :].mean(axis=0))
+            dsiscope = dsihdu[:, 1:, :].mean(axis=1).flatten()
             ax.plot(dsiscope)
         if tmhdu is not None:
-            for c in displayamps:
-                tmscope = np.append(tmscope, tmhdu[c + 1].data[:, :].mean(axis=0))
+            tmscope = tmhdu[:, 1:, :].mean(axis=1).flatten()
             ax.plot(tmscope)
 
         ax.set_xlabel('Scanned channel')
@@ -159,15 +207,15 @@ def scan_scope_display(idsi, itm, displayamps=range(16), append=False):
     else:
         # separate line for each scan
         # with appropriate color schemes
-        color_idx = np.linspace(0, 1, len(displayamps))
+        color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, len(displayamps))]
 
-        for i, c in zip(color_idx, displayamps):
+        for i, c in enumerate(displayamps):
             if dsihdu is not None:
-                dsiscope = dsihdu[c + 1].data[:, :].mean(axis=0)
-                ax.plot(dsiscope, label='DSI-C%d' % c, color=plt.cm.jet(i))
+                dsiscope = dsihdu[i, :, :].mean(axis=1)
+                ax.plot(dsiscope, label='DSI-C%d' % c, color=color_idx[i])
             if tmhdu is not None:
-                tmscope = tmhdu[c + 1].data[:, :].mean(axis=0)
-                ax.plot(tmscope, label='TM-C%d' % c, color=plt.cm.jet(i))
+                tmscope = tmhdu[i, :, :].mean(axis=1)
+                ax.plot(tmscope, label='TM-C%d' % c, color=color_idx[i])
 
         ax.set_xlim(0, 255)
         ax.set_xticks(np.arange(0, 256, 32))
@@ -179,14 +227,15 @@ def scan_scope_display(idsi, itm, displayamps=range(16), append=False):
     plt.show()
 
 
-def combined_scope_display(idsi, itm, seqfile, c, readout='ReadPixel'):
+def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', datadir=''):
     """
     Display scan scope for a channel along with sequencer states.
     Can be given the name of the main used (will detect automatically the function used and the offset of the ADC),
     or the name of the readout function. What is hardcoded here is the name of the ADC trigger ('TRG').
     Averages over all scan lines that are supposed to be within the detector physically.
-    :param idsi: fits file with scan data in normal DSI mode (None is accepted)
-    :param itm: fits file with scan data in Transparent Mode (None is accepted but not recommended)
+    :param datadir: path to image files (optional), also path for output PNG
+    :param dsifile: fits or raw file with scan data in normal DSI mode (None is accepted)
+    :param tmfile: fits or raw file with scan data in Transparent Mode (None is accepted)
     :param seqfile: sequencer file, needs full path
     :param c: extension name
     :param readout: function or program used during fits file acquisition
@@ -194,13 +243,13 @@ def combined_scope_display(idsi, itm, seqfile, c, readout='ReadPixel'):
 
     # image extensions are labeled as 'Segment00' in CCS
     # they are in extensions 1 to 16
-    # skip first ten lines and last 50 to stop before sensor edge
+    # skip first line (assuming we may have only 4)
     try:
-        dsiscope = pyfits.getdata(idsi, extname=c)[10:-50, :].mean(axis=0)
+        dsiscope = get_scandata_fromfile(dsifile, datadir, selectchannels=[c])[1:, :].mean(axis=0)
     except:
         dsiscope = None
     try:
-        tmscope = pyfits.getdata(itm, extname=c)[10:-50, :].mean(axis=0)
+        tmscope = get_scandata_fromfile(tmfile, datadir, selectchannels=[c])[1:, :].mean(axis=0)
     except:
         tmscope = None
 
@@ -239,7 +288,6 @@ def combined_scope_display(idsi, itm, seqfile, c, readout='ReadPixel'):
     plt.title("%s in %s for %s" % (readfunction, readfile, c))
     plt.savefig("combinedscope.png")
     plt.show()
-
 
 
 if __name__ == '__main__':
