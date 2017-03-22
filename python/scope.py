@@ -96,10 +96,10 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         # reshape by channel
         length = rawdata.shape[0] / nchannels
         # temporary fix for missing last pixel
-        #rawdata = rawdata[:256 * (length/256) * nchannels]
+        rawdata = rawdata[:256 * (length/256) * nchannels]
         rawdata = rawdata.reshape(length/256, 256, nchannels)  # assumes this is a scan image
 
-        chandata = np.swapaxes(rawdata[:, :, displayamps], 0, 2)  # puts the channel as first axis
+        chandata = np.transpose(rawdata[:, :, displayamps], (2, 0, 1))  # puts the channel as first axis
 
     #print chandata.shape
     return chandata
