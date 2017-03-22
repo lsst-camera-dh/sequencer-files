@@ -2033,7 +2033,8 @@ class SeqParser(object):
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[includes]"
+        if self.verbose:
+            print "[includes]"
         r = self.m_include_section(pnext)
         if r == None:
             result['includes'] = []  # keep it optional
@@ -2042,7 +2043,8 @@ class SeqParser(object):
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[constants]"
+        if self.verbose:
+            print "[constants]"
         r = self.m_constant_section(pnext)
         if r == None:
             return None
@@ -2050,7 +2052,8 @@ class SeqParser(object):
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[clocks]"
+        if self.verbose:
+            print "[clocks]"
         r = self.m_clock_section(pnext)
         if r == None:
             return None
@@ -2058,14 +2061,16 @@ class SeqParser(object):
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[pointers]"
+        if self.verbose:
+            print "[pointers]"
         r = self.m_ptr_section(pnext)
         if r != None:
             pnext, result['pointers'] = r
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[functions]"
+        if self.verbose:
+            print "[functions]"
         r = self.m_func_section(pnext)
         if r == None:
             return None
@@ -2073,14 +2078,16 @@ class SeqParser(object):
 
         pnext = self.m_empty_lines(pnext)
 
-        print "[subroutines]"
+        if self.verbose:
+            print "[subroutines]"
         r = self.m_subr_section(pnext)
         if r != None:
             pnext, result['subroutines'] = r
 
         pnext = self.m_empty_lines(pnext)
             
-        print "[mains]"
+        if self.verbose:
+            print "[mains]"
         r = self.m_subr_section(pnext, main=True)
         if r == None:
             return None

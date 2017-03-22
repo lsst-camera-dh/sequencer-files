@@ -29,6 +29,10 @@ from matplotlib import pyplot as plt
 # add sequencer reading method
 import rebtxt
 
+# global for path to sequencer file
+seqpath = "/Users/nayman/Documents/REB/TS8/sequencer-files"
+
+
 def find_transition_index(states):
     """
     Finds the indexes of values changes in the list. Returns the first one.
@@ -69,10 +73,11 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         imgdata = []
         for i in displayamps:
             imgdata.append(hdulist[i + 1].data)
-
+            #print hdulist[i+1].data.shape
         hdulist.close()
         del hdulist  # clean-up
-        return np.stack(imgdata)
+
+        chandata = np.stack(imgdata)
 
     else:
         nchannels = 48
@@ -90,11 +95,25 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         rawdata = np.bitwise_xor(buff, 0x1FFFF)
         # reshape by channel
         length = rawdata.shape[0] / nchannels
-        # temporary until fix for missing last pixel
-        rawdata = rawdata[:256 * (length/256) * nchannels]
+        # temporary fix for missing last pixel
+        #rawdata = rawdata[:256 * (length/256) * nchannels]
         rawdata = rawdata.reshape(length/256, 256, nchannels)  # assumes this is a scan image
 
-        return np.swapaxes(rawdata[:, :, displayamps], 0, 2)
+        chandata = np.swapaxes(rawdata[:, :, displayamps], 0, 2)  # puts the channel as first axis
+
+    #print chandata.shape
+    return chandata
+
+
+def get_rootfile(filename):
+    rootname = ''
+    # remove path, extension, and up to first '_'
+    try:
+        rootname = os.path.splitext(os.path.basename(filename))[0]
+        rootname = rootname.split('_',1)[1]
+    except:
+        pass
+    return rootname
 
 
 def plot_scan_states(ax, seq, readfunction, offset=0, extend=1, marktransitions=True):
@@ -145,13 +164,13 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     Display sequencer states only.
     Needs to be given the name of the main used.
     Will detect automatically the function used and the offset of the ADC.
-    :param seqfile: sequencer file, needs full path
+    :param seqfile: sequencer file, needs full path from seqpath global variable.
     :param readout: function or program used during fits file acquisition
     :param trigname: name of the ADC trigger clock in the sequencer file
     """
 
     # gets sequencer object
-    seq = rebtxt.Sequencer.fromtxtfile(seqfile, verbose=False)
+    seq = rebtxt.Sequencer.fromtxtfile(os.path.join(seqpath, seqfile), verbose=False)
 
     # finds the function used for readout if given the Main
     if readout in seq.functions_desc:
@@ -167,7 +186,7 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
 
     fig, ax = plt.subplots(figsize=(13, 8))
     plot_scan_states(ax, seq, readfunction, offset)
-    plt.savefig("sequencerscope.png")
+    plt.savefig(os.path.join(seqpath, "sequencerscope.png"))
     plt.show()
 
 
@@ -223,11 +242,11 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
         ax.set_ylabel('Scan (ADU)')
         set_legend_outside(ax)
 
-    plt.savefig("scanplot.png")
+    plt.savefig(os.path.join(datadir, "scanplot.png"))
     plt.show()
 
 
-def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', datadir=''):
+def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', datadir='', loc='', display=True):
     """
     Display scan scope for a channel along with sequencer states.
     Can be given the name of the main used (will detect automatically the function used and the offset of the ADC),
@@ -239,22 +258,28 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     :param seqfile: sequencer file, needs full path
     :param c: extension name
     :param readout: function or program used during fits file acquisition
+    :param loc: a string to give additionnal information in the plot title, like the CCD type or location
     """
 
     # image extensions are labeled as 'Segment00' in CCS
     # they are in extensions 1 to 16
     # skip first line (assuming we may have only 4)
+    dataname = ''
     try:
-        dsiscope = get_scandata_fromfile(dsifile, datadir, selectchannels=[c])[0, 1:, :].mean(axis=1)
+        dsiscope = get_scandata_fromfile(dsifile, datadir, selectchannels=[c])
+        dsiscope = dsiscope[0].mean(axis=0)  # 3D array, select single channel
+        dataname = get_rootfile(dsifile)
     except:
         dsiscope = None
     try:
-        tmscope = get_scandata_fromfile(tmfile, datadir, selectchannels=[c])[0, 1:, :].mean(axis=1)
+        tmscope = get_scandata_fromfile(tmfile, datadir, selectchannels=[c])
+        tmscope = tmscope[0].mean(axis=0)  # same
+        dataname = get_rootfile(tmfile)
     except:
         tmscope = None
 
     # gets sequencer object
-    seq = rebtxt.Sequencer.fromtxtfile(seqfile, verbose=False)
+    seq = rebtxt.Sequencer.fromtxtfile(os.path.join(seqpath, seqfile), verbose=False)
 
     # finds the function used for readout if given the Main
     if readout in seq.functions_desc:
@@ -269,8 +294,12 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     # ax1.set_xlim(0,255)
     ax1.set_xticks(np.arange(0, 256, 32))
     if dsiscope is not None:
+        # cuts first point if anomalous (because trigger occurs before pixel transfer)
+        np.clip(dsiscope, 0, dsiscope[1:].max(), out=dsiscope)
         ax1.plot(dsiscope, label='DSI')
     if tmscope is not None:
+        # cuts first point if anomalous (because trigger occurs before pixel transfer)
+        np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
         ax1.plot(tmscope, label='TM')
     ax1.set_ylabel('Scan (ADU)')
     ax1.grid(axis='x')
@@ -285,9 +314,11 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     plot_scan_states(ax2, seq, readfunction, offset)
 
     readfile = os.path.basename(seqfile)
-    plt.title("%s in %s for %s" % (readfunction, readfile, c))
-    plt.savefig("combinedscope.png")
-    plt.show()
+    plt.title("%s in %s for %s-channel %02d" % (readfunction, readfile, loc, c))
+    plt.savefig(os.path.join(datadir, "combinedscope-%s-%s-%02d.png" % (dataname, loc, c)))
+
+    if display:
+        plt.show()
 
 
 if __name__ == '__main__':

@@ -21,19 +21,18 @@ from matplotlib import pyplot as plt
 import scope
 
 
-def raft_display_allchans(inputfile, datadir=''):
+def get_scandata_raft(inputfile, datadir=''):
     """
-    Builds up data from all raft files and display scans.
+    Builds up data array from all raft files, plus list of segment names.
     :param datadir: optional, directory where data is stored
     :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given
     :return:
     """
     raftarrays = []
     if os.path.splitext(inputfile)[1] in [".fits", ".fz"]:
-        # starts with s00 through s22
-        seglist = ["s%d%d" % (i, j) for i in range(3) for j in range(3)]
-        raftfits = [inputfile.replace("s00", s) for s in seglist]
-        nccdperfile = 1
+        # starts with 00 through 22
+        seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+        raftfits = [inputfile.replace("00", s) for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     else:
@@ -41,32 +40,51 @@ def raft_display_allchans(inputfile, datadir=''):
         reblist = ["Reb0", "Reb1", "Reb2"]
         rebraws = [inputfile.replace("Reb0", s) for s in reblist]
         seglist = [r + "-%s" % stripe for stripe in ['A', 'B', 'C'] for r in reblist]
-        nccdperfile = 3
         for f in rebraws:
-            raftarrays.append(scope.get_scandata_fromfile(f, datadir))
+            fullreb = scope.get_scandata_fromfile(f, datadir)
+            raftarrays.append(np.split(fullreb, 3, axis=0))  # splits REB data into 3 CCDs
+
+    return raftarrays, seglist
+
+def raft_display_allchans(inputfile, datadir=''):
+    """
+    Builds up data from all raft files and display scans.
+    :param datadir: optional, directory where data is stored
+    :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given
+    :return:
+    """
+    raftarrays, seglist = get_scandata_raft(inputfile, datadir)
 
     fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(10, 10))
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
     # plot all channels, with one subplot per CCD
+    listaxes = []
     for num,tmscope in enumerate(raftarrays):
-        for stripe in range(nccdperfile):
-            ax = axes[(num * nccdperfile) / 3, (num * nccdperfile) % 3 + stripe]
+        ax = axes[num  / 3, num  % 3 ]
 
-            # single CCD plot
-            for c in range(16):
-                # image extensions are labeled as 'Segment00' in CCS
-                # they are in extensions 1 to 16
-                tmchan = tmscope[c + stripe * 16, 1:, :].mean(axis=1)
-                ax.plot(tmchan, label=c, color=color_idx[c])
+        # single CCD plot
+        for c in range(16):
+            # image extensions are labeled as 'Segment00' in CCS
+            # they are in extensions 1 to 16
+            print tmscope.shape
+            tmchan = tmscope[c].mean(axis=0)
+            ax.plot(tmchan, label=c, color=color_idx[c])
+            if num == 0:
+                # for common legend
+                listaxes.append(ax)
+
             ax.set_xlim(0, 255)
             ax.set_xticks(np.arange(0, 256, 32))
-            ax.set_title(seglist[num * nccdperfile + stripe])
+            ax.set_title(seglist[num])
             #ax.set_xlabel('Time increment (10 ns)')
             #ax.set_ylabel('Scan (ADU)')
             ax.grid(True)
-    # TODO: common legend
-    plt.savefig("multiscope.png")
+
+    # TODO: common legend that works
+    #plt.legend(handles=listaxes,loc = 'upper center', bbox_to_anchor = (0.5, 0), bbox_transform = plt.gcf().transFigure)
+    dataname = scope.get_rootfile(inputfile)
+    plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
     plt.show()
 
 
