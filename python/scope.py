@@ -202,12 +202,15 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
     fig, ax = plt.subplots(figsize=(16, 8))
     ax.grid(True)
 
+    dataname = ''
     try:
         dsihdu = get_scandata_fromfile(dsifile, datadir, selectchannels=displayamps)
+        dataname = os.path.splitext(os.path.basename(dsifile))[0]
     except:
         dsihdu = None
     try:
         tmhdu = get_scandata_fromfile(tmfile, datadir, selectchannels=displayamps)
+        dataname = os.path.splitext(os.path.basename(tmfile))[0]
     except:
         tmhdu = None
 
@@ -230,10 +233,12 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
 
         for i, c in enumerate(displayamps):
             if dsihdu is not None:
-                dsiscope = dsihdu[i, :, :].mean(axis=1)
+                dsiscope = dsihdu[i].mean(axis=0)
+                np.clip(dsiscope, 0, dsiscope[1:].max(), out=dsiscope)
                 ax.plot(dsiscope, label='DSI-C%d' % c, color=color_idx[i])
             if tmhdu is not None:
-                tmscope = tmhdu[i, :, :].mean(axis=1)
+                tmscope = tmhdu[i].mean(axis=0)
+                np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
                 ax.plot(tmscope, label='TM-C%d' % c, color=color_idx[i])
 
         ax.set_xlim(0, 255)
@@ -242,7 +247,8 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
         ax.set_ylabel('Scan (ADU)')
         set_legend_outside(ax)
 
-    plt.savefig(os.path.join(datadir, "scanplot.png"))
+    plt.title(dataname)
+    plt.savefig(os.path.join(datadir, "scanplot-%s.png" % dataname))
     plt.show()
 
 

@@ -23,10 +23,13 @@ seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 
 #multiscope.raft_display_allchans("00_test-cj-mod3b_flat_transp_scan2.fits", datadir)
 #multiscope.raft_display_allchans("00_test-cj-mod3b_transp_dark_scan2.fits", datadir)
-for c in range(16):
+#for c in range(16):
     #scope.combined_scope_display("01_test-cj-mod3b_flat_scan2.fits",
     #                            "01_test-cj-mod3b_flat_transp_scan2.fits",
     #                            seqfile=seqfile, c=c, datadir=datadir, loc="01", display=False)
-    scope.combined_scope_display("01_test-cj-mod3_scan.fits",
-                                "01_test-cj-mod3b_transp_dark_scan2.fits",
-                                seqfile=seqfile, c=c, datadir=datadir, loc="01", display=False)
+    #scope.combined_scope_display("01_test-cj-mod3_scan.fits",
+    #                            "01_test-cj-mod3b_transp_dark_scan2.fits",
+    #                            seqfile=seqfile, c=c, datadir=datadir, loc="01", display=False)
+
+for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]:
+    scope.scan_scope_display(None, "%s_test-cj-mod3b_transp_dark_scan2.fits" % s, datadir=datadir)
