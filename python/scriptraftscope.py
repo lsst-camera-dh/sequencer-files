@@ -3,9 +3,9 @@ import multiscope
 
 
 
-#datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/'
+datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj-tst2'
-datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
+#datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
@@ -31,5 +31,16 @@ seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
     #                            "01_test-cj-mod3b_transp_dark_scan2.fits",
     #                            seqfile=seqfile, c=c, datadir=datadir, loc="01", display=False)
 
-for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]:
-    scope.scan_scope_display(None, "%s_test-cj-mod3b_transp_dark_scan2.fits" % s, datadir=datadir)
+#for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]:
+#    scope.scan_scope_display(None, "%s_test-cj-mod3b_transp_dark_scan2.fits" % s, datadir=datadir)
+
+
+# Mixing raw and fits files does not work now
+#listscans = ["reset-first/scan-mode-transparent/Image_R00.Reb0_20170320200751.dat",
+#             "cj-tst2/scan-mode-tm-cj-mod2/00_test-cj-mod2.fits",
+#             "mod3b_scan/00_test-cj-mod3b_transp_dark_scan2.fits"]
+listscans = ["cj-tst2/scan-mode-tm-cj-mod2/00_test-cj-mod2.fits",
+             "mod3b_scan/00_test-cj-mod3b_transp_dark_scan2.fits"]
+listlabels = ["Mod2", "Mod3"]
+
+scope.compare_scope_display(listscans, listlabels, datadir)

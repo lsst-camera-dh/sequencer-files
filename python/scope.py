@@ -100,6 +100,7 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         rawdata = rawdata.reshape(length/256, 256, nchannels)  # assumes this is a scan image
 
         chandata = np.transpose(rawdata[:, :, displayamps], (2, 0, 1))  # puts the channel as first axis
+        # TODO: match the order from the fits file
 
     #print chandata.shape
     return chandata
@@ -325,6 +326,54 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
 
     if display:
         plt.show()
+
+
+def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)):
+    """
+    Displays several scans on the same plot for each (selected) channel of the CCD.
+    :return:
+    """
+
+    dataname = os.path.splitext(os.path.basename(scanlist[0]))[0]
+    # number of plots to do
+    ndisplay = len(scanlist)
+
+    alltmhdu = []
+    for tmfile in scanlist:
+        try:
+            # loads up all data in one array
+            alltmhdu.append(get_scandata_fromfile(tmfile, datadir, selectchannels=displayamps))
+        except:
+            ndisplay -= 1
+            continue
+    print "Found %d scan files to display" % ndisplay
+    # plot
+    fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(10, 10))
+
+    # color scheme
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, ndisplay)]
+
+    for c in range(len(displayamps)):  # channels to display
+        # subplot
+        ax = axes[c / 4, c % 4]
+
+        for i in range(ndisplay):  # scan files for a channel
+            tmhdu = alltmhdu[i]
+            tmscope = tmhdu[c].mean(axis=0)
+            # first point is often invalid due to trigger position
+            np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
+            ax.plot(tmscope, label=labellist[i], color=color_idx[i])
+
+        ax.set_xlim(0, 255)
+        ax.set_xticks(np.arange(0, 256, 32))
+        #ax.set_xlabel('Time increment (10 ns)')
+        #ax.set_ylabel('Scan (ADU)')
+        ax.grid(True)
+        #set_legend_outside(ax)
+
+    plt.title(dataname)
+    plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
+    plt.show()
 
 
 if __name__ == '__main__':
