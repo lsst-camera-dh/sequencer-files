@@ -32,7 +32,7 @@ def get_scandata_raft(inputfile, datadir=''):
     if os.path.splitext(inputfile)[1] in [".fits", ".fz"]:
         # starts with 00 through 22
         seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
-        raftfits = [inputfile.replace("00", s) for s in seglist]
+        raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     else:
@@ -56,7 +56,7 @@ def raft_display_allchans(inputfile, datadir=''):
     """
     raftarrays, seglist = get_scandata_raft(inputfile, datadir)
 
-    fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(10, 10))
+    fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 12))
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
     # plot all channels, with one subplot per CCD
@@ -85,6 +85,7 @@ def raft_display_allchans(inputfile, datadir=''):
     # TODO: common legend that works
     #plt.legend(handles=listaxes,loc = 'upper center', bbox_to_anchor = (0.5, 0), bbox_transform = plt.gcf().transFigure)
     dataname = scope.get_rootfile(inputfile)
+    #plt.title(dataname)  # TODO: put it above all plots
     plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
     plt.show()
 
