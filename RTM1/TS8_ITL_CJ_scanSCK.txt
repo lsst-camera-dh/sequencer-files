@@ -1,7 +1,7 @@
 # REB5 timing for ITL CCD
 # Original file: E2V file for TS8 by Homer Neal
 # 20161116: Modified by Claire Juramy for ITL sensors
-# 20170321: Additional timing tests in TS8: attempt to pretend that this is a normal ccd
+# 20170321: Additional timing tests in TS8: attempt to pretend that this is a normal ccd (mod3s version)
 # 20170323: dedicated sequences to test crosstalk between clocks and video channels
 # WARNING: this file as it is currently will not acquire real data
 
@@ -15,15 +15,12 @@
     BufferP:          1000 ns   # Parallel transfer buffer time
     ISO1:             200 ns    # Time between ASPIC clamp and first ramp
     ISO2:             400 ns    # Time between ASPIC ramps
-    TimeS:            200 ns    # Base element of serial transfers
+    TimeS:            180 ns    # Base element of serial transfers
     BufferS:           90 ns    # Buffer for serial clock crossing
     FlushS:           300 ns    # Base element of serial flush
     RampTime:         320 ns    # ASPIC ramp time
     clockperiod:      10 ns     # FPGA clock period (required by the interpreter)
-# TimeC added by CR team for 'Clamp Time'
-    TimeC:            230 ns    # clamp time
-# end of CR changes
-
+    TimeC:            200 ns    # clamp time
 
 [clocks]  # clock channels
     P1:   8  # Parallel clock 1
@@ -54,8 +51,8 @@
     REP_SUBR    CleaningNumber  1 # Number of full CCD clears before acquiring a frame
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
     PTR_FUNC    Exposure       ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
-    PTR_FUNC    EExposure       ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
-    PTR_FUNC    SingleClock     ReadS3Long      # Whichever single clock function we are using for fake readout
+    PTR_FUNC    EExposure      ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
+    PTR_FUNC    SingleClock    ReadS3Long     # Whichever single clock function we are scanning using the fake readout
 
 [functions]
     Default:  # Default state when not operating
