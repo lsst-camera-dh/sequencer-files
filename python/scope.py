@@ -348,7 +348,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
             continue
     print "Found %d scan files to display" % ndisplay
     # plot
-    fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(10, 10))
+    fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(14, 9))
 
     # color scheme
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, ndisplay)]
@@ -371,7 +371,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         ax.grid(True)
         #set_legend_outside(ax)
 
-    plt.title(dataname)
+    #plt.title(dataname)
     plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
     plt.show()
 
