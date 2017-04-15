@@ -5,6 +5,7 @@
 # 20170410: copied from TS8_ITL_ResetFirst_CJ_20170321_mod3.seq for noise tests on RTM1
 # 20170413: modified for faster readout: TimeS to 120 ns, TimeC to 180 ns, ISO1 to 150 ns
 # ISO2 to 350 ns, removed 20 ns timeslice after RD, S1/S3 buffer to 50 ns, BufferP to 100 ns
+# Adding incremental modifications to get closer to 2s read time
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -14,10 +15,10 @@
     DetectorRows:   2048    # Total number of rows in a full readout
     TimeP:          7000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
-    ISO1:            150 ns   # Time between ASPIC clamp and first ramp
-    ISO2:            350 ns   # Time between ASPIC ramps
+    ISO1:            140 ns   # Time between ASPIC clamp and first ramp
+    ISO2:            340 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
-    BufferS:          90 ns   # Buffer for serial clock crossing
+    BufferS:          80 ns   # Buffer for serial clock crossing
     FlushS:          300 ns   # Base element of serial flush
     RampTime:        320 ns   # ASPIC ramp time
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
@@ -99,14 +100,14 @@
       clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG, SHU
       slices:
          TimeS       = 1,  1,  0,  1,  0,  0,  0,  0,  0,  0
-         50 ns       = 0,  1,  0,  1,  0,  0,  0,  0,  0,  0
          TimeS       = 0,  0,  0,  1,  0,  0,  0,  0,  1,  0
          BufferS     = 0,  0,  1,  1,  0,  0,  0,  0,  0,  0
          TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0,  0
          TimeC       = 0,  0,  1,  0,  1,  1,  0,  0,  0,  0
          ISO1        = 0,  0,  1,  0,  0,  0,  0,  0,  0,  0
-         RampTime    = 0,  0,  1,  0,  0,  0,  1,  0,  0,  0
-         BufferS     = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
+         300 ns      = 0,  0,  1,  0,  0,  0,  1,  0,  0,  0
+         20 ns       = 0,  0,  1,  0,  0,  0,  1,  0,  0,  0
+         60 ns       = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
          ISO2        = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0
          RampTime    = 0,  1,  0,  0,  0,  0,  0,  1,  0,  0
          30 ns       = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0

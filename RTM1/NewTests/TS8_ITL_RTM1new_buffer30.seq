@@ -5,6 +5,7 @@
 # 20170410: copied from TS8_ITL_ResetFirst_CJ_20170321_mod3.seq for noise tests on RTM1
 # 20170413: modified for faster readout: TimeS to 120 ns, TimeC to 180 ns, ISO1 to 150 ns
 # ISO2 to 350 ns, removed 20 ns timeslice after RD, S1/S3 buffer to 50 ns, BufferP to 100 ns
+# Adding incremental modifications to get closer to 2s read time
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -99,7 +100,7 @@
       clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG, SHU
       slices:
          TimeS       = 1,  1,  0,  1,  0,  0,  0,  0,  0,  0
-         50 ns       = 0,  1,  0,  1,  0,  0,  0,  0,  0,  0
+         30 ns       = 0,  1,  0,  1,  0,  0,  0,  0,  0,  0
          TimeS       = 0,  0,  0,  1,  0,  0,  0,  0,  1,  0
          BufferS     = 0,  0,  1,  1,  0,  0,  0,  0,  0,  0
          TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0,  0
