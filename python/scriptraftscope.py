@@ -7,15 +7,16 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj-tst2'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj20170324'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM1/rmBufferS1S3'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM1/Run4846D/RTM1new_mod50'
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod4s.seq'
-seqfile = 'RTM1/TS8_ITL_RTM1noise_rmBufferS1S3.seq'
+seqfile = 'RTM1/TS8_ITL_RTM1new_mod50.seq'
 
-tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
+#tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
+tmbasefile = "00_RTM1new_mod50_1s-scan.fits"
 #older: "00_readRG-scan.fits", "00_mod4s_bias-scan.fits", "00_readS3Linvert-scan.fits", "00_readS2-scan.fits"
 # "00_readS1-scan.fits", "00_readS1invert-scan.fits", "00_test-cj-mod3b_transp_dark_scan2.fits"
 # "00_test-cj-mod3b_flat_transp_scan2.fits, "scan-mode-tm-cj-mod2/00_test-cj-mod2.fits"
@@ -23,7 +24,7 @@ tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
 
 #---- Scan display for all raft channels
 
-#multiscope.raft_display_allchans(tmbasefile, datadir)
+multiscope.raft_display_allchans(tmbasefile, datadir)
 
 #---- Combined display of single channel with clock sequences
 
@@ -68,7 +69,7 @@ tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
 #             "mod3b_scan/00_test-cj-mod3b_transp_dark_scan2.fits"]
 #listlabels = ["Mod2", "Mod3"]
 
-listlabels = [s for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]]
-listscans = ["%s_RTM1noise_rmBufferS1S3_2_tm.fits" % s for s in listlabels]
+#listlabels = [s for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]]
+#listscans = ["%s_RTM1noise_rmBufferS1S3_2_tm.fits" % s for s in listlabels]
 
-scope.compare_scope_display(listscans, listlabels, datadir)
+#scope.compare_scope_display(listscans, listlabels, datadir)
