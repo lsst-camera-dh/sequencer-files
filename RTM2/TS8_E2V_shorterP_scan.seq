@@ -2,6 +2,8 @@
 # new baseline sequencer at LPNHE with overlap in parallel clocks
 # 20170119, C. Juramy: initialized from seq-newflush-overp.txt
 # 20170407 C.J: modified Mains for TS8
+# 20170426 C.J.: decreased parallel transfer times again to match new file from E2V that clears up the new tearing
+# 20170502 C.J.: taken changes from TS8 run and formatted for scanning
 
 # NOTE that the RampTime is 320 ns to (nearly) reach LSST readout times
 # so the ASPIC RC parameters should be set to 15
@@ -12,13 +14,14 @@
     SerCols:         522    # Size of serial register
     DetectorCols:    576    # Total number of columns in a full readout
     DetectorRows:   2048    # Total number of rows in a full readout
-    TimeP:            5000 ns   # Base time element of parallel transfers
+    TimeP:            4000 ns   # Base time element of parallel transfers
     OverlapP:         1000 ns   # Overlap at three phases in parallel transfer
     BufferP:          2500 ns   # Parallel transfer buffer time
+    FlushP:           2500 ns   # Fast parallel clear transfer time
     TimeS:            300 ns    # Base element of serial transfers
     BufferS:           80 ns    # Buffer for serial clock crossing
     RampTime:         320 ns    # ASPIC ramp time
-    TimeC:            250 ns    # ASPIC Clamp time
+    TimeC:            220 ns    # ASPIC Clamp time
     ISO1:             130 ns    # Time between end of ASPIC clamp/reset and start of RD
     ISO2:             320 ns    # Time between S3 down and start of ASPIC RU
     FlushS:           540 ns    # Base element for flushing the serial register
@@ -44,16 +47,16 @@
     SHU: 16  # Shutter TTL (for testing only)
 
 [pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
-    REP_FUNC    PreCols        0  # Number of columns to skip before readout window, including prescan
-    REP_FUNC    ReadCols     576  # Number of columns to read
-    REP_FUNC    PostCols       0  # Number of columns to discard after window (it is up to the user that total
+    REP_FUNC    PreCols      100  # Number of columns to skip before readout window, including prescan
+    REP_FUNC    ReadCols     256  # Number of columns to read
+    REP_FUNC    PostCols     220  # Number of columns to discard after window (it is up to the user that total
     # columns = 576)
     REP_FUNC    OverCols       0  # Number of columns acquired after line is read for baseline subtraction
     REP_FUNC    ReadCols2      0  # Number of columns in second part of ROI if split
     REP_SUBR    ExposureTime   5  # Duration of exposure in units of 25 ms
-    REP_SUBR    PreRows        0  # Number of rows to skip before window
-    REP_SUBR    ReadRows    2048  # Number of rows of the window
-    REP_SUBR    PostRows       0  # Number of rows after window (it is up to the user that total lines = 2048)
+    REP_SUBR    PreRows       48  # Number of rows to skip before window
+    REP_SUBR    ReadRows    1000  # Number of rows of the window
+    REP_SUBR    PostRows    1000  # Number of rows after window (it is up to the user that total lines = 2048)
     REP_SUBR    CleaningNumber 0  # Number of full CCD clears before acquiring a frame
     PTR_SUBR    CleaningSubr    FlushLine  # Subroutine to use for clearing the frame
     PTR_FUNC    Exposure    ExposureFlush  # Function to use during exposure: SerialFlush or ExposureFlush
@@ -79,8 +82,8 @@
          OverlapP    = 1,  1,  0,  1,  0
          TimeP       = 1,  1,  0,  0,  0
          OverlapP    = 1,  1,  1,  0,  0
-         1000 ns     = 0,  1,  1,  0,  0
-         7540 ns     = 0,  1,  1,  0,  0  # made it longer to match e2v timing
+         TimeP       = 0,  1,  1,  0,  0
+         5000 ns     = 0,  1,  1,  0,  0  # made it longer to match e2v timing
       constants:     S1=1, S2=1
 
     ReverseLine:  # Single line transfer in reverse direction
@@ -94,19 +97,19 @@
          OverlapP    = 1,  0,  1,  1
          TimeP       = 0,  0,  1,  1
          OverlapP    = 0,  1,  1,  1
-         1000 ns     = 0,  1,  1,  0
-         7540 ns     = 0,  1,  1,  0  # made it longer to match e2v timing
+         TimeP       = 0,  1,  1,  0
+         5000 ns     = 0,  1,  1,  0  # made it longer to match e2v timing
       constants:     S1=1, S2=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
       clocks:          P1, P2, P3, P4
       slices:
-         7500 ns     = 0,  1,  1,  0
-         15000 ns    = 0,  0,  1,  1
-         15000 ns    = 1,  0,  0,  1
-         15000 ns    = 1,  1,  0,  0
-         36000 ns    = 0,  1,  1,  0  # made it longer to match e2v timing
-         7500 ns     = 0,  1,  1,  0
+         FlushP      = 0,  1,  1,  0
+         FlushP      = 0,  0,  1,  1
+         FlushP      = 1,  0,  0,  1
+         FlushP      = 1,  1,  0,  0
+         FlushP      = 0,  1,  1,  0  
+         FlushP      = 0,  1,  1,  0  # doubled to match E2V timing
       constants: S1=1, S2=1, S3=1, RG=1, RST=1
 
     ReadPixel:  # Single pixel read 
@@ -128,7 +131,7 @@
     StartOfImage:  # Signals start of frame to be recorded
       clocks:         SOI
       slices:
-        4600 ns     = 0  # lets ADC finish previous conversion and transfer
+        4800 ns     = 0  # lets ADC finish previous conversion and transfer
         100 ns      = 1
         100 ns      = 0
       constants:    P2=1, P3=1, S1=1, S2=1, RG=1
@@ -136,7 +139,7 @@
     EndOfImage:  # Signals end of frame to be recorded
       clocks:         EOI, SHU
       slices:
-        4600 ns     = 0,  0  # lets ADC finish conversion and transfer
+        4800 ns     = 0,  0  # lets ADC finish conversion and transfer
         100 ns      = 1,  0
         100 ns      = 0,  0
       constants:    P2=1, P3=1, S1=1, S2=1, RG=1
