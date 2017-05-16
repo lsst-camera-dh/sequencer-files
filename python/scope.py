@@ -103,6 +103,7 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         # TODO: match the order from the fits file
 
     #print chandata.shape
+    print("Read data from %s : " % inputfile + chandata.shape.__repr__())
     return chandata
 
 
@@ -326,6 +327,8 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
 
     if display:
         plt.show()
+    else:
+        plt.close()
 
 
 def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)):
@@ -373,6 +376,89 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
 
     #plt.title(dataname)
     plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
+    plt.show()
+
+
+def cut_scan_plot(scanfile, channel, cutcolumns=[180], datadir='', polynomfit=True, displayamps=range(16)):
+    """
+    Cut and fit plots accross image (designed for images acquired in scanning mode).
+    If polynomfit is set to False, reverts to average and standard deviation.
+    :param cutcolumns: list of columns for display accross column direction (to check fit)
+    :param channel: selected channel for display
+    :return:
+    """
+    img = get_scandata_fromfile(scanfile, datadir, selectchannels=displayamps)
+    rootname = os.path.splitext(os.path.basename(scanfile))[0]
+
+    Nlines = img.shape[1]
+    Nbins = img.shape[2]
+    lines = np.arange(Nlines)
+    Nchan = len(displayamps)
+
+    if polynomfit:
+        figX, (p0, p1, pdev) = plt.subplots(nrows=3, num='Fit over lines', figsize=(8, 12))
+        plt.xlabel('Scan increment (10 ns)')
+        figY = plt.figure(num='Selected line fit', figsize=(8, 5))
+        plt.xlabel('Line')
+        plt.ylabel('ADU')
+
+        stddev = np.empty((Nchan, Nbins))
+        polyscan = np.empty((Nchan, 2, Nbins))
+        for c in range(Nchan):
+            # first-order polynomial fit of scans, plus dispersion
+            polyscan[c] = np.polyfit(lines, img[c], 1)
+
+            for b in range(Nbins):
+                polyfit = np.poly1d(polyscan[c, :, b])
+                residuals = img[c, :, b] - polyfit(lines)
+                stddev[c, b] = residuals.std()
+                if b in cutcolumns:
+                    plt.figure(figY.number)
+                    plt.plot(img[c, :, b])
+                    plt.plot(polyfit(lines))
+
+        # plots along line direction
+        plt.figure(figX.number)
+        # p0.plot(polyscan[1, :])
+        plt.subplot(311)
+        for c in range(Nchan):
+            plt.plot(polyscan[c, 1, :])
+        plt.ylabel('Constant in polynomial fit')
+        plt.subplot(312)
+        for c in range(Nchan):
+            plt.plot(polyscan[c, 0, :])
+        # p1.plot(polyscan[0, :])
+        plt.ylabel('Slope in polynomial fit')
+        plt.subplot(313)
+        for c in range(Nchan):
+            plt.plot(stddev[c])
+        # pdev.plot(stddev)
+        plt.ylabel('Residuals from fit')
+
+        # save figures
+        figX.savefig(os.path.join(datadir, 'scanfit' + rootname + '.png'))
+        figY.savefig(os.path.join(datadir, 'plotscanfit' + rootname + '.png'))
+
+    else:
+        fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
+
+        # plots mean and standard deviation along line direction
+        axes[0].set_title(rootname)
+        axes[0].set_xlim(0, Nbins)
+        for c in range(Nchan):
+            axes[0].plot(img[c].mean(axis=0))
+        axes[0].set_xlabel('Time increment (10 ns)')
+        axes[0].set_ylabel('Average of scan (ADU)')
+        axes[0].grid(True)
+
+        axes[1].set_xlim(0, Nbins)
+        for c in range(Nchan):
+            axes[1].plot(img[c].std(axis=0))
+        axes[1].set_xlabel('Time increment (10 ns)')
+        axes[1].set_ylabel('Dispersion of scan (ADU)')
+        axes[1].grid(True)
+        plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
+
     plt.show()
 
 
