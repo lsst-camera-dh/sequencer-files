@@ -379,13 +379,12 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
     plt.show()
 
 
-def cut_scan_plot(scanfile, channel, cutcolumns=[180], datadir='', polynomfit=True, displayamps=range(16)):
+def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displayamps=range(16)):
     """
     Cut and fit plots accross image (designed for images acquired in scanning mode).
     If polynomfit is set to False, reverts to average and standard deviation.
     :param cutcolumns: list of columns for display accross column direction (to check fit)
-    :param channel: selected channel for display
-    :return:
+     :return:
     """
     img = get_scandata_fromfile(scanfile, datadir, selectchannels=displayamps)
     rootname = os.path.splitext(os.path.basename(scanfile))[0]

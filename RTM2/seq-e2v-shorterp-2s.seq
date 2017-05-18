@@ -279,7 +279,7 @@
 #
 
     Exposure25ms:  # Repeat exposure function for 25 ms
-        CALL    @Exposure       repeat(13216)
+        CALL    @Exposure       repeat(13441)
         RTS
         
     ClearCCD:  # Clear CCD once
