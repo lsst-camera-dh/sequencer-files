@@ -99,7 +99,7 @@
       constants:     S1=1, RST=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
-      clocks:          P1, P2, P3, RG
+      clocks:          P1, P2, P3
       slices:
          BufferP     = 0,  1,  0
          TimeP       = 0,  1,  1
