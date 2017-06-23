@@ -131,3 +131,5 @@ if __name__ == '__main__':
             print_header_stats(f)
             #plothisto_overscan(f)
 
+#ld = [os.path.join(datadir, 'S%d%d' % (i, j)) for i in range(3) for j in range(3)]
+#raftfits = [os.path.join(d, f) for d in ld for f in os.listdir(d)]
