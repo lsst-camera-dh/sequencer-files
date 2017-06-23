@@ -8,7 +8,8 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj20170324'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM1/Run4846D/RTM1new_mod50'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM2/seq-e2v-shorterp-2s_scan/'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM2/seq-e2v-shorterp-2s_scan/'
+datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
 
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
@@ -16,10 +17,14 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM2/seq-e2v-shorterp-2s_scan/'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod4s.seq'
 #seqfile = 'RTM1/TS8_ITL_RTM1new_mod50.seq'
-seqfile = 'RTM2/seq-e2v-shorterp-2s.seq'
+#seqfile = 'RTM2/seq-e2v-shorterp-2s.seq'
+seqfile = 'ETU1/TS8_ITL_fix.seq'
 
 #tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
-tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
+#tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
+tmbasefile = "00_test_tm_20170621210028.fits"
+dsibasefile = "00_test_tm_20170621204509.fits"
+
 #older: "00_readRG-scan.fits", "00_mod4s_bias-scan.fits", "00_readS3Linvert-scan.fits", "00_readS2-scan.fits"
 # "00_readS1-scan.fits", "00_readS1invert-scan.fits", "00_test-cj-mod3b_transp_dark_scan2.fits"
 # "00_test-cj-mod3b_flat_transp_scan2.fits, "scan-mode-tm-cj-mod2/00_test-cj-mod2.fits"
@@ -36,9 +41,10 @@ tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #                             "scan-mode-transparent/Image_R00.Reb0_20170320200751.dat",
 #                             seqfile=seqfile, c=0, datadir=datadir)
 
-scope.combined_scope_display('',
-                             tmbasefile,
-                             seqfile=seqfile, c=12, datadir=datadir, loc="00")
+#for s in ["%d%d" % (i,j) for i in range(3) for j in range(3)]:
+#    scope.combined_scope_display(dsibasefile.replace("00_", s + '_'),
+#                                 tmbasefile.replace("00_", s + '_'),
+#                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
 
 #for c in range(16):
     #scope.combined_scope_display("rtm2-scan-dsi-bias/11-rtm2-scan-bias_2.fits",
@@ -48,10 +54,11 @@ scope.combined_scope_display('',
     #                            "rtm2-scan-tm-half-full/11-rtm2-scan-tm-675nm-25s_1.fits",
     #                            seqfile=seqfile, c=c, datadir=datadir, loc="11", display=False)
 
-#for c in range(16):
-#    scope.combined_scope_display("01_RTM1noise_rmBufferS1S3_2.fits",
-#                             "01_RTM1noise_rmBufferS1S3_2_tm.fits",
-#                             seqfile=seqfile, c=c, datadir=datadir, loc="01")
+s = "21"
+for c in range(16):
+    scope.combined_scope_display(dsibasefile.replace("00_", s + '_'),
+                                 tmbasefile.replace("00_", s + '_'),
+                                 seqfile=seqfile, c=c, datadir=datadir, loc=s)
 
 
 
@@ -83,23 +90,6 @@ scope.combined_scope_display('',
 
 #---- Checking statistics on scans
 
-#tmbasefile = "rtm2-scan-tm-bias/02-rtm2-scan-tm-bias_2.fits"
-#scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=True)
-#tmbasefile = "rtm2-scan-tm-half-full/02-rtm2-scan-tm-675nm-25s_1.fits"
-#scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
-
-tmbasefile = "10_shorterp-2s_scan_30s_flat_tm_exp1.fits"
+#tmbasefile = "10_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
-#tmbasefile = "rtm2-scan-tm-half-full/11-rtm2-scan-tm-675nm-25s_1.fits"
-#scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
-
-#basefile = "rtm2-scan-dsi-bias/02-rtm2-scan-bias_2.fits"
-#scope.cut_scan_plot(basefile, datadir=datadir, polynomfit=False)
-#basefile = "rtm2-scan-dsi-half-full/02-rtm2-scan-675nm-25s_1.fits"
-#scope.cut_scan_plot(basefile, datadir=datadir, polynomfit=False)
-
-#basefile = "rtm2-scan-dsi-bias/11-rtm2-scan-bias_2.fits"
-#scope.cut_scan_plot(basefile, datadir=datadir, polynomfit=False)
-#basefile = "rtm2-scan-dsi-half-full/11-rtm2-scan-675nm-25s_1.fits"
-#scope.cut_scan_plot(basefile, datadir=datadir, polynomfit=False)
 

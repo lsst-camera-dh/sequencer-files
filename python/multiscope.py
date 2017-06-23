@@ -34,7 +34,7 @@ def get_scandata_raft(inputfile, datadir=''):
         seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
         # when REB2 data is missing
         #seglist = ["%d%d" % (i, j) for i in range(2) for j in range(3)]
-        raftfits = [inputfile.replace("00-", s + '-') for s in seglist]
+        raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     else:

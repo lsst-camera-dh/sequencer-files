@@ -452,7 +452,10 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
 
         axes[1].set_xlim(0, Nbins)
         for c in range(Nchan):
-            axes[1].plot(img[c].std(axis=0))
+            stdscan = img[c].std(axis=0)
+            # clip first point if needed
+            np.clip(stdscan, 0, stdscan[1:].max(), out=stdscan)
+            axes[1].plot(stdscan)
         axes[1].set_xlabel('Time increment (10 ns)')
         axes[1].set_ylabel('Dispersion of scan (ADU)')
         axes[1].grid(True)
