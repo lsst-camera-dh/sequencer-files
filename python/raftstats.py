@@ -10,16 +10,31 @@ import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors as mplcol
 
-def get_fits_raft(inputfile, datadir=''):
+def get_fits_raft(inputfile='', datadir=''):
     """
     Builds up list of all raft files and list of segment names.
-    :param datadir: optional, directory where data is stored
-    :param inputfile: the first file (S00/ or 00_). Full path if datadir is not given
+    :param datadir: for tree structure, directory where data is stored. Root path if all files are in the same dir.
+    :param inputfile: the first file (00_). Can also work with full path if datadir is not given.
     :return:
     """
     # starts with 00 through 22
     seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
-    raftfits = [os.path.join(datadir, inputfile.replace("00", s)) for s in seglist]
+
+    # if all files in same directory
+    if inputfile:
+        raftfits = [os.path.join(datadir, inputfile.replace("00", s)) for s in seglist]
+
+    # tree structure
+    else:
+        raftfits = []
+        for segstr in seglist:
+            d = os.path.join(datadir, 'S%s' % segstr)
+            for f in os.listdir(d):
+                print f
+                if f[-4:] == 'fits' and os.stat(os.path.join(d, f)).st_size > 1e6:
+                    # one file per directory
+                    raftfits.append(os.path.join(d, f))
+                    break
 
     return raftfits, seglist
 
@@ -38,6 +53,28 @@ def print_header_stats(fitsfile):
 
     hdulist.close()
     del hdulist
+
+
+def write_header_stats(raftfitstuple, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
+    """
+    Creates summary file with statistics stored in extension headers and recalculated noise.
+    :return:
+    """
+    datadir, dataname = os.path.split(raftfitstuple[0][0])
+    outf = open(os.path.join(datadir, 'raftstats.txt'), 'w')
+
+    for fl,segstr in zip(raftfitstuple[0], raftfitstuple[1]):
+        hdulist = pyfits.open(fl)
+
+        for i in range(1, 17):
+            h = hdulist[i].header
+            stdcalc = hdulist[i].data[ROIrows, ROIcols].std()
+            outf.write("%s\t %s\t %.2f\t %.2f\t %.2f\t %.2f\t %.2f\n"  %
+                       (segstr, h['EXTNAME'], h['AVERAGE'], h['STDEV'],h['AVGBIAS'], h['STDVBIAS'], stdcalc))
+
+        hdulist.close()
+        del hdulist
+    outf.close()
 
 
 def plothisto_overscan(fitsfile):
