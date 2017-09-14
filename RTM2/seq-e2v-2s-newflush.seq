@@ -1,11 +1,14 @@
 # REB timing for E2V CCD
 # 
 # 20170119, C. Juramy: initialized from seq-newflush-overp.txt (new baseline sequencer at LPNHE with overlap in parallel clocks)
-# 20170407 C.J.: modified Mains for TS8
-# 20170414 C.J.: increased parallel transfer times (TimeP and OverlapP) and decreased pixel time to match ITL at 2s read time
-# 20170426 C.J.: decreased parallel transfer times again to match new file from E2V that clears up the new tearing
-# 20170505: C.J.: fixed first pixel transfer, added FlushP parameter specific to fast flush
-# 20170516 C.J.: shortened CCD reset to reach nominal readout time, now using TimeS parameter
+# 20170407, C.J.: modified Mains for TS8
+# 20170414, C.J.: increased parallel transfer times (TimeP and OverlapP) and decreased pixel time to match ITL at 2s read time
+# 20170426, C.J.: decreased parallel transfer times again to match new file from E2V that clears up the new tearing
+# 20170505, C.J.: fixed first pixel transfer, added FlushP parameter specific to fast flush
+# 20170516, C.J.: shortened CCD reset to reach nominal readout time, now using TimeS parameter
+# 20170724, C.J.: introduced flushing by bursts during exposure, keeping the naming conventions for ExposureFlush, ExposureNoFlush, 
+# SerialFlush, DarkNoFlush but turning them into subroutines. FlushPixel, FlushPixelOpen, NoFlushPixel, NoFlushPixelOpen replace 
+# them as functions. Set their duration to 1790 ns to match ReadPixel.
 
 # NOTE that the RampTime is 320 ns to reach LSST readout times
 # so the ASPIC RC parameters should be set to 15
@@ -26,7 +29,7 @@
     TimeC:            220 ns   # ASPIC Clamp time
     ISO1:             130 ns   # Time between end of ASPIC clamp/reset and start of RD
     ISO2:             320 ns   # Time between S3 down and start of ASPIC RU
-    FlushS:           540 ns   # Base element for flushing the serial register
+    FlushS:           500 ns   # Base element for flushing the serial register (set to match ReadPixel)
     clockperiod:      10 ns    # FPGA clock period (required by the interpreter)
     ElemExposure:     25 ms    # Duration of the elementary exposure subroutine
 
@@ -61,11 +64,11 @@
     REP_SUBR    PostRows       0  # Number of rows after window (it is up to the user that total lines = 2048)
     REP_SUBR    CleaningNumber 0  # Number of full CCD clears before acquiring a frame
     PTR_SUBR    CleaningSubr    BulkFlushLine  # Subroutine to use for clearing the frame
-    PTR_FUNC    Exposure    ExposureFlush  # Function to use during exposure: SerialFlush or ExposureFlush
+    PTR_SUBR    Exposure        ExposureFlush  # Elementary subroutine to use during exposure: SerialFlush or ExposureFlush
     # or ExposureNoFlush or DarkNoFlush
-    PTR_FUNC    EExposure   ExposureFlush  # Function to use during exposure (SerialFlush or ExposureFlush)
-    REP_FUNC    FlushTime    50000  # Repetitions of SerialFlush function during FlushRegister
-    REP_SUBR    PumpNumber     1000 # Number of parallel pumps
+    PTR_SUBR    EExposure       ExposureFlush  # Elementary subroutine to use during exposure (SerialFlush or ExposureFlush)
+    REP_FUNC    FlushTime  50000  # Repetitions of FlushPixel function during FlushRegister
+    REP_SUBR    PumpNumber  1000  # Number of parallel pumps
 
 [functions]
     Default:  # Default state when not operating
@@ -144,44 +147,48 @@
         100 ns      = 0
       constants:    P2=1, P3=1, S1=1, S2=1, RG=1
 
-    SerialFlush:  # Single pixel flush with timing set by FlushS parameter
+    FlushPixel:  # Single pixel flush with timing set by FlushS parameter
       clocks:          RG, S1, S2, S3
       slices:
          FlushS      = 1,  0,  1,  0
          BufferS     = 1,  0,  1,  1
-         FlushS      = 0,  0,  0,  1
-         BufferS     = 0,  1,  0,  1
-         FlushS      = 0,  1,  0,  0
-         BufferS     = 0,  1,  1,  0
+         50 ns       = 1,  0,  0,  1
+         FlushS      = 1,  0,  0,  1
+         BufferS     = 1,  1,  0,  1
+         FlushS      = 1,  1,  0,  0
+         BufferS     = 1,  1,  1,  0
       constants:     P2=1, P3=1, RST=1
 
-    ExposureFlush:  # Exposure while flushing serial register (testing only), same timing as SerialFlushReg
+    FlushPixelOpen:  # Exposure while flushing serial register (testing only), same timing as FlushPixel
       clocks:          RG, S1, S2, S3
       slices:
          FlushS      = 1,  0,  1,  0
          BufferS     = 1,  0,  1,  1
+         50 ns       = 1,  0,  0,  1
          FlushS      = 1,  0,  0,  1
          BufferS     = 1,  1,  0,  1
          FlushS      = 1,  1,  0,  0
          BufferS     = 1,  1,  1,  0
       constants:     P2=1, P3=1, RST=1, SHU=1
 
-    DarkNoFlush:  # Dark without flushing serial register, same timing as SerialFlushReg
+    NoFlushPixel:  # Dark without flushing serial register, same timing as FlushPixel, all clocks high to clear serial register
       clocks:          RG, S1, S2, S3
       slices:
          FlushS      = 1,  1,  1,  1
          BufferS     = 1,  1,  1,  1
+         50 ns       = 1,  1,  1,  1
          FlushS      = 1,  1,  1,  1
          BufferS     = 1,  1,  1,  1
          FlushS      = 1,  1,  1,  1
          BufferS     = 1,  1,  1,  1
       constants:     P2=1, P3=1, RST=1
 
-    ExposureNoFlush:  # Exposure without flushing serial register (testing only), same timing as SerialFlushReg
+    NoFlushPixelOpen:  # Exposure without flushing serial register (testing only), same timing as FlushPixel, all clocks high to clear serial register
       clocks:          RG, S1, S2, S3
       slices:
          FlushS      = 1,  1,  1,  1
          BufferS     = 1,  1,  1,  1
+         50 ns       = 1,  1,  1,  1
          FlushS      = 1,  1,  1,  1
          BufferS     = 1,  1,  1,  1
          FlushS      = 1,  1,  1,  1
@@ -219,23 +226,23 @@
 
     FlushLine:  # Transfer line and flush it pixel by pixel
         CALL    TransferLine
-        CALL    SerialFlush     repeat(DetectorCols)
+        CALL    FlushPixel     repeat(DetectorCols)
         RTS
 
     WindowLine:  # Line readout
         CALL    TransferLine
-        CALL    SerialFlush     repeat(@PreCols)
-        CALL    SerialFlush     repeat(1)  # for transferring first pixel
+        CALL    FlushPixel      repeat(@PreCols)
+        CALL    FlushPixel      repeat(1)  # for transferring first pixel
         CALL    ReadPixel       repeat(@ReadCols)
-        CALL    SerialFlush     repeat(@PostCols)
+        CALL    FlushPixel      repeat(@PostCols)
         RTS
 
     WindowWithOverscan:  # Line readout with split ROI and overscan
         CALL    TransferLine
-        CALL    SerialFlush     repeat(@PreCols)
-        CALL    SerialFlush     repeat(1)  # for transferring first pixel
+        CALL    FlushPixel      repeat(@PreCols)
+        CALL    FlushPixel      repeat(1)  # for transferring first pixel
         CALL    ReadPixel       repeat(@ReadCols)
-        CALL    SerialFlush     repeat(@PostCols)
+        CALL    FlushPixel      repeat(@PostCols)
         CALL    ReadPixel       repeat(@ReadCols2)
         CALL    ReadPixel       repeat(@OverCols)
         RTS
@@ -251,11 +258,11 @@
 #
 
     CloseShutter:  # Gives time for shutter to close (to be adapted depending on setup)
-        CALL    SerialFlush    repeat(50000)
+        CALL    FlushPixel     repeat(50000)
         RTS
 
     FlushRegister:  # Flushing serial register from accumulated charges (solving E2V DC issue)
-        CALL    SerialFlush     repeat(@FlushTime)
+        CALL    FlushPixel     repeat(@FlushTime)
         RTS
 
     ReadFrame:  # Readout and acquisition of a CCD frame (window)
@@ -278,8 +285,26 @@
 # Exposure operations -----------------------------------------------
 #
 
-    Exposure25ms:  # Repeat exposure function for 25 ms
-        CALL    @Exposure       repeat(13441)
+    ExposureFlush:  # Elementary exposure with burst of flushing, 25 ms duration
+        CALL    NoFlushPixelOpen   repeat(13390)
+        CALL    FlushPixelOpen     repeat(576)
+        RTS
+
+    ExposureNoFlush:  # Elementary exposure without flushing, 25 ms duration
+        CALL    NoFlushPixelOpen   repeat(13966)
+        RTS
+
+    SerialFlush:  # Elementary dark with burst of flushing, 25 ms duration
+        CALL    NoFlushPixel       repeat(13390)
+        CALL    FlushPixel         repeat(576)
+        RTS
+
+    DarkNoFlush:  # Elementary dark without flushing, 25 ms duration
+        CALL    NoFlushPixel       repeat(13966)
+        RTS
+
+    Exposure25ms:  # Selects exposure subroutine, 25 ms duration
+        JSR     @Exposure          repeat(1)
         RTS
         
     ClearCCD:  # Clear CCD once
