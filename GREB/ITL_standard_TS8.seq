@@ -1,0 +1,450 @@
+################################################################################
+#  itl_standard.seq                                                            #
+#                                                                              #      
+#  Sequencer configuration file for use with the FPGA on the LSSTcam           #
+#  readout electronics boards.                                                 #
+#                                                                              #      
+#  This is the 'standard' version normally used.                               #
+#                                                                              #
+#  Author: P. Doherty                                                          #
+#  Date: September 29, 2016                                                    #
+#                                                                              #
+################################################################################
+
+[constants]
+    
+    # Timing Parameters  
+    ParDelay:  2500 ns       #  Parallel Clock State Duration was 2500
+    SerDelay:   120 ns       #  Serial Clock State Duration
+    RampDelay:  400 ns       #  Integrator Dwell Time
+    TimeP:            5000 ns   # Base time element of parallel transfers  TBC: might need to be longer 
+    BufferP:          1000 ns   # Parallel transfer buffer time
+    ISO1:             200 ns    # Time between ASPIC clamp and first ramp
+    ISO2:             400 ns    # Time between ASPIC ramps
+    TimeS:            100 ns    # Base element of serial transfers
+    BufferS:           70 ns    # Buffer for serial clock crossing
+    FlushS:           300 ns    # Base element of serial flush
+    RampTime:         320 ns    # ASPIC ramp time
+    clockperiod:      10 ns     # FPGA clock period (required by the interpreter
+    
+
+################################################################################ 
+#  Clocks are the bit assignments for the sequence engine.                     #
+#                                                                              # 
+[clocks]
+    RU:     0     # ASPIC ramp-up integration
+    RD:     1     # ASPIC ramp-down integration
+    RST:    2     # ASPIC integrator reset
+    CL:     3     # ASPIC clamp
+    S1:     4     # Serial clock 1
+    S2:     5     # Serial clock 2
+    S3:     6     # Serial clock 3
+    RG:     7     # CCD reset gate
+    P1:     8     # Parallel clock 1
+    P2:     9     # Parallel clock 2
+    P3:    10     # Parallel clock 3
+    P4:    11     # Parallel clock 4
+    TRG:   12     # ADC trigger
+    SOI:   13     # Start of image
+    EOI:   14     # End of image 
+    TIMER: 15     # Used interanally when timing (does not DO anything) 
+    SYNC:  17     # External synchronization pulse
+    SHTR:  16     # Shutter Output
+
+
+################################################################################     
+#  pointers   can define a pointer to a function or to a repetition number 
+#              (for subroutines or functions)
+#  
+[pointers] 
+    REP_SUBR Exptime    10000   # Integration Time: milliseconds
+    REP_SUBR OpenDelay     0   # Shutter open  delay: milliseconds
+    REP_SUBR CloseDelay  800   # Shutter close delay: milliseconds
+    REP_SUBR Light         1   # 1 = integrate light, 0 = don't
+    REP_SUBR Dark          0   # 1 = integrate dark,  0 = don't
+    REP_SUBR Slope         0   # 1 = slope frame, 0 = not
+    REP_FUNC SlopeDelay 1000   # delay between rows in 'slope' mode, in us
+    
+    REP_SUBR ClearCount    2   # number of clears before integration
+
+    REP_SUBR SegRows    2020   #  Number of physical rows of the sensor 
+    REP_SUBR PreRows       0   #  Number of rows to discard before subarray 
+    REP_SUBR ReadRows   2020   #  Number of binned rows to read in the subarray
+    REP_SUBR PostRows      0   #  Number of rows to discard after  subarray
+    REP_SUBR OverRows      0   #  Number of rows to read after image is read
+
+    REP_FUNC SegCols     540   #  Number of physical columns of the sensor 
+    REP_FUNC PreCols       0   #  Number of cols to discard before subarray  
+    REP_FUNC ReadCols    540   #  Number of cols to read in the subarray
+    REP_FUNC ReadCols2     0   #  Number of cols to read in the subarray
+    REP_FUNC PostCols      0   #  Number of cols to discard after subarray
+    REP_FUNC OverCols      0   #  Number of cols to read after image is read
+    
+    
+    REP_FUNC BinPar        1   # Parallel Binning factor
+    REP_FUNC BinSer        1   # Serial binning factor
+    
+################################################################################ 
+#  Functions                                                                   #
+#  Wave-front Sensor Acquisition Mode Function Definitions                     #
+#                                                                              #
+#  Functions are the lowest level of programming for the sequencer             #
+#  Functions consist of timeslices in which a set of clocks are                #
+#  assigned a particular value for a defined period of time.                   #
+#                                                                              #
+[functions]      
+    Default: # Default state when not operating
+      clocks: RU,RD,RST,CL,S1,S2,S3,RG,P1,P2,P3,P4,TRG,SOI,EOI
+      slices:     
+        1us = 0,0,1,1,1,1,0,1,0,0,1,0,0,0,0
+               
+
+    Serial_Shift:  # Shift a pixel in the output register
+       clocks: S1,S2,S3
+       slices:
+         SerDelay = 1,1,0
+         SerDelay = 1,0,0 
+         SerDelay = 1,0,1 
+         SerDelay = 0,0,1 
+         SerDelay = 0,1,1 
+         SerDelay = 0,1,0 
+         SerDelay = 1,1,0 
+       constants: P1=0,P2=1,P3=0,RST=1,CL=1
+
+            
+    Serial_Discard:  # Discard a pixel from the output register
+       clocks: S1,S2,S3,RG
+       slices:
+         SerDelay = 1,1,0,1 
+         SerDelay = 1,0,0,1 
+         SerDelay = 1,0,1,1 
+         SerDelay = 0,0,1,1  
+         SerDelay = 0,1,1,1 
+         SerDelay = 0,1,0,1 
+         SerDelay = 1,1,0,0 
+       constants: P1=0,P2=1,P3=0,RST=1,CL=1
+            
+
+     Forward_Parallel_Shift:  # Forward shift from image array to output register
+       clocks: P1,P2,P3,P4, RG, S1,S2,S3
+       slices:
+         ParDelay = 0,1,0,0, 1, 1,1,0 
+         ParDelay = 0,1,1,0, 1, 1,1,0
+         ParDelay = 0,0,1,0, 1, 1,1,0
+         ParDelay = 1,0,1,0, 1, 1,1,0
+         ParDelay = 1,0,0,0, 1, 1,1,0
+         ParDelay = 1,1,0,0, 1, 1,1,0
+         ParDelay = 0,1,0,0, 1, 1,1,0
+         ParDelay = 0,1,0,0, 0, 1,1,0
+         ParDelay = 0,1,0,0, 0, 1,0,0
+         10 us    = 0,1,0,0, 0, 1,0,0
+       constants: RST=1,CL=1
+
+            
+#    Reverse_Parallel_Shift:  # Reverse shift a row in the image array
+#       clocks: P1,P2,P3,P4
+#       slices:
+#         ParDelay = 0,1,0,0
+#         ParDelay = 1,1,0,0 
+#         ParDelay = 1,0,0,0 
+#         ParDelay = 1,0,1,0 
+#         ParDelay = 0,0,1,0 
+#         ParDelay = 0,1,1,0 
+#         ParDelay = 0,1,0,0 
+#       constants: S1=1,S2=1,S3=0,RG=1,RST=1,CL=1
+          
+
+    Parallel_Dump:  # Discard a row from the image array
+       clocks: P1,P2,P3,P4
+       slices:
+         ParDelay = 0,1,0,0 
+         ParDelay = 0,1,1,0 
+         ParDelay = 0,0,1,0 
+         ParDelay = 1,0,1,0 
+         ParDelay = 1,0,0,0 
+         ParDelay = 1,1,0,0 
+         ParDelay = 0,1,0,0 
+       constants: S1=1,S2=1,S3=1,RG=1,RST=1,CL=1
+       
+        
+#    Bin1_Pixel_Readout:  # Read a pixel using binning factor of one
+#       clocks: RU,RD, RST,CL, S1,S2,S3, RG,TRG,SYNC
+#       slices:
+#         100 ns      = 0,0, 1,1, 1,0,0, 1,0,0  # 
+#         100 ns      = 0,0, 1,1, 1,0,0, 0,0,0  # 
+#         100 ns      = 0,0, 1,1, 1,0,1, 0,0,0  # 
+#         100 ns      = 0,0, 1,1, 0,0,1, 0,0,0  # 
+#         100 ns      = 0,0, 0,1, 0,1,1, 0,0,0  # 
+#         100 ns      = 0,0, 0,0, 0,1,0, 0,0,0  # 
+#         150 ns      = 0,0, 0,0, 1,1,0, 0,0,0  # 
+#         RampDelay   = 1,0, 0,0, 1,1,0, 0,0,0  # 
+#         100 ns      = 0,0, 0,0, 1,1,0, 0,0,0  # 
+#         400 ns      = 0,0, 0,0, 1,0,0, 0,0,0  # 
+#         RampDelay   = 0,1, 0,0, 1,0,0, 0,0,0  # 
+#         120 ns      = 0,0, 0,0, 1,0,0, 0,0,0  # 
+#         20 ns       = 0,0, 0,0, 1,0,0, 0,1,0  # 
+#         20 ns       = 0,0, 0,0, 1,0,0, 0,0,0  # 
+#       constants: P1=0,P2=1,P3=0
+
+    Bin1_Pixel_Readout:  # Single pixel read
+      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG, SYNC
+      slices:
+         BufferS     = 1,  1,  0,  1,  0,  0,  0,  0,  0,  0
+         TimeS       = 1,  0,  0,  1,  0,  0,  0,  0,  0,  0
+         BufferS     = 1,  0,  1,  1,  0,  0,  0,  0,  1,  0
+         TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0,  0
+         230 ns      = 0,  1,  1,  0,  1,  1,  0,  0,  0,  0
+         ISO1        = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
+         RampTime    = 0,  1,  1,  0,  0,  0,  1,  0,  0,  0
+         20 ns       = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
+         ISO2        = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0
+         RampTime    = 0,  1,  0,  0,  0,  0,  0,  1,  0,  0
+         30 ns       = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0
+       constants: P1=0,P2=1,P3=0 
+
+
+#    Shift_and_Ramp_Up:  # Shift and Ramp Up
+#       clocks: RU,RD,RST,CL,S1,S2,S3,RG,TRG,SYNC
+#       slices:
+#         120 ns      = 0,0,1,1,1,0,0,1,0,0  # RST CL S1       RG
+#         120 ns      = 0,0,1,1,1,0,1,1,0,0  # RST CL S1       RG
+#         120 ns      = 0,0,1,1,0,0,1,0,0,0  # RST CL       S3
+#         120 ns      = 0,0,1,1,0,1,1,0,0,0  # RST CL    S2 S3
+#         120 ns      = 0,0,0,1,0,1,0,0,0,0  #     CL    S2
+#          50 ns      = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
+#         RampDelay   = 1,0,0,0,1,1,0,0,0,0  # RU     S1 S2
+#       constants: P1=0,P2=1,P3=0
+     
+
+#    Ramp_Down_and_Convert:  # Ramp Down and Convert
+#       clocks: RU,RD,RST,CL,S1,S2,S3,RG,TRG,SYNC
+#       slices:   
+#         10 ns       = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
+#         400 ns      = 0,0,0,0,1,0,0,0,0,0  #        S1 (S2 falls)
+#         RampDelay   = 0,1,0,0,1,0,0,0,0,0  # RD     S1
+#         20 ns       = 0,0,0,0,1,0,0,0,0,0  #        S1
+#         50 ns       = 0,0,0,0,1,0,0,0,1,0  # TRG    S1
+#         20 ns       = 0,0,0,0,1,0,0,0,0,0  #        S1
+#       constants: P1=0,P2=1,P3=0
+
+
+    Slope_Parallel_Shift:  # Forward shift during 'slope' frame acquisition
+       clocks: P1,P2,P3,P4
+       slices:
+         ParDelay = 0,1,0,0 
+         ParDelay = 0,1,1,0 
+         ParDelay = 0,0,1,0 
+         ParDelay = 1,0,1,0 
+         ParDelay = 1,0,0,0 
+         ParDelay = 1,1,0,0 
+         ParDelay = 0,1,0,0
+       constants: S1=1,S2=1,S3=0,RG=1,RST=1,CL=1,SHTR=1
+
+    Slope_Pixel_Readout:  # Read a pixel using binning factor of one
+       clocks: RU,RD,RST,CL,S1,S2,S3,RG,TRG,SYNC
+       slices:
+         100 ns      = 0,0,1,1,1,0,0,1,0,0  # RST CL S1       RG
+         100 ns      = 0,0,1,1,1,0,1,1,0,0  # RST CL S1    S3 RG
+         100 ns      = 0,0,1,1,0,0,1,0,0,0  # RST CL       S3
+         100 ns      = 0,0,0,1,0,1,1,0,0,0  #     CL    S2 S3
+         100 ns      = 0,0,0,0,0,1,0,0,0,0  #           S2
+         150 ns      = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
+         RampDelay   = 1,0,0,0,1,1,0,0,0,0  # RU     S1 S2
+         10 ns       = 0,0,0,0,1,1,0,0,0,0  #        S1 S2
+         400 ns      = 0,0,0,0,1,0,0,0,0,0  #        S1 (S2 falls)
+         RampDelay   = 0,1,0,0,1,0,0,0,0,0  # RD     S1
+         120 ns      = 0,0,0,0,1,0,0,0,0,0  #        S1
+         20 ns       = 0,0,0,0,1,0,0,0,1,0  # TRG    S1
+         20 ns       = 0,0,0,0,1,0,0,0,0,0  #        S1
+       constants: P1=0,P2=1,P3=0,SHTR=1
+
+ 
+    StartImage:  # signal that data is going to be generated
+       clocks: SOI
+       slices:
+        10000 ns     = 0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1
+        100 ns      = 0
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+
+    EndImage:  # signal that data is generation is finished
+       clocks: EOI
+       slices:
+        10000 ns    = 0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1
+        100 ns      = 0
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+    Sync:  # synchronization pulse
+       clocks: SYNC
+       slices:
+         10 us = 0
+          1 us = 1
+         10 us = 0
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+    Light100us:  # open the shutter and integrate light for 100 us
+       clocks: SHTR,SYNC
+       slices:
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+         10000 ns = 1,1
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+       
+    Dark100us:  # integrate dark current for 100 us
+       clocks: SHTR,SYNC
+       slices:
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+         1000 ns = 0,1
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+    Delay100us:  # do nothing for 100 us
+       clocks: SYNC
+       slices:
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+         1000 ns = 0
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+    Slope1us:  # pause with shutter open for 1 us
+       clocks: SHTR,SYNC
+       slices:
+         500 ns = 1,0
+         500 ns = 1,0
+       constants: S1=1,S2=1,S3=0,RG=1,P1=0,P2=1,P3=0,RST=1,CL=1
+
+#  ******************************************************************* #
+#   Sequencer Routines                                                 #
+#   Functions are combined into 'subroutines'                          #
+#                                                                      #
+
+[subroutines]   
+
+    Light1ms:
+        CALL  Light100us  repeat(10)
+        RTS
+
+    Dark1ms:
+        CALL  Dark100us  repeat(10)
+        RTS
+
+    Delay1ms:
+        CALL  Delay100us  repeat(10)
+        RTS
+
+    ClearRow:  # Flush a single row off the CCD            
+        CALL  Forward_Parallel_Shift
+        CALL  Serial_Discard    repeat(@SegCols)
+        RTS
+       
+    ClearFast: # Flush the entire image array once, FAST            
+        CALL  Parallel_Dump   repeat(2000)
+        JSR  ClearRow
+        RTS
+
+    ClearSlow: # Flush the entire image array, SLOWLY            
+        JSR  ClearRow   repeat(@SegRows)
+        RTS
+
+    ReadRow:
+        CALL  Sync
+        CALL  Forward_Parallel_Shift   repeat(@BinPar)
+        CALL  Serial_Discard           repeat(@PreCols)
+        CALL  Bin1_Pixel_Readout       repeat(@ReadCols)  
+        CALL  Serial_Discard           repeat(@PostCols)
+        CALL  Bin1_Pixel_Readout       repeat(@ReadCols2)  
+        CALL  Bin1_Pixel_Readout       repeat(@OverCols)
+        RTS
+
+    SlopeRow:
+        CALL  Sync
+        CALL  Slope_Parallel_Shift
+        CALL  Slope_Pixel_Readout   repeat(@ReadCols)
+        CALL  Slope1us  repeat(@SlopeDelay)
+        RTS
+ 
+#    ReadArrayRow:
+#        CALL  Forward_Parallel_Shift
+#        CALL  Serial_Discard      repeat(@PreCols)
+#        CALL  Bin1_Pixel_Readout  repeat(@ReadCols)
+#        CALL  Serial_Discard      repeat(@PostCols)
+#        RTS     
+#           
+#    ReadArray:
+#        CALL  StartImage
+#        JSR   ClearRow        repeat(@PreRows)
+#        JSR   ReadArrayRow    repeat(@ReadRows)
+#        JSR   ClearRow        repeat(@PostRows)
+#        CALL  EndImage
+#        RTS     
+
+    ReadCCD:
+        CALL  StartImage
+        JSR   ClearRow        repeat(@PreRows)
+        JSR   ReadRow         repeat(@ReadRows)
+        JSR   ClearRow        repeat(@PostRows)
+        JSR   ReadRow         repeat(@OverRows)
+        CALL  EndImage
+        RTS  
+
+    ReadSlope:
+        CALL  StartImage
+        JSR   SlopeRow   repeat(@ReadRows)
+        CALL  EndImage
+        RTS  
+
+    IntLight:
+        JSR   Light1ms  repeat(@OpenDelay)  # shutter open delay
+        JSR   Light1ms  repeat(@Exptime)    # integrate light
+        JSR   Delay1ms  repeat(@CloseDelay) # shutter close delay
+        RTS
+    
+    IntDark:        
+        JSR   Delay1ms  repeat(@OpenDelay)  # shutter open delay
+        JSR   Dark1ms   repeat(@Exptime)
+        JSR   Delay1ms  repeat(@CloseDelay) # shutter close delay
+        RTS
+            
+    Acquire:
+        JSR   ClearFast  repeat(@ClearCount)
+        JSR   IntLight   repeat(@Light)       
+        JSR   IntDark    repeat(@Dark)       
+        JSR   ReadCCD    repeat(@Light) # readout for Light acquisitions
+        JSR   ReadCCD    repeat(@Dark)  # readout for Dark  acquisitions
+        JSR   ReadSlope  repeat(@Slope) # readout for Slope  acquisitions
+        RTS  
+
+        
+#  *********************************************************** #
+#   Main routine, take a picture!                              #
+
+[mains]
+    Main:
+        JSR  Acquire
+        END
+        
+
+
