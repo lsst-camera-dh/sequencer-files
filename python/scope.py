@@ -131,6 +131,7 @@ def plot_scan_states(ax, seq, readfunction, offset=0, extend=1, marktransitions=
     """
     funcscope = seq.functions_desc[readfunction]['function']  # function object
     clocklist = seq.functions_desc[readfunction]['clocks']  # names of active clocks
+    #clocklist.pop()  # activate this to remove shutter if it is in the clock list
 
     ax.set_ylabel('Sequencer states')
     ax.set_ylim((0, len(clocklist)))
@@ -164,7 +165,7 @@ def plot_scan_states(ax, seq, readfunction, offset=0, extend=1, marktransitions=
 def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     """
     Display sequencer states only.
-    Needs to be given the name of the main used.
+    Needs to be given the name of the main used or the function to be plotted.
     Will detect automatically the function used and the offset of the ADC.
     :param seqfile: sequencer file, needs full path from seqpath global variable.
     :param readout: function or program used during fits file acquisition
@@ -180,15 +181,17 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     else:
         readfunction = seq.find_function_withclock(readout, 'TRG')
 
-
     # find offset between start of function and trigger of ADC
     clockline = seq.channels['TRG']
     funcscope = seq.functions_desc[readfunction]['function']  # function object
     offset = funcscope.scope(clockline).index(1)
 
-    fig, ax = plt.subplots(figsize=(13, 8))
+    fig, ax = plt.subplots(figsize=(13, 6))
     plot_scan_states(ax, seq, readfunction, offset)
-    plt.savefig(os.path.join(seqpath, "sequencerscope.png"))
+    ax.set_xlim(0, 255)
+    seqroot = os.path.splitext(seqfile)[0]
+    plt.title("%s in %s" % (funcscope.name, seqroot)) 
+    plt.savefig(os.path.join(seqpath, "%s-statesplot.png" % seqroot))
     plt.show()
 
 
@@ -395,7 +398,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
     Nchan = len(displayamps)
 
     if polynomfit:
-        figX, (p0, p1, pdev) = plt.subplots(nrows=3, num='Fit over lines', figsize=(8, 12))
+        figX, (p0, p1, pdev) = plt.subplots(nrows=3, num='Fit over lines', figsize=(9, 9))
         plt.xlabel('Scan increment (10 ns)')
         figY = plt.figure(num='Selected line fit', figsize=(8, 5))
         plt.xlabel('Line')

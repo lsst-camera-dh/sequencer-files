@@ -19,6 +19,7 @@ import os.path
 import numpy as np
 from matplotlib import pyplot as plt
 import scope
+import pyfits
 
 
 def get_scandata_raft(inputfile, datadir=''):
@@ -92,6 +93,71 @@ def raft_display_allchans(inputfile, datadir=''):
     #plt.title(dataname)  # TODO: put it above all plots
     plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
     plt.show()
+
+
+def get_extension_header(imgcols, imglines, CCDchan, fitshdu, detstring):
+    """
+    Builds FITS extension header with position information for each channel.
+    :type CCDchan: int
+    :type fitshdu: pyfits.HDU
+    :type detstring: basestring
+    :type channels: list
+    :type displayborders: bool
+    :return:
+    """
+    extheader = fitshdu.header
+    extheader["NAXIS1"] = imgcols
+    extheader["NAXIS2"] = imglines
+    extheader['DETSIZE'] = detstring
+    extheader['CHANNEL'] = CCDchan
+
+    parstringlow = '1:%d' % imglines
+    parstringhigh = '%d:%d' % (2 * imglines, imglines + 1)
+    colwidth = imgcols
+    extheader['DATASEC'] = '[1:%d,1:%d]' % (imgcols, imglines)
+
+    numCCD = CCDchan / 16
+    chan = CCDchan - numCCD * 16
+    if chan < 8:
+        pdet = parstringhigh
+        # REB3 with swapped channels
+        #si = colwidth * (7 - CCDchan - 8 * numCCD) + 1
+        #sf = colwidth * (7 - CCDchan - 8 * numCCD + 1)
+        # REB5
+        si = colwidth * (CCDchan - 8 * numCCD) + 1
+        sf = colwidth * (CCDchan - 8 * numCCD + 1)
+    else:
+        pdet = parstringlow
+        si = colwidth * (CCDchan - 8 * (numCCD + 1) + 1)
+        sf = colwidth * (CCDchan - 8 * (numCCD + 1)) + 1
+
+    extheader['DETSEC'] = '[%d:%d,%s]' % (si, sf, pdet)
+
+
+def reframe_scope_frames(listfits):
+    """
+    Corrects datasec keywords based on real frame size.
+    :param listfits:
+    :return:
+    """
+    for f in listfits:
+        h = pyfits.open(f)
+        imgcols = h[1].header['naxis1']
+        imglines = h[1].header['naxis2']
+        detstring = '[1:%d,1:%d]' % (imgcols * 8, 2 * imglines)
+        # Create HDU list
+        primaryhdu = pyfits.PrimaryHDU()
+        primaryhdu.header = h[0].header.copy()
+        primaryhdu.header['DETSIZE'] = (detstring, 'NOAO MOSAIC keywords')
+        hcopy = pyfits.HDUList([primaryhdu])
+
+        #print h.info()
+        for extnum in range(1,17,1):
+            exthdu = pyfits.ImageHDU(data=h[extnum].data)
+            get_extension_header(imgcols, imgcols, extnum-1, exthdu, detstring)
+            hcopy.append(exthdu)
+
+        hcopy.writeto(f[:-5] + "f.fz", clobber=True)
 
 
 if __name__ == '__main__':

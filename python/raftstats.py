@@ -18,11 +18,11 @@ def get_fits_raft(inputfile='', datadir=''):
     :return:
     """
     # starts with 00 through 22
-    seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+    seglist = ["%d%d_" % (i, j) for i in range(3) for j in range(3)]
 
     # if all files in same directory
     if inputfile:
-        raftfits = [os.path.join(datadir, inputfile.replace("00", s)) for s in seglist]
+        raftfits = [os.path.join(datadir, inputfile.replace("00_", s)) for s in seglist]
 
     # tree structure
     else:
