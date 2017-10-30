@@ -8,7 +8,7 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj-tst2'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj20170324'
-#datadir = '/Users/nayman/Documents/REB/TS8/RTM1/Run4846D/RTM1new_mod50'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM1/rmBufferS1S3'
 datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
 
@@ -24,6 +24,7 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 #tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #tmbasefile = "00_test_tm_20170621210028.fits"
+#tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
 #dsibasefile = "00_test_tm_20170621204509.fits"
 
 #older: "00_readRG-scan.fits", "00_mod4s_bias-scan.fits", "00_readS3Linvert-scan.fits", "00_readS2-scan.fits"
@@ -34,7 +35,7 @@ tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 
 #---- Scan display for all raft channels
 
-#multiscope.raft_display_allchans(tmbasefile, datadir)
+multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM2')
 
 #---- Combined display of single channel with clock sequences
 
@@ -94,6 +95,6 @@ tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 #tmbasefile = "10_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
 
-l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
+#l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
-scope.cut_scan_plot(l[0][1], cutcolumns=[160], datadir=datadir, polynomfit=True, displayamps=range(16))
+#scope.cut_scan_plot(l[0][1], cutcolumns=[160], datadir=datadir, polynomfit=True, displayamps=range(16))

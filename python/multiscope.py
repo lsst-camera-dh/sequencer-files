@@ -35,7 +35,8 @@ def get_scandata_raft(inputfile, datadir=''):
         seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
         # when REB2 data is missing
         #seglist = ["%d%d" % (i, j) for i in range(2) for j in range(3)]
-        raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+        #raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+        raftfits = [inputfile.replace("00", s) for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     else:
@@ -50,16 +51,17 @@ def get_scandata_raft(inputfile, datadir=''):
 
     return raftarrays, seglist
 
-def raft_display_allchans(inputfile, datadir=''):
+def raft_display_allchans(inputfile, datadir='', suptitle=''):
     """
     Builds up data from all raft files and display scans.
     :param datadir: optional, directory where data is stored
     :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given
+    :param suptitle: personalized title
     :return:
     """
     raftarrays, seglist = get_scandata_raft(inputfile, datadir)
 
-    fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 12))
+    fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 9))
     # when REB2 data is missing
     # fig, axes = plt.subplots(nrows = 2, ncols = 3, figsize=(15, 9))
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
@@ -76,21 +78,29 @@ def raft_display_allchans(inputfile, datadir=''):
             #print tmscope.shape
             tmchan = tmscope[c].mean(axis=0)
             ax.plot(tmchan, label=c, color=color_idx[c])
-            if num == 0:
+            #if num == 0:
                 # for common legend
-                listaxes.append(ax)
+                #listaxes.append(ax)
 
             ax.set_xlim(0, 255)
             ax.set_xticks(np.arange(0, 256, 32))
             ax.set_title(seglist[num])
-            #ax.set_xlabel('Time increment (10 ns)')
-            #ax.set_ylabel('Scan (ADU)')
+
+            if num%3 == 0:
+                ax.set_ylabel('Scan (ADU)')
+            if num/3 == 2:
+                ax.set_xlabel('Time increment (10 ns)')
             ax.grid(True)
 
-    # TODO: common legend that works
+
+    ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+
     #plt.legend(handles=listaxes,loc = 'upper center', bbox_to_anchor = (0.5, 0), bbox_transform = plt.gcf().transFigure)
     dataname = scope.get_rootfile(inputfile)
-    #plt.title(dataname)  # TODO: put it above all plots
+    if suptitle:
+        plt.suptitle(suptitle, fontsize='x-large')
+    else:
+        plt.suptitle(dataname)
     plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
     plt.show()
 
