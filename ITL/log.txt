@@ -5,4 +5,4 @@
 # older files should be copied as appropriate to ETU1/, ETU2/, or by default RTM1/ for memory
 
 20171102: TS8_ITL_2s_newflush.seq : initiated with latest file from dev
-
+20171102: TS8_ITL_2s_newflush_v2.seq : upgraded clearing counts
