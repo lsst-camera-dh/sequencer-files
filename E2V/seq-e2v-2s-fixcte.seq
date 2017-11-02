@@ -338,7 +338,7 @@
 
     PocketPump:  # One acquisition followed by pocket pumping
         JSR     ExposeFrame
-        JSR     CloseShutter
+#        JSR     CloseShutter  # this is not needed (included in ExposeFrame)
         JSR     PumpFrame
         END
 

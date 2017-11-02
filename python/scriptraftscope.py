@@ -9,9 +9,9 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/mod3b_scan'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj20170324'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM1/rmBufferS1S3'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
-
+datadir = '/Users/nayman/Documents/REB/TS8/RTM8/'
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
@@ -20,8 +20,10 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #seqfile = 'RTM1/TS8_ITL_RTM1new_mod50.seq'
 #seqfile = 'RTM2/seq-e2v-shorterp-2s.seq'
 #seqfile = 'ETU1/TS8_ITL_fix.seq'
+seqfile = 'ITL/TS8_ITL_2s_newflush_v2.seq'
 
-tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
+tmbasefile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
+#tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 #tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #tmbasefile = "00_test_tm_20170621210028.fits"
 #tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
@@ -35,7 +37,7 @@ tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 
 #---- Scan display for all raft channels
 
-multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM2')
+#multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM8 1s dark')
 
 #---- Combined display of single channel with clock sequences
 
@@ -49,9 +51,9 @@ multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM2')
 #                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
 
 #for c in range(16):
-    #scope.combined_scope_display("rtm2-scan-dsi-bias/11-rtm2-scan-bias_2.fits",
-    #                             "rtm2-scan-tm-bias/11-rtm2-scan-tm-bias_2.fits",
-    #                           seqfile=seqfile, c=c, datadir=datadir, loc="11", display=False)
+#    scope.combined_scope_display("rtm8scanmodetm1/01_rtm8_tm_1_bias.fits",
+#                                 "rtm8scanmodedsi1/01_rtm8_dsi_1_bias.fits",
+#                                 seqfile=seqfile, c=c, datadir=datadir, loc="01", display=True)
     #scope.combined_scope_display("rtm2-scan-dsi-half-full/11-rtm2-scan-675nm-25s_1.fits",
     #                            "rtm2-scan-tm-half-full/11-rtm2-scan-tm-675nm-25s_1.fits",
     #                            seqfile=seqfile, c=c, datadir=datadir, loc="11", display=False)
@@ -68,7 +70,7 @@ multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM2')
 
 #for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]:
 #    scope.scan_scope_display(None, "rtm2-scan-tm-bias/%s-rtm2-scan-tm-bias_2.fits" % s, datadir=datadir)
-    #scope.scan_scope_display(None, "%s_test-cj-mod3b_transp_dark_scan2.fits" % s, datadir=datadir)
+#    scope.scan_scope_display(None, "%s_test-cj-mod3b_transp_dark_scan2.fits" % s, datadir=datadir)
 
 # single CCD
 #scope.scan_scope_display(None, "00_RTM1noise_rmBufferS1S3_2_tm.fits", datadir=datadir)
@@ -84,17 +86,21 @@ multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM2')
 #             "mod3b_scan/00_test-cj-mod3b_transp_dark_scan2.fits"]
 #listlabels = ["Mod2", "Mod3"]
 
-#listlabels = [s for s in ["%d%d" % (i, j) for i in range(2) for j in range(3)]]
-#listscans = ["%s_RTM1noise_rmBufferS1S3_2_tm.fits" % s for s in listlabels]
+#listlabels = [s for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]]
+#listscans = ["rtm8scanmodetm1/%s_rtm8_tm_1_bias.fits" % s for s in listlabels]
 
 #scope.compare_scope_display(listscans, listlabels, datadir)
 
 
 #---- Checking statistics on scans
 
-#tmbasefile = "10_shorterp-2s_scan_30s_flat_tm_exp1.fits"
+
 #scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
 
-#l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
+l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
-#scope.cut_scan_plot(l[0][1], cutcolumns=[160], datadir=datadir, polynomfit=True, displayamps=range(16))
+scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
+
+#for f in l[0]:
+#    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
+

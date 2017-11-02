@@ -463,6 +463,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         axes[1].set_ylabel('Dispersion of scan (ADU)')
         axes[1].grid(True)
         plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
+        plt.suptitle('Scan statistics for %s' % rootname)
 
     plt.show()
 
