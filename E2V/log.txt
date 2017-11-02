@@ -1,0 +1,8 @@
+# this directory holds the baseline sequencer file for E2V rafts
+# it should only be holding a single sequencer file at any time
+# modifications should be documented in this file
+# any change in file content should result in a change in file name
+# older files should be copied to RTM2/ for memory
+
+20171102: seq-e2v-2s-fixcte.seq : initiated with latest file from dev
+
