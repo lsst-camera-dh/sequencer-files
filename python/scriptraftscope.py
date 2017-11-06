@@ -99,8 +99,8 @@ tmbasefile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
 
 l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
-scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
+#scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
 
 #for f in l[0]:
 #    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
-
+scope.cut_scan_plot("rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits", datadir=datadir, polynomfit=False, displayamps=range(16))

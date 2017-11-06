@@ -396,6 +396,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
     Nbins = img.shape[2]
     lines = np.arange(Nlines)
     Nchan = len(displayamps)
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, Nchan)]
 
     if polynomfit:
         figX, (p0, p1, pdev) = plt.subplots(nrows=3, num='Fit over lines', figsize=(9, 9))
@@ -416,7 +417,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
                 stddev[c, b] = residuals.std()
                 if b in cutcolumns:
                     plt.figure(figY.number)
-                    plt.plot(img[c, :, b])
+                    plt.plot(img[c, :, b], color=color_idx[c])
                     plt.plot(polyfit(lines))
 
         # plots along line direction
@@ -424,16 +425,16 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         # p0.plot(polyscan[1, :])
         plt.subplot(311)
         for c in range(Nchan):
-            plt.plot(polyscan[c, 1, :])
+            plt.plot(polyscan[c, 1, :], color=color_idx[c])
         plt.ylabel('Constant in polynomial fit')
         plt.subplot(312)
         for c in range(Nchan):
-            plt.plot(polyscan[c, 0, :])
+            plt.plot(polyscan[c, 0, :], color=color_idx[c])
         # p1.plot(polyscan[0, :])
         plt.ylabel('Slope in polynomial fit')
         plt.subplot(313)
         for c in range(Nchan):
-            plt.plot(stddev[c])
+            plt.plot(stddev[c], color=color_idx[c])
         # pdev.plot(stddev)
         plt.ylabel('Residuals from fit')
 
@@ -448,7 +449,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         axes[0].set_title(rootname)
         axes[0].set_xlim(0, Nbins)
         for c in range(Nchan):
-            axes[0].plot(img[c].mean(axis=0))
+            axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
         axes[0].set_xlabel('Time increment (10 ns)')
         axes[0].set_ylabel('Average of scan (ADU)')
         axes[0].grid(True)
@@ -458,12 +459,14 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
             stdscan = img[c].std(axis=0)
             # clip first point if needed
             np.clip(stdscan, 0, stdscan[1:].max(), out=stdscan)
-            axes[1].plot(stdscan)
+            axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
         axes[1].set_xlabel('Time increment (10 ns)')
         axes[1].set_ylabel('Dispersion of scan (ADU)')
         axes[1].grid(True)
+        # single legend and title
+        axes[1].legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+        plt.suptitle('Scan statistics for %s' % rootname, fontsize='large')
         plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
-        plt.suptitle('Scan statistics for %s' % rootname)
 
     plt.show()
 
