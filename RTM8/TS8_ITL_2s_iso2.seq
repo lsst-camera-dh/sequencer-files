@@ -12,7 +12,7 @@
 # 20171011, C.J.: added FlushP parameter specific to fast flush and CleaningSubr pointer for full frame flush
 # 20171101, H.N.: added new count for ClearCCD and set clearing counts to 1 by default
 # 20171102, C.J.: added flush of serial register right before frame readout to remove charges from fast clear (matches E2V sequence)
-# 20171106, C.J.: tests to fix RTM8 issues
+# 20171106, C.J.: tests to fix RTM8 issues: added 20ns to ISO1, 30ns to ISO2, split second TS to shorten RG
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
