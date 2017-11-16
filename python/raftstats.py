@@ -18,11 +18,11 @@ def get_fits_raft(inputfile='', datadir=''):
     :return:
     """
     # starts with 00 through 22
-    seglist = ["%d%d_" % (i, j) for i in range(3) for j in range(3)]
+    seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
 
     # if all files in same directory
     if inputfile:
-        raftfits = [os.path.join(datadir, inputfile.replace("00_", s)) for s in seglist]
+        raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_')) for s in seglist]
 
     # tree structure
     else:
@@ -137,7 +137,7 @@ def corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
     return a
 
 
-def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
+def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521), xylabels=None, title=''):
     """
     Plot of correlation coefficients over list of CCD images.
     :param raftsfits:
@@ -150,8 +150,16 @@ def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 52
 
     a = corrcoef_raft(raftsfits, ROIrows, ROIcols)
     fig, ax = plt.subplots(figsize=(8, 8))
-    cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=0.3, clip=True))
-    ax.set_title('Correlation for %s' % dataname)
+    cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=1, clip=True), interpolation='none')
+    if title:
+        ax.set_title('Correlation for %s' % title)
+    else:
+        ax.set_title('Correlation for %s' % dataname)
+    ax.set_xticks(np.arange(0, 16*len(raftsfits), 16))
+    ax.set_yticks(np.arange(0, 16*len(raftsfits), 16))
+    if xylabels:
+        ax.set_xticklabels(xylabels)
+        ax.set_yticklabels(xylabels)
     cbar = fig.colorbar(cax, orientation='vertical')
 
     plt.savefig(os.path.join(datadir, "corr-%s.png" % dataname))
