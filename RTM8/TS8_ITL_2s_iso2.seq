@@ -13,6 +13,7 @@
 # 20171101, H.N.: added new count for ClearCCD and set clearing counts to 1 by default
 # 20171102, C.J.: added flush of serial register right before frame readout to remove charges from fast clear (matches E2V sequence)
 # 20171106, C.J.: tests to fix RTM8 issues: added 20ns to ISO1, 30ns to ISO2, split second TS to shorten RG
+# 20171118, C.J.: modified parallel transfer to transfer with S1 and S2 high
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -85,15 +86,17 @@
 #         1 us        =  1,  1,  1,  1,  1,   0
 
     TransferLine:  # Single line transfer
-      clocks:          P1, P2, P3, RG, S2, SHU
+      clocks:          P1, P2, P3, RG, S2
       slices:
-         BufferP     = 0,  1,  0,  1,  1,  0
-         TimeP       = 0,  1,  1,  1,  1,  0
-         TimeP       = 0,  0,  1,  1,  1,  0
-         TimeP       = 1,  0,  1,  1,  1,  0
-         TimeP       = 1,  0,  0,  1,  1,  0
-         TimeP       = 1,  1,  0,  1,  1,  0
-         TimeP       = 0,  1,  0,  0,  0,  0
+         BufferP     = 0,  1,  0,  1,  1
+         TimeP       = 0,  1,  1,  1,  1
+         TimeP       = 0,  0,  1,  1,  1
+         TimeP       = 1,  0,  1,  1,  1
+         TimeP       = 1,  0,  0,  1,  1
+         TimeP       = 1,  1,  0,  1,  1
+         TimeP       = 0,  1,  0,  1,  1
+         TimeP       = 0,  1,  0,  0,  1
+         TimeP       = 0,  1,  0,  0,  0
       constants:     S1=1, RST=1
 
     ReverseLine:  # Single line transfer in the reverse direction
@@ -105,7 +108,7 @@
          TimeP       = 1,  0,  1,  1,  1
          TimeP       = 0,  0,  1,  1,  1
          TimeP       = 0,  1,  1,  1,  1
-         TimeP       = 0,  1,  0,  0,  0
+         TimeP       = 0,  1,  0,  1,  1
       constants:     S1=1, RST=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
