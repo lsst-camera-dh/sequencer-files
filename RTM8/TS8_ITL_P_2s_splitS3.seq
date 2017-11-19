@@ -86,7 +86,7 @@
 #         1 us        =  1,  1,  1,  1,  1,   0
 
     TransferLine:  # Single line transfer
-      clocks:          P1, P2, P3, RG, S2, SHU
+      clocks:          P1, P2, P3, RG, S2
       slices:
          BufferP     = 0,  1,  0,  1,  1
          TimeP       = 0,  1,  1,  1,  1
