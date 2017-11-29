@@ -69,7 +69,6 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
     # plot all channels, with one subplot per CCD
-    listaxes = []
     for num,tmscope in enumerate(raftarrays):
         ax = axes[num  / 3, num  % 3 ]
 

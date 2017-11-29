@@ -334,7 +334,7 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
         plt.close()
 
 
-def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)):
+def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16), title='', diff=False):
     """
     Displays several scans on the same plot for each (selected) channel of the CCD.
     :return:
@@ -363,22 +363,34 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         # subplot
         ax = axes[c / 4, c % 4]
 
-        for i in range(ndisplay):  # scan files for a channel
-            tmhdu = alltmhdu[i]
-            tmscope = tmhdu[c].mean(axis=0)
-            # first point is often invalid due to trigger position
-            np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
-            ax.plot(tmscope, label=labellist[i], color=color_idx[i])
+        if diff:
+            for i in range(1, ndisplay):  # scan files for a channel
+                tmhdu = alltmhdu[i] - alltmhdu[0]
+                tmscope = tmhdu[c].mean(axis=0)
+                # first point is often invalid due to trigger position
+                np.clip(tmscope, tmscope[1:].min(), tmscope[1:].max(), out=tmscope)
+                ax.plot(tmscope, label="%s - %s"% (labellist[i], labellist[0]), color=color_idx[i])
+        else:
+            for i in range(ndisplay):  # scan files for a channel
+                tmhdu = alltmhdu[i]
+                tmscope = tmhdu[c].mean(axis=0)
+                # first point is often invalid due to trigger position
+                np.clip(tmscope, tmscope[1:].min(), tmscope[1:].max(), out=tmscope)
+                ax.plot(tmscope, label=labellist[i], color=color_idx[i])
 
         ax.set_xlim(0, 255)
         ax.set_xticks(np.arange(0, 256, 32))
         #ax.set_xlabel('Time increment (10 ns)')
         #ax.set_ylabel('Scan (ADU)')
         ax.grid(True)
-        #set_legend_outside(ax)
 
-    #plt.title(dataname)
-    plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
+    ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+    if title:
+        plt.suptitle(title, fontsize='x-large')
+    if diff:
+        plt.savefig(os.path.join(datadir, "scandiff-%s.png" % dataname))
+    else:
+        plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
     plt.show()
 
 
