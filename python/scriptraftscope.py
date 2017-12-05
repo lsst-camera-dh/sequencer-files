@@ -11,18 +11,21 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM1/rmBufferS1S3'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod4s.seq'
-seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
+#seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
 #seqfile = 'RTM2/seq-e2v-shorterp-2s.seq'
 #seqfile = 'ETU1/TS8_ITL_fix.seq'
-#seqfile = 'RTM8/singleclock/TS8_ITL_allS.seq'
+seqfile = 'RTM8/singleclock/TS8_ITL_allS.seq'
 
-tmbasefile = "REB0/00_bias2.fits"
+#tmbasefile = "00_bias2.fits"
+tmbasefile = "00_rtm8_tm_1_bias.fits"
+#tmbasefile = "REB0/00_bias2.fits"
 #tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 #tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #tmbasefile = "00_test_tm_20170621210028.fits"
@@ -81,25 +84,28 @@ tmbasefile = "REB0/00_bias2.fits"
 
 #scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
 
-#Sl = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
+l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
 #scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
 
 #for f in l[0]:
-#    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
+    #scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
+    #scope.stats_scan_plot(f, datadir=datadir, basecols=slice(70, 90), signalcols=slice(140, 160))
 
+multiscope.plot_corrcoef_raftscope(l[0], ROIrows=slice(10,1000), ROIcols=slice(140,160),
+                                   xylabels=l[1], title='RTM8 scan at signal time', norm=False)
 
 #---- Comparing scans channel per channel for a single CCD
 
 # Mixing raw and fits files does not work now
-listlabels = ["Baseline", "BSS=0", "REB0"]
+#listlabels = ["Baseline", "BSS=0", "REB0"]
 #listlabels = [s for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]]
 
-listscans = ["rtm8scanmodetm1/01_rtm8_tm_1_bias.fits",
-             "specscans/BSS0/01_bias2.fits",
-             "specscans/REB0/01_bias2.fits"]
+#listscans = ["rtm8scanmodetm1/01_rtm8_tm_1_bias.fits",
+#             "specscans/BSS0/01_bias2.fits",
+#             "specscans/REB0/01_bias2.fits"]
 #listscans = ["rtm8scanmodetm1/%s_rtm8_tm_1_bias.fits" % s for s in listlabels]
 
-scope.compare_scope_display(listscans, listlabels, datadir, title='Channels of S01', diff=False)
+#scope.compare_scope_display(listscans, listlabels, datadir, title='Channels of S01', diff=False)
 
 

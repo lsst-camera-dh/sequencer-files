@@ -150,7 +150,7 @@ def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 52
 
     a = corrcoef_raft(raftsfits, ROIrows, ROIcols)
     fig, ax = plt.subplots(figsize=(8, 8))
-    cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmin=0,vmax=0.5, clip=True), interpolation='none')
+    cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=1, clip=True), interpolation='none')
     if title:
         ax.set_title('Correlation for %s' % title)
     else:

@@ -18,6 +18,7 @@ import sys
 import os.path
 import numpy as np
 from matplotlib import pyplot as plt
+from matplotlib import colors as mplcol
 import scope
 import pyfits
 
@@ -169,6 +170,78 @@ def reframe_scope_frames(listfits):
             hcopy.append(exthdu)
 
         hcopy.writeto(f[:-5] + "f.fz", clobber=True)
+
+
+def corrcoef_raftscope(raftsfits, ROIrows, ROIcols, norm=True):
+    """
+    Correlation over one or more CCDs, calculating correlation aloong lines at each time index in ROIcols,
+    then averaging.
+    :param raftsfits: file list
+    :param ROIrows: must be in the format: slice(start, stop)
+    :param ROIcols: must be in the format: slice(start, stop)
+    :param norm: if True, computes correlation coefficients; if not, returns covariances
+    :return:
+    """
+    stackh = []
+
+    for fl in raftsfits:
+        h = pyfits.open(fl)
+        for i in range(1, 17):
+            stackh.append(h[i].data[ROIrows, ROIcols])
+        h.close()
+        del h
+    stackh = np.stack(stackh)
+    print stackh.shape
+
+    a = []
+
+    for numcol in range(ROIcols.stop - ROIcols.start):
+        if norm:
+            a.append(np.corrcoef(stackh[:, :, numcol]))
+        else:
+            a.append(np.cov(stackh[:, :, numcol]))
+    a = np.stack(a)
+    print a.shape
+
+    return a.mean(axis=0)
+
+
+def plot_corrcoef_raftscope(raftsfits, ROIrows, ROIcols, xylabels=None, title='', norm=True):
+    """
+    Plot of correlation coefficients over list of CCD images.
+    :param raftsfits:
+    :param ROIrows: must be in the format: slice(start, stop)
+    :param ROIcols: must be in the format: slice(start, stop)
+    :param norm: if True, computes correlation coefficients; if not, returns covariances
+    :return:
+    """
+    datadir, dataname = os.path.split(raftsfits[0])
+    dataname = os.path.splitext(dataname)[0]
+
+    a = corrcoef_raftscope(raftsfits, ROIrows, ROIcols, norm)
+    fig, ax = plt.subplots(figsize=(10, 8))
+    if norm:
+        cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=1, clip=True), interpolation='nearest')
+    else:
+        cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=20000, clip=True), interpolation='nearest')
+    if norm:
+        titlestr = "Correlation for %s"
+    else:
+        titlestr = "Covariances for %s"
+    if title:
+        ax.set_title(titlestr % title)
+    else:
+        ax.set_title(titlestr % dataname)
+    ax.set_xticks(np.arange(0, 16*len(raftsfits), 16))
+    ax.set_yticks(np.arange(0, 16*len(raftsfits), 16))
+    if xylabels:
+        ax.set_xticklabels(xylabels)
+        ax.set_yticklabels(xylabels)
+    cbar = fig.colorbar(cax, orientation='vertical')
+
+    plt.savefig(os.path.join(datadir, "corrscope-%s.png" % dataname))
+    plt.show()
+
 
 
 if __name__ == '__main__':

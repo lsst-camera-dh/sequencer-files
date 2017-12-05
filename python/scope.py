@@ -483,6 +483,28 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
     plt.show()
 
 
+def stats_scan_plot(scanfile, datadir='', basecols=slice(70, 90), signalcols=slice(140, 160)):
+    """
+    Computes average and standard deviation of scan plots in two bands.
+     :return:
+    """
+    img = get_scandata_fromfile(scanfile, datadir, selectchannels=range(16))
+    rootname = os.path.splitext(os.path.basename(scanfile))[0]
+
+    Nlines = img.shape[1]
+    Nbins = img.shape[2]
+    lines = np.arange(Nlines)
+    Nchan = 16
+
+    # plots mean and standard deviation along line direction
+    for c in range(Nchan):
+        data= img[c]
+        basedata = data[:, basecols]
+        signaldata= data[:, signalcols]
+        print("%02d\t%10.2f\t%7.2f\t%10.2f\t%7.2f" %
+              (c, basedata.mean(), basedata.std(axis=0).mean(), signaldata.mean(), signaldata.std(axis=0).mean()))
+
+
 if __name__ == '__main__':
     idsi = sys.argv[1]
     itm = sys.argv[2]
