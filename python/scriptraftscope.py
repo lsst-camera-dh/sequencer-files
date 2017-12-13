@@ -11,8 +11,8 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM1/rmBufferS1S3'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
-#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
@@ -21,16 +21,20 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
 #seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
 #seqfile = 'RTM2/seq-e2v-shorterp-2s.seq'
 #seqfile = 'ETU1/TS8_ITL_fix.seq'
-seqfile = 'RTM8/singleclock/TS8_ITL_allS.seq'
+seqfile = 'RTM8/singleclock/TS8_ITL_singleS1.seq'
 
-#tmbasefile = "00_bias2.fits"
-tmbasefile = "00_rtm8_tm_1_bias.fits"
+tmbasefile = "00_bias2.fits"
+#tmbasefile = "00_rtm8_tm_1_bias.fits"
 #tmbasefile = "REB0/00_bias2.fits"
 #tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
 #tmbasefile = "00_shorterp-2s_scan_30s_flat_tm_exp1.fits"
 #tmbasefile = "00_test_tm_20170621210028.fits"
 #tmbasefile = "00_RTM1noise_rmBufferS1S3_2_tm.fits"
 #dsibasefile = "00_test_tm_20170621204509.fits"
+
+# returns tuple: (list of files, list of segments)
+l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
+
 
 #older: "00_readRG-scan.fits", "00_mod4s_bias-scan.fits", "00_readS3Linvert-scan.fits", "00_readS2-scan.fits"
 # "00_readS1-scan.fits", "00_readS1invert-scan.fits", "00_test-cj-mod3b_transp_dark_scan2.fits"
@@ -48,10 +52,10 @@ tmbasefile = "00_rtm8_tm_1_bias.fits"
 #                             "scan-mode-transparent/Image_R00.Reb0_20170320200751.dat",
 #                             seqfile=seqfile, c=0, datadir=datadir)
 
-#for s in ["%d%d" % (i,j) for i in range(3) for j in range(3)]:
-#    scope.combined_scope_display(dsibasefile.replace("00_", s + '_'),
-#                                 tmbasefile.replace("00_", s + '_'),
-#                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
+for f,s in zip(l[0],l[1]):
+    scope.combined_scope_display(None,
+                                 f,
+                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
 
 #for c in range(16):
 #    scope.combined_scope_display("rtm8scanmodetm1/01_rtm8_tm_1_bias.fits",
@@ -84,7 +88,6 @@ tmbasefile = "00_rtm8_tm_1_bias.fits"
 
 #scope.cut_scan_plot(tmbasefile, datadir=datadir, polynomfit=False)
 
-l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
 #scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
 
@@ -92,8 +95,8 @@ l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
     #scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
     #scope.stats_scan_plot(f, datadir=datadir, basecols=slice(70, 90), signalcols=slice(140, 160))
 
-multiscope.plot_corrcoef_raftscope(l[0], ROIrows=slice(10,1000), ROIcols=slice(140,160),
-                                   xylabels=l[1], title='RTM8 scan at signal time', norm=False)
+multiscope.plot_corrcoef_raftscope(l[0], ROIrows=slice(10,1000), ROIcols=slice(150,170),
+                                   xylabels=l[1], title='RTM8 S1-only scan at low time', norm=False)
 
 #---- Comparing scans channel per channel for a single CCD
 

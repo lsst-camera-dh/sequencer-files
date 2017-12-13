@@ -179,10 +179,10 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     if readout in seq.functions_desc:
         readfunction = readout
     else:
-        readfunction = seq.find_function_withclock(readout, 'TRG')
+        readfunction = seq.find_function_withclock(readout, trigname)
 
     # find offset between start of function and trigger of ADC
-    clockline = seq.channels['TRG']
+    clockline = seq.channels[trigname]
     funcscope = seq.functions_desc[readfunction]['function']  # function object
     offset = funcscope.scope(clockline).index(1)
 
