@@ -6,19 +6,19 @@ import numpy as np
 from matplotlib import pyplot as plt
 import multiscope
 
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/allS'
 
 seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
 
-listlabels = ["Baseline", "BSS=0", "REB0"]
+#listlabels = ["Baseline", "BSS=0", "REB0"]
+listlabels = ["Bias", "Flat 1s"]
 
+#listscans = ["rtm8scanmodetm1/00_rtm8_tm_1_bias.fits",
+#            "specscans/BSS0/00_bias2.fits",
+#             "specscans/REB0/00_bias2.fits"]
+listscans = ["00_bias2.fits", "00_1sflat.fits"]
 
-listscans = ["rtm8scanmodetm1/00_rtm8_tm_1_bias.fits",
-             "specscans/BSS0/00_bias2.fits",
-             "specscans/REB0/00_bias2.fits"]
-
-
-fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 9))
+fig, axes = plt.subplots(nrows = 2, ncols = 3, figsize=(15, 9))
 
 color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
@@ -38,10 +38,10 @@ for num,tmscope in enumerate(raftarrays[:3]):
         ax.set_title(seglist[num])
 
         if num%3 == 0:
-            ax.set_ylabel('Scan (ADU)')
+            ax.set_ylabel('Bias scan (ADU)')
         ax.grid(True)
 
-# subtract baseline from BSS0
+# subtract baseline from second scan
 raftarrays2, seglist = multiscope.get_scandata_raft(listscans[1], datadir)
 
 for num,tmscope,tmscope2 in zip(range(3), raftarrays[:3], raftarrays2[:3]):
@@ -57,30 +57,30 @@ for num,tmscope,tmscope2 in zip(range(3), raftarrays[:3], raftarrays2[:3]):
         ax.set_title(seglist[num])
 
         if num%3 == 0:
-            ax.set_ylabel('BSS0-Baseline (ADU)')
+            ax.set_ylabel('Flat1s-Bias (ADU)')
         if num/3 == 2:
             ax.set_xlabel('Time increment (10 ns)')
         ax.grid(True)
 
 # subtract baseline from REB0
-raftarrays3, seglist = multiscope.get_scandata_raft(listscans[2], datadir)
-
-for num,tmscope,tmscope2 in zip(range(3), raftarrays[:3], raftarrays3[:3]):
-    ax = axes[2, num  % 3 ]
+#raftarrays3, seglist = multiscope.get_scandata_raft(listscans[2], datadir)
+#
+#for num,tmscope,tmscope2 in zip(range(3), raftarrays[:3], raftarrays3[:3]):
+#    ax = axes[2, num  % 3 ]
 
     # single CCD plot
-    for c in range(16):
-        tmchan = tmscope2[c].mean(axis=0) - tmscope[c].mean(axis=0)
-        ax.plot(tmchan, color=color_idx[c])
-
-        ax.set_xlim(0, 255)
-        ax.set_xticks(np.arange(0, 256, 32))
-        ax.set_title(seglist[num])
-
-        if num%3 == 0:
-            ax.set_ylabel('REB0-Baseline (ADU)')
-        ax.set_xlabel('Time increment (10 ns)')
-        ax.grid(True)
+#    for c in range(16):
+#        tmchan = tmscope2[c].mean(axis=0) - tmscope[c].mean(axis=0)
+#        ax.plot(tmchan, color=color_idx[c])
+#
+#        ax.set_xlim(0, 255)
+#        ax.set_xticks(np.arange(0, 256, 32))
+#        ax.set_title(seglist[num])
+#
+#        if num%3 == 0:
+#            ax.set_ylabel('REB0-Baseline (ADU)')
+#        ax.set_xlabel('Time increment (10 ns)')
+#        ax.grid(True)
 
 
 ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
