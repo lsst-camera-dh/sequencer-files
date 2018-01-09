@@ -115,20 +115,20 @@
 # Note that if the other times are not adjusted this will insert an extra
 # 330 ns into the readout
     ReadPixel:  # Single pixel read
-      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG, SHU
+      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
       slices:
-         TimeS       = 1,  1,  0,  1,  0,  0,  0,  0,  0,  0
-         BufferS     = 0,  1,  0,  1,  0,  0,  0,  0,  0,  0
-         TimeS       = 0,  0,  0,  1,  0,  0,  0,  0,  0,  0
-         BufferS     = 0,  0,  1,  1,  0,  0,  0,  0,  1,  0
-         TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0,  0
-         TimeC       = 0,  1,  1,  0,  1,  1,  0,  0,  0,  0
-         ISO1        = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
-         RampTime    = 0,  1,  1,  0,  0,  0,  1,  0,  0,  0
-         20 ns       = 0,  1,  1,  0,  0,  0,  0,  0,  0,  0
-         ISO2        = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0
-         RampTime    = 0,  1,  0,  0,  0,  0,  0,  1,  0,  0
-         30 ns       = 0,  1,  0,  0,  0,  0,  0,  0,  0,  0
+         TimeS       = 1,  1,  0,  1,  0,  0,  0,  0,  0
+         BufferS     = 0,  1,  0,  1,  0,  0,  0,  0,  0
+         TimeS       = 0,  0,  0,  1,  0,  0,  0,  0,  0
+         BufferS     = 0,  0,  1,  1,  0,  0,  0,  0,  1
+         TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0
+         TimeC       = 0,  1,  1,  0,  1,  1,  0,  0,  0
+         ISO1        = 0,  1,  1,  0,  0,  0,  0,  0,  0
+         RampTime    = 0,  1,  1,  0,  0,  0,  1,  0,  0
+         20 ns       = 0,  1,  1,  0,  0,  0,  0,  0,  0
+         ISO2        = 0,  1,  0,  0,  0,  0,  0,  0,  0
+         RampTime    = 0,  1,  0,  0,  0,  0,  0,  1,  0
+         30 ns       = 0,  1,  0,  0,  0,  0,  0,  0,  0
        constants: P1=0,P2=1,P3=0 
 
 
