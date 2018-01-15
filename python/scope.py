@@ -505,6 +505,72 @@ def stats_scan_plot(scanfile, datadir='', basecols=slice(70, 90), signalcols=sli
               (c, basedata.mean(), basedata.std(axis=0).mean(), signaldata.mean(), signaldata.std(axis=0).mean()))
 
 
+def stitch_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
+    """
+    Stitches segments of long scan file into array
+    :return:
+    """
+    nchan = len(displayamps)
+
+    itm = pyfits.open(os.path.join(datadir,scanfile))
+    tmscope = np.zeros((nchan, 256 * niter))
+
+    for chan in range(nchan):
+        # populates arrays by re-stitching scan lines back to back
+        for l in range(niter):
+            nsplitlines = itm[1].header["NAXIS2"] / niter
+            tmscope[chan, (l * 256):(1 + l) * 256] \
+                = itm[displayamps[chan] + 1].data[l * nsplitlines:(l + 1) * nsplitlines, :].mean(axis=0)
+            # clipping outliers
+            average = tmscope[chan,:].mean()
+            margin =  tmscope[chan,:].std()
+            np.clip(tmscope[chan], tmscope[chan].min(), average + 5 * margin , out=tmscope[chan])
+    itm.close()
+    del itm
+
+    return tmscope
+
+
+def plot_long_scan(scanfile, niter, datadir='', seqfile='', readfunction="ReadPixel", displayamps=range(16)):
+    """
+    Display long scan scope for given channels along with sequencer states, for a long scan acquired in a single image.
+    Sequencer file needs full path (offline version), else use B.reb.reb.seq (online).
+    Needs to be given the function that was scanned.
+    niter is the number of separate scans the frame is split into.
+    """
+    nchan = len(displayamps)
+    tmscope = stitch_long_scan(scanfile, niter, datadir, displayamps)
+
+    # gets sequencer object
+    seq = rebtxt.Sequencer.fromtxtfile(os.path.join(seqpath, seqfile), verbose=False)
+
+    colors = [plt.cm.jet(i) for i in np.linspace(0, 1, nchan)]
+
+    fig, ax1 = plt.subplots(figsize=(16, 8))
+
+    ax1.set_xticks(np.arange(0, 256 * niter, 256))
+    for chan in range(nchan):
+        numchan = displayamps[chan]
+        ax1.plot(tmscope[chan], label='CH%d' % numchan, color=colors[chan])
+    ax1.set_xlabel('Time increment (10 ns)')
+    ax1.set_ylabel('Scan (ADU)')
+    ax1.grid(axis='x')
+    # set legend outside (function does not work with secondary axis)
+    box = ax1.get_position()
+    ax1.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+    plt.legend(bbox_to_anchor=(1.07, 1), loc=2, borderaxespad=0.)
+
+    ax2 = ax1.twinx()
+    ax2.set_position([box.x0, box.y0, box.width * 0.85, box.height])
+
+    # by construction in long_scan there is no offset between start of function and trigger of ADC
+    # and the scan length is just above the function duration
+    # note that this can make the last part wrong (if the sequencer moves into the next function)
+    plot_scan_states(ax2, seq, readfunction, extend=niter)
+    plt.savefig(os.path.join(datadir, "combinedlongscope-%s.png" % os.path.basename(scanfile)))
+    #plt.show()
+
+
 if __name__ == '__main__':
     idsi = sys.argv[1]
     itm = sys.argv[2]

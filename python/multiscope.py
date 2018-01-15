@@ -80,9 +80,6 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
             #print tmscope.shape
             tmchan = tmscope[c].mean(axis=0)
             ax.plot(tmchan, label=c, color=color_idx[c])
-            #if num == 0:
-                # for common legend
-                #listaxes.append(ax)
 
             ax.set_xlim(0, 255)
             ax.set_xticks(np.arange(0, 256, 32))
@@ -94,6 +91,51 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
                 ax.set_xlabel('Time increment (10 ns)')
             ax.grid(True)
 
+    ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+
+    dataname = scope.get_rootfile(inputfile)
+    if suptitle:
+        plt.suptitle(suptitle, fontsize='x-large')
+    else:
+        plt.suptitle(dataname)
+    plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
+    plt.show()
+
+
+def raft_display_longscan(inputfile, niter, datadir='', suptitle=''):
+    """
+    Builds up data from and display long scans.
+    :param datadir: optional, directory where data is stored
+    :param inputfile: the first file (S00)
+    :param suptitle: personalized title
+    :return:
+    """
+    seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+    raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+
+    fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 9))
+    # when REB2 data is missing
+    # fig, axes = plt.subplots(nrows = 2, ncols = 3, figsize=(15, 9))
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
+
+    # plot all channels, with one subplot per CCD
+    for num in range(len(raftfits)):
+        ax = axes[num  / 3, num  % 3 ]
+        tmscope = scope.stitch_long_scan(raftfits[num], niter, datadir)
+
+        # single CCD plot
+        for c in range(16):
+            ax.plot(tmscope[c], label=c, color=color_idx[c])
+
+            ax.set_xlim(0, 256 * niter)
+            ax.set_xticks(np.arange(0, 256 * niter, 100))
+            ax.set_title(seglist[num])
+
+            if num%3 == 0:
+                ax.set_ylabel('Scan (ADU)')
+            if num/3 == 2:
+                ax.set_xlabel('Time increment (10 ns)')
+            ax.grid(True)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
 
