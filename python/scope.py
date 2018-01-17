@@ -571,6 +571,61 @@ def plot_long_scan(scanfile, niter, datadir='', seqfile='', readfunction="ReadPi
     #plt.show()
 
 
+def stats_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
+    """
+    Plots average and standard deviation of long scan.
+    """
+
+    nchan = len(displayamps)
+
+    itm = pyfits.open(os.path.join(datadir, scanfile))
+    nsplitlines = itm[1].header["NAXIS2"] / niter
+    tmscope = np.zeros((nchan, nsplitlines, 256 * niter))
+
+    for chan in range(nchan):
+        # populates arrays by re-stitching scan lines back to back
+        for l in range(niter):
+            tmscope[chan, :, (l * 256):(1 + l) * 256] \
+                = itm[displayamps[chan] + 1].data[l * nsplitlines:(l + 1) * nsplitlines, :]
+    itm.close()
+    del itm
+
+    rootname = os.path.splitext(os.path.basename(scanfile))[0]
+
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, nchan)]
+
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
+
+    # plots mean and standard deviation along line direction
+    axes[0].set_xlim(0, niter * 256)
+    for c in range(nchan):
+        axes[0].plot(tmscope[c].mean(axis=0), color=color_idx[c])
+    axes[0].set_xlabel('Time increment (10 ns)')
+    axes[0].set_ylabel('Average of scan (ADU)')
+    axes[0].grid(True)
+
+    axes[1].set_xlim(0, niter * 256)
+    ylim = 0
+    for c in range(nchan):
+        stdscan = tmscope[c].std(axis=0)
+        # clip first point
+        #np.clip(stdscan, 0, stdscan[1:].max(), out=stdscan)
+        axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
+        ylim = max(ylim, stdscan.mean() * 1.5)
+    # limit on std display
+    axes[1].set_ylim(0, ylim)
+    axes[1].set_xlabel('Time increment (10 ns)')
+    axes[1].set_ylabel('Dispersion of scan (ADU)')
+    axes[1].grid(True)
+
+    # single legend and title
+    axes[1].legend(bbox_to_anchor=(1.03, 0), loc='lower left', borderaxespad=0.)
+    plt.suptitle('Scan statistics for %s' % rootname, fontsize='large')
+    plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
+
+    plt.show()
+
+
 if __name__ == '__main__':
     idsi = sys.argv[1]
     itm = sys.argv[2]

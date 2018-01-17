@@ -19,19 +19,19 @@ def walk_compress(eodir):
             # extension header
             for i in range(16):
                 #h[i + 1].header['DATASEC'] = "[4:512, 1:2000]"
-                h[i + 1].header['CHANNEL'] = i
+                #h[i + 1].header['CHANNEL'] = i
                 exthdu = pyfits.CompImageHDU(data=h[i + 1].data, header=h[i + 1].header.copy(),
                                                    compression_type='RICE_1')
                 hdulist.append(exthdu)
 
             # auxiliary data
-            for i in range(17, 25, 1):
+            for i in range(17, 30, 1):
                 try:
                     hdulist.append(h[i])
                 except:
                     pass
 
-            hdulist.writeto(os.path.join(root, f), overwrite=True)
+            hdulist.writeto(os.path.join(root, f), clobber=True)
 
             h.close()
             del h

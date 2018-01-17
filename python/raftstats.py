@@ -39,17 +39,24 @@ def get_fits_raft(inputfile='', datadir=''):
     return raftfits, seglist
 
 
-def repr_header_stats(fitsfile):
+def repr_header_stats(fitsfile, recalc=False):
     """
-    String from statistics stored in extension headers.
+    String from statistics stored in extension headers or recalculated.
     :return:
     """
 
     hdulist = pyfits.open(fitsfile)
     statstr = ""
-    for i in range(16):
-        h = hdulist[i + 1].header
-        statstr += "%s %10.2f %10.2f %10.2f %8.2f\n" % (h['EXTNAME'], h['AVERAGE'], h['STDEV'],h['AVGBIAS'], h['STDVBIAS'])
+    if recalc:
+        for i in range(16):
+            h = hdulist[i + 1].header
+            data = hdulist[i + 1].data
+            statstr += "%s %10.2f %10.2f %10.2f %8.2f\n" % (h['EXTNAME'], data[100:2000, 20:500].mean(), data[100:2000, 20:500].std(), data[100:2000, 540:576].mean(), data[100:2000, 540:576].std())
+
+    else:
+        for i in range(16):
+            h = hdulist[i + 1].header
+            statstr += "%s %10.2f %10.2f %10.2f %8.2f\n" % (h['EXTNAME'], h['AVERAGE'], h['STDEV'],h['AVGBIAS'], h['STDVBIAS'])
 
     hdulist.close()
     del hdulist
@@ -57,12 +64,12 @@ def repr_header_stats(fitsfile):
     return statstr
 
 
-def print_header_stats(fitsfile):
+def print_header_stats(fitsfile, recalc=False):
     """
     String from statistics stored in extension headers.
     :return:
     """
-    print repr_header_stats(fitsfile)
+    print repr_header_stats(fitsfile, recalc=recalc)
 
 
 def write_header_stats(raftfitstuple, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
@@ -184,9 +191,10 @@ if __name__ == '__main__':
     for f in raftfits:
         if os.path.splitext(f)[1] in [".fits", ".fz"]:
             #print f
+            outstats.write(f+'\n')
             #print_header_stats(f)
             #plothisto_overscan(f)
-            outstats.write(repr_header_stats(f))
+            outstats.write(repr_header_stats(f, True))
 
     outstats.close()
 
