@@ -239,11 +239,11 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
         for i, c in enumerate(displayamps):
             if dsihdu is not None:
                 dsiscope = dsihdu[i].mean(axis=0)
-                np.clip(dsiscope, 0, dsiscope[1:].max(), out=dsiscope)
+                np.clip(dsiscope, 0, dsiscope[1:-1].max(), out=dsiscope)
                 ax.plot(dsiscope, label='DSI-C%d' % c, color=color_idx[i])
             if tmhdu is not None:
                 tmscope = tmhdu[i].mean(axis=0)
-                np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
+                np.clip(tmscope, 0, tmscope[1:-1].max(), out=tmscope)
                 ax.plot(tmscope, label='TM-C%d' % c, color=color_idx[i])
 
         ax.set_xlim(0, 255)
@@ -306,11 +306,11 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     ax1.set_xticks(np.arange(0, 256, 32))
     if dsiscope is not None:
         # cuts first point if anomalous (because trigger occurs before pixel transfer)
-        np.clip(dsiscope, 0, dsiscope[1:].max(), out=dsiscope)
+        np.clip(dsiscope, 0, dsiscope[1:-1].max(), out=dsiscope)
         ax1.plot(dsiscope, label='DSI')
     if tmscope is not None:
         # cuts first point if anomalous (because trigger occurs before pixel transfer)
-        np.clip(tmscope, 0, tmscope[1:].max(), out=tmscope)
+        np.clip(tmscope, 0, tmscope[1:-1].max(), out=tmscope)
         ax1.plot(tmscope, label='TM')
     ax1.set_ylabel('Scan (ADU)')
     ax1.grid(axis='x')

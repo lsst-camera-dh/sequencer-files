@@ -70,6 +70,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
     # plot all channels, with one subplot per CCD
+    maxplot = 0
     for num,tmscope in enumerate(raftarrays):
         ax = axes[num  / 3, num  % 3 ]
 
@@ -79,17 +80,23 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
             # they are in extensions 1 to 16
             #print tmscope.shape
             tmchan = tmscope[c].mean(axis=0)
+            maxplot = max(maxplot, tmchan[1:-1].max())
             ax.plot(tmchan, label=c, color=color_idx[c])
 
-            ax.set_xlim(0, 255)
-            ax.set_xticks(np.arange(0, 256, 32))
-            ax.set_title(seglist[num])
+        ax.set_xlim(0, 255)
+        ax.set_xticks(np.arange(0, 256, 32))
+        ax.set_title(seglist[num])
 
-            if num%3 == 0:
-                ax.set_ylabel('Scan (ADU)')
-            if num/3 == 2:
-                ax.set_xlabel('Time increment (10 ns)')
-            ax.grid(True)
+        if num%3 == 0:
+            ax.set_ylabel('Scan (ADU)')
+        if num/3 == 2:
+            ax.set_xlabel('Time increment (10 ns)')
+        ax.grid(True)
+
+    for num in range(len(raftarrays)):
+        ax = axes[num / 3, num % 3]
+        # common scale for all subplots
+        ax.set_ylim(0, maxplot * 1.02)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
 

@@ -2,7 +2,7 @@ import scope
 import raftstats
 import multiscope
 
-
+rtm = "RTM8"
 
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU2Dev/cj-tst2'
@@ -12,7 +12,8 @@ import multiscope
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/'
 #datadir = '/Users/nayman/Documents/REB/TS8/ETU1/IR2/2017-06-21'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RDscans'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RDscans'
+datadir = '/Users/nayman/Documents/REB/TS8/%s/RTM8-scan-mode-images' % rtm
 
 #seqfile = 'TS8_ITL_ResetFirst_20170313-scan-mode.seq'
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod2.seq'
@@ -23,7 +24,8 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RDscans'
 #seqfile = 'ETU1/TS8_ITL_fix.seq'
 seqfile = 'RTM8/singleclock/TS8_ITL_allS.seq'
 
-tmbasefile = "00_RD14_tm_1s_2.fits"
+tmbasefile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
+#tmbasefile = "00_RD14_tm_1s_2.fits"
 #tmbasefile = "00_rtm8_tm_1_bias.fits"
 #tmbasefile = "REB0/00_bias2.fits"
 #tmbasefile = "rtm2-scan-tm-bias/00-rtm2-scan-tm-bias_2.fits"
@@ -44,7 +46,7 @@ l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
 #---- Scan display for all raft channels
 
-multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM8 in TS7-3')
+multiscope.raft_display_allchans(tmbasefile, datadir, '%s with 90 ns serial overlap' % rtm)
 
 #---- Combined display of single channel with clock sequences
 
