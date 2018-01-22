@@ -460,6 +460,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         # plots mean and standard deviation along line direction
         axes[0].set_title(rootname)
         axes[0].set_xlim(0, Nbins)
+        axes[0].set_ylim(0, img[:, 2:-2].max())
         for c in range(Nchan):
             axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
         axes[0].set_xlabel('Time increment (10 ns)')
@@ -467,11 +468,12 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         axes[0].grid(True)
 
         axes[1].set_xlim(0, Nbins)
+        maxstd = 0
         for c in range(Nchan):
             stdscan = img[c].std(axis=0)
-            # clip first point if needed
-            np.clip(stdscan, 0, stdscan[1:].max(), out=stdscan)
+            maxstd = max(maxstd, stdscan[5:-1].max())
             axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
+        axes[1].set_ylim(0, maxstd)
         axes[1].set_xlabel('Time increment (10 ns)')
         axes[1].set_ylabel('Dispersion of scan (ADU)')
         axes[1].grid(True)
