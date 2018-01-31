@@ -5,4 +5,7 @@
 # older files should be copied to RTM2/ for memory
 
 20171102: seq-e2v-2s-fixcte.seq : initiated with latest file from dev
+20180131: adding two files for debugging purposes. These files should 
+become part of the standard testing suite, so they should be held in
+the same place. They will not produce actual images, only fakes.
 

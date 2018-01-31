@@ -125,33 +125,40 @@ def get_raft_integration_total(listfile, listsensor, datadir, RDstart, RDstop, R
     outfile.close()
 
 
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
-tmjitterfile = "00_bias2.fits"
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
+#tmjitterfile = "00_bias2.fits"
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RGhigh-longS1'
 #tmjitterfile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_tm.fits"
+datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RGhigh'
+tmjitterfile = "00_scan_tm_TS8_ITL_RGhigh_longS1_fix.fits"
 
 # returns tuple: (list of files, list of segments)
 l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
 
 if False:
-    medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(70, 85), ROjump=slice(90, 130))
-
-    #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(60, 80), ROjump=slice(90, 100))
+    #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(70, 85), ROjump=slice(90, 130))
+    medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(60, 80), ROjump=slice(90, 100))
+    #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(130, 150), ROjump=slice(160, 170))
 
     print medianjitter
 
 else:
-    medianjitter = [ 0.21927865,  0.28621586,  0.11381844,  0.10551608,  0.10325677,  0.1850758, 0.17761087,  0.14448285,  0.10784372]
+    #medianjitter = [ 0.21927865,  0.28621586,  0.11381844,  0.10551608,  0.10325677,  0.1850758, 0.17761087,  0.14448285,  0.10784372]
+    medianjitter = [0.18985758,  0.14373283,  0.16518399,  0.08404735,  0.10938918,  0.21957924,
+  0.23564675,  0.16540295,  0.14028727]
 
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8/'
-tmpixelfile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
-dsipixelfile = "rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits"
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images'
+#tmpixelfile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
+#dsipixelfile = "rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits"
+tmpixelfile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
+dsipixelfile = "00_TS8_ITL_clockcross90_bias_scan_dsi.fits"
 
 li = raftstats.get_fits_raft(inputfile=tmpixelfile, datadir=datadir)
 ldsi = raftstats.get_fits_raft(inputfile=dsipixelfile, datadir=datadir)
 
 # extracting "slope" (difference of waveform levels) from TM
-if False:
+if True:
     get_raft_integration_bounds(li[0], li[1], medianjitter, datadir, RDstart=60, RDstop=92, RUstart=133, RUstop=165)
 
 # extracting integrated levels from DSI
