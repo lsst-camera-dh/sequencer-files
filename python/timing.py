@@ -27,15 +27,22 @@ def breakout(seqfile, exptype):
     :return:
     """
     seq = rebtxt.Sequencer.fromtxtfile(seqfile, verbose=False)
-    reprseq = seq.sequence(exptype, verbose=False)
 
-    for l in reprseq:
-        print l
+    if exptype in seq.program.subroutines:
+        reprseq = seq.sequence(exptype, verbose=False)
+
+        for l in reprseq:
+            print l
+
+    elif exptype in seq.functions_desc:
+        f = seq.get_function(exptype)
+        print f
+        print "Total time: %d ns" % (f.total_time() * 10)
 
 
 if __name__ == '__main__':
     if len(sys.argv) < 3:
-        print("timing.py requires sequencer file and main/subroutine name")
+        print("timing.py requires sequencer file and main/subroutine/function name")
         sys.exit()
     seqfile = sys.argv[1]
     exptype = sys.argv[2]

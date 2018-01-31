@@ -40,7 +40,7 @@ def get_fits_raft(inputfile='', datadir=''):
 
 
 def repr_stats(fitsfile, recalc=False, ROI1rows=slice(100, 1900), ROI1cols=slice(20, 500),
-               ROI2rows=slice(100, 1900), ROI2cols=slice(540, 576),):
+               ROI2rows=slice(100, 1900), ROI2cols=slice(540, 576)):
     """
     String from statistics stored in extension headers or recalculated.
     :return:
@@ -112,6 +112,50 @@ def plothisto_overscan(fitsfile):
     dataname = os.path.splitext(dataname)[0]
     plt.savefig(os.path.join(datadir, "histoverscan-%s.png" % dataname))
     plt.show()
+
+
+def average_1D_tofile(listfile, listsensor, datadir, axis, ROI, norm=False):
+    """
+    Output to file of frames averaging over one direction.
+    0 = average over lines, stack for each column
+    1 = average over columns, stack for each line
+    """
+    outfile = open(os.path.join(datadir, 'average1D.txt'), 'w')
+
+    for num, hfile in enumerate(listfile):
+        try:
+            h = pyfits.open(os.path.join(datadir, hfile))
+        except:
+            continue
+
+        for channel in range(16):
+            outfile.write('%s-%02d\t\t' % (listsensor[num], channel))
+        outfile.write('\n')
+
+        #print h[1].data.shape
+        imax = h[1].data.shape[0 if axis else 1]
+        linedata = np.zeros((16, imax))
+        linestd = np.zeros((16, imax))
+
+        for channel in range(16):
+            if axis == 0:
+                linedata[channel, :] = h[channel + 1].data[ROI, :].mean(axis=axis)
+                linestd[channel, :] = h[channel + 1].data[ROI, :].std(axis=axis)
+            else:
+                linedata[channel, :] = h[channel + 1].data[:, ROI].mean(axis=axis)
+                linestd[channel, :] = h[channel + 1].data[:, ROI].std(axis=axis)
+            # option to normalize
+            if norm:
+                linedata[channel, :] = linedata[channel, :] - linedata[channel, -30:].mean()
+
+        for i in range(imax):
+            for channel in range(16):
+                outfile.write("%.2f\t%.2f\t" % (linedata[channel, i], linestd[channel, i] ))
+            outfile.write('\n')
+
+        h.close()
+        del h
+    outfile.close()
 
 
 def corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):

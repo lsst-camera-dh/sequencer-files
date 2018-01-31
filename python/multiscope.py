@@ -71,6 +71,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
 
     # plot all channels, with one subplot per CCD
     maxplot = 0
+    minplot = 25000
     for num,tmscope in enumerate(raftarrays):
         ax = axes[num  / 3, num  % 3 ]
 
@@ -81,6 +82,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
             #print tmscope.shape
             tmchan = tmscope[c].mean(axis=0)
             maxplot = max(maxplot, tmchan[1:-1].max())
+            minplot = min(minplot, tmchan[1:-1].min())
             ax.plot(tmchan, label=c, color=color_idx[c])
 
         ax.set_xlim(0, 255)
@@ -97,6 +99,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
         ax = axes[num / 3, num % 3]
         # common scale for all subplots
         ax.set_ylim(0, maxplot * 1.02)
+        #ax.set_ylim(minplot * 0.95, maxplot * 1.02)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
 
@@ -223,7 +226,7 @@ def reframe_scope_frames(listfits):
 
 def corrcoef_raftscope(raftsfits, ROIrows, ROIcols, norm=True):
     """
-    Correlation over one or more CCDs, calculating correlation aloong lines at each time index in ROIcols,
+    Correlation over one or more CCDs, calculating correlation along lines at each time index in ROIcols,
     then averaging.
     :param raftsfits: file list
     :param ROIrows: must be in the format: slice(start, stop)
