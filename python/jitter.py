@@ -82,7 +82,7 @@ def get_raft_jitter(listfile, listsensor, datadir, RObaseline, ROjump):
 
     return medianjitter
 
-def get_raft_integration_bounds(listfile, listsensor, timejitter, datadir, RDstart, RDstop, RUstart, RUstop):
+def get_raft_integration_bounds(listfile, listsensor, medianjitter, datadir, RDstart, RDstop, RUstart, RUstop):
 
     basename = os.path.basename(listfile[0])[:-5]
     outfile = open(os.path.join(datadir, 'RDRUbounds-%s.txt' % basename), 'w')
@@ -96,10 +96,31 @@ def get_raft_integration_bounds(listfile, listsensor, timejitter, datadir, RDsta
             RDamplitude = abs(linedata[c, RDstart] - linedata[c, RDstop])
             RUamplitude = abs(linedata[c, RUstart] - linedata[c, RUstop])
             jitternoise = np.sqrt(RDamplitude ** 2 + RUamplitude ** 2) * medianjitter[num]/(RDstop - RDstart) * 0.1
-            outfile.write("S%s-%02d %d %d %d %d %d %d %.3f %.2f\n" % (listsensor[num], c,
-                                                                  linedata[c, RDstart], linedata[c, RDstop],
-                                                   linedata[c, RUstart], linedata[c, RUstop],
-                                                   RDamplitude, RUamplitude, medianjitter[num], jitternoise))
+            outfile.write("S%s-%02d %d %d %d %d %d %d %.3f %.2f\n" %
+                          (listsensor[num], c, linedata[c, RDstart], linedata[c, RDstop],
+                           linedata[c, RUstart], linedata[c, RUstop], RDamplitude, RUamplitude,
+                           medianjitter[num], jitternoise))
+
+    outfile.close()
+
+
+def get_raft_integration_total(listfile, listsensor, datadir, RDstart, RDstop, RUstart, RUstop):
+
+    basename = os.path.basename(listfile[0])[:-5]
+    outfile = open(os.path.join(datadir, 'RDRUtotals-%s.txt' % basename), 'w')
+
+    for num, hfile in enumerate(listfile):
+        linedata, linestd = get_scan_data(hfile, datadir)
+        if not(linestd.any()) or not(linedata.any()):
+            continue
+
+        for c in range(16):
+            baseline = linedata[c, RDstart - 20:RDstart - 5].mean()
+            RDamplitude = linedata[c, RDstop + 5:RUstart - 10].mean()
+            RUamplitude = linedata[c, RUstop + 5:RUstop + 25].mean()
+            outfile.write("S%s-%02d %.2f %.2f %.2f %.2f %.2f\n" %
+                          (listsensor[num], c, baseline, RDamplitude, RUamplitude,
+                           abs(RDamplitude - baseline), abs(RUamplitude - RDamplitude)))
 
     outfile.close()
 
@@ -122,12 +143,17 @@ if False:
 else:
     medianjitter = [ 0.21927865,  0.28621586,  0.11381844,  0.10551608,  0.10325677,  0.1850758, 0.17761087,  0.14448285,  0.10784372]
 
-datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
-tmpixelfile = "00_rtm8_tm_1_bias.fits"
-
+datadir = '/Users/nayman/Documents/REB/TS8/RTM8/'
+tmpixelfile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
+dsipixelfile = "rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits"
 
 li = raftstats.get_fits_raft(inputfile=tmpixelfile, datadir=datadir)
+ldsi = raftstats.get_fits_raft(inputfile=dsipixelfile, datadir=datadir)
 
-if True:
+# extracting "slope" (difference of waveform levels) from TM
+if False:
     get_raft_integration_bounds(li[0], li[1], medianjitter, datadir, RDstart=60, RDstop=92, RUstart=133, RUstop=165)
 
+# extracting integrated levels from DSI
+if True:
+    get_raft_integration_total(ldsi[0], ldsi[1], datadir, RDstart=60, RDstop=92, RUstart=133, RUstop=165)
