@@ -210,14 +210,17 @@ def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 52
 
 
 if __name__ == '__main__':
-    # temporary for test files
     datadir = sys.argv[1]
-    raftfits = [os.path.join(datadir, f) for f in sorted(os.listdir(datadir))]
+    # for test files
+    #raftfits = [os.path.join(datadir, f) for f in sorted(os.listdir(datadir))]
+    # for tree structure
+    raftfits = get_fits_raft('', datadir)[0]
+
     outstats = open(os.path.join(datadir, "statsheader.txt"), 'w')
     for f in raftfits:
         if os.path.splitext(f)[1] in [".fits", ".fz"]:
             #print f
-            outstats.write(f+'\n')
+            #outstats.write(f+'\n')
             #print_header_stats(f)
             #plothisto_overscan(f)
             outstats.write(repr_stats(f, True))
