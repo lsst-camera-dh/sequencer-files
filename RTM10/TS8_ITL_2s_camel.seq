@@ -2,7 +2,7 @@
 # Original file: TS8_ITL_2s_newflush_v3.seq
 # 20180202, C.J.: modified readout sequence to replicate STA Archon readout
 
-# this file is made for an RC time constant of xxx ns (integration time 480 ns), RC should be set to xxx
+# this file is made for an RC time constant of 450 ns (integration time 480 ns), RC should be set to 0b1001 (0x9)
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
