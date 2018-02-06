@@ -2,10 +2,11 @@ import scope
 import raftstats
 import multiscope
 
-rtm = "RTM9"
+rtm = "RTM10"
 c = "S3"
 
-datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
+datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm10_2s_camel_scans" % rtm
+#datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
 #datadir = '/Users/nayman/Documents/REB/TS8/%s/singleclockscans/single%s' % (rtm, c)
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/rtm8scanmodetm1'
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RDscans'
@@ -15,7 +16,8 @@ datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
 #seqfile = 'RTM8/TS8_ITL_longS1_scan.seq'
-seqfile = "E2V/seq-e2v-RGhigh.seq"
+#seqfile = "E2V/seq-e2v-RGhigh.seq"
+seqfile = "RTM10/TS8_ITL_2s_camel.seq"
 
 #tmbasefile = "00_scan_tm_TS8_ITL_injectRD_fix_2.fits"
 #tmbasefile = "00_scan_tm_TS8_ITL_singleS3.fits"
@@ -25,28 +27,30 @@ seqfile = "E2V/seq-e2v-RGhigh.seq"
 #tmbasefile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_dsi.fits"
 #tmbasefile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
 #tmbasefile = "00_bias2.fits"
-tmbasefile = "00_seq-e2v-RGhigh_scan_tm_2.fits"
+#tmbasefile = "00_seq-e2v-RGhigh_scan_tm_2.fits"
+tmbasefile = "00_2s_camel_scan_tm_2.fits"
+dsibasefile = "00_2s_camel_scan_dsi_2.fits"
 
 # returns tuple: (list of files, list of segments)
 l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
-
+ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
 
 
 #---- Scan display for all raft channels
 
-multiscope.raft_display_allchans(tmbasefile, datadir, '%s with RG high at all time' % (rtm,))
+multiscope.raft_display_allchans(tmbasefile, datadir, '%s with camel clocking' % (rtm,))
 
 #---- Combined display of single channel with clock sequences
 
 
-#for f,s in zip(l[0],l[1]):
-#    scope.combined_scope_display(None, f,
-#                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
+for f,s,d in zip(l[0],l[1],ldsi[0]):
+    scope.combined_scope_display(d, f,
+                                 seqfile=seqfile, c=12, datadir=datadir, loc=s)
 
-for c in [4]:
-    scope.combined_scope_display("00_seq-e2v-injectRD_scan_dsi_1.fits",
-                                 tmbasefile,
-                                 seqfile=seqfile, c=c, datadir=datadir, loc="01", display=True)
+#for c in [4]:
+#    scope.combined_scope_display("00_seq-e2v-injectRD_scan_dsi_1.fits",
+#                                 tmbasefile,
+#                                 seqfile=seqfile, c=c, datadir=datadir, loc="01", display=True)
 
 #s = "21"
 #for c in range(16):

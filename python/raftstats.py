@@ -22,8 +22,10 @@ def get_fits_raft(inputfile='', datadir=''):
 
     # if all files in same directory
     if inputfile:
-        raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_')) for s in seglist]
-
+        if '00_' in inputfile:
+            raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_')) for s in seglist]
+        else:
+            raftfits = [os.path.join(datadir, inputfile.replace("00-", s + '-')) for s in seglist]
     # tree structure
     else:
         raftfits = []
@@ -156,6 +158,29 @@ def average_1D_tofile(listfile, listsensor, datadir, axis, ROI, norm=False):
         h.close()
         del h
     outfile.close()
+
+
+def roistats_raft(raftsfits, ROIrows=slice(100, 1900), ROIcols=slice(530, 576)):
+    """
+    Statistics in ROI for raft.
+    :param raftsfits: file list
+    :return:
+    """
+    allmean = np.zeros(16 * len(raftsfits))
+    allstd = np.zeros(16 * len(raftsfits))
+
+    for num, fl in enumerate(raftsfits):
+        try:
+            h = pyfits.open(fl)
+        except:
+            continue
+        for i in range(1, 17):
+            allmean[num * 16 + i - 1] = h[i].data[ROIrows, ROIcols].mean()
+            allstd[num * 16 + i - 1] = h[i].data[ROIrows, ROIcols].std()
+        h.close()
+        del h
+
+    return allmean, allstd
 
 
 def corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
