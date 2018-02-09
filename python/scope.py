@@ -307,11 +307,11 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
     if dsiscope is not None:
         # cuts first point if anomalous (because trigger occurs before pixel transfer)
         np.clip(dsiscope, 0, dsiscope[1:-1].max(), out=dsiscope)
-        ax1.plot(dsiscope, label='DSI')
+        ax1.plot(dsiscope, label='DSI', color='b')
     if tmscope is not None:
         # cuts first point if anomalous (because trigger occurs before pixel transfer)
         np.clip(tmscope, 0, tmscope[1:-1].max(), out=tmscope)
-        ax1.plot(tmscope, label='TM')
+        ax1.plot(tmscope, label='TM', color='g')
     ax1.set_ylabel('Scan (ADU)')
     ax1.grid(axis='x')
 
