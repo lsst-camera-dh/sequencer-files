@@ -1,7 +1,26 @@
 # !/usr/bin/env python
 
+# usage in command line:
+# python parsesummary.py /Users/nayman/Documents/REB/TS8/ITL-sensors
+# python parsesummary.py /Users/nayman/Documents/REB/TS8/ITL-sensors/recap-confluence.txt
+
+
 import os
 import sys
+
+def half_median(table):
+    """
+    Outputs the medians of the two halves of a 16-element table, in string format.
+    :return:
+    """
+
+    stable = sorted(table[:8])
+    retstr = "%.2f" % ((stable[3] + stable[4]) * 0.5)
+    stable = sorted(table[8:])
+    retstr += "\t%.2f" % ((stable[3] + stable[4]) * 0.5)
+
+    return retstr
+
 
 def parse_summary(summaryfile, selectitem, Nfits=1):
     """
@@ -44,7 +63,8 @@ def parse_summary_dump(dumpfile, selectitem):
             except:
                 continue
             if table:
-                outf.write("%.2f\n" % (max(table[:7] + table[9:])))  # writes out previous sensor
+                stable = sorted(table)
+                outf.write("%.2f\t%s\n" % (max(table[:7] + table[9:]), half_median(table)))  # writes out previous sensor
             outf.write("%s\t" % ccd)
             table = []  # empty table
             continue
@@ -52,14 +72,14 @@ def parse_summary_dump(dumpfile, selectitem):
         numstr = l.split("=")[selectitem + 1].split('|')[0]
         table.append(float(numstr))
 
-    outf.write("%.2f\n" % (max(table[:7] + table[9:])))  # last sensor
+    outf.write("%.2f\t%s\n" % (max(table[:7] + table[9:]), half_median(table)))  # last sensor
     f.close()
     outf.close()
 
 
-def maxall_directory(datadir, Nfits=1):
+def parse_all_directory(datadir, Nfits=1):
     """
-    Parses all summary files in directory and finds maximum average bias, outputs to file.
+    Parses all summary files in directory and finds maximum/median/etc. outputs to file.
     :param datadir:
     :param Nfits:
     :return:
@@ -72,13 +92,13 @@ def maxall_directory(datadir, Nfits=1):
 
         print("Opening %s" % f)
         table = parse_summary(os.path.join(datadir, f), 1, Nfits)
-        outf.write("%s\t %.2f\n" % (f[8:11], max(table[:7] + table[9:])))
+        outf.write("%s\t %.2f\t%s\n" % (f[8:11], max(table[:7] + table[9:]), half_median(table)))
 
     outf.close()
 
 if __name__ == '__main__':
     inputdata = sys.argv[1]
     if os.path.isdir(inputdata):
-        maxall_directory(inputdata)
+        parse_all_directory(inputdata)
     else:
         parse_summary_dump(inputdata, 1)

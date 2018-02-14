@@ -11,7 +11,7 @@
 # them as functions. Set their duration to 1790 ns to match ReadPixel.
 # 20170914, C.J: increased BufferS2S3 and decreased TimeS/BufferS3 of ReadPixel to fix serial CTI. 
 # This puts ReadPixel at 1810 ns, but kept matching functions to 1790 ns for now.
-# 20180207, C.J.: slow down fast parallel clear
+# 20180207, C.J.: slow down fast parallel clear, set default CleaningNumber to 1
 
 # NOTE that the RampTime is 320 ns to reach LSST readout times
 # so the ASPIC RC parameters should be set to 15
@@ -25,7 +25,7 @@
     TimeP:           4000 ns   # Base time element of parallel transfers  
     OverlapP:        1000 ns   # Overlap at three phases in parallel transfer
     BufferP:         2500 ns   # Parallel transfer buffer time
-    FlushP:          5000 ns   # Fast parallel clear transfer time
+    FlushP:          6000 ns   # Fast parallel clear transfer time
     TimeS:            140 ns   # Base element of serial transfers (minimal time for single clock phase up)
     BufferS:           80 ns   # Buffer for serial clock crossing
     BufferS2S3:       140 ns   # Longer buffer for S2S3 serial clock crossing
@@ -67,7 +67,7 @@
     REP_SUBR    PreRows        0  # Number of rows to skip before window
     REP_SUBR    ReadRows    2048  # Number of rows of the window (set at 2012 for nominal readout time)
     REP_SUBR    PostRows       0  # Number of rows after window (it is up to the user that total lines = 2048)
-    REP_SUBR    CleaningNumber 0  # Number of full CCD clears before acquiring a frame
+    REP_SUBR    CleaningNumber 1  # Number of full CCD clears before acquiring a frame
     PTR_SUBR    CleaningSubr    BulkFlushLine  # Subroutine to use for clearing the frame
     PTR_SUBR    Exposure        ExposureFlush  # Elementary subroutine to use during exposure: SerialFlush or ExposureFlush
     # or ExposureNoFlush or DarkNoFlush

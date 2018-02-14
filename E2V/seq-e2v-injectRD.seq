@@ -28,7 +28,7 @@
     TimeP:           4000 ns   # Base time element of parallel transfers  
     OverlapP:        1000 ns   # Overlap at three phases in parallel transfer
     BufferP:         2500 ns   # Parallel transfer buffer time
-    FlushP:          2500 ns   # Fast parallel clear transfer time
+    FlushP:          6000 ns   # Fast parallel clear transfer time
     TimeS:            140 ns   # Base element of serial transfers (minimal time for single clock phase up)
     BufferS:           80 ns   # Buffer for serial clock crossing
     BufferS2S3:       140 ns   # Longer buffer for S2S3 serial clock crossing

@@ -7,3 +7,4 @@
 20171102: TS8_ITL_2s_newflush.seq : initiated with latest file from dev
 20171102: TS8_ITL_2s_newflush_v2.seq : upgraded clearing counts
 20171102: TS8_ITL_2s_newflush_v3.seq : added flush of serial register right before readout
+20180214: TS8_ITL_2s_newflush_v3.seq : slowed down fast parallel flush
