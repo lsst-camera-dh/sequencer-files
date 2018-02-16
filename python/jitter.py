@@ -39,7 +39,7 @@ def get_raft_jitter(listfile, listsensor, datadir, RObaseline, ROjump):
     allslope = np.zeros(16 * len(listfile))
     alljitter = np.zeros(16 * len(listfile))
     colors = [plt.cm.jet(i) for i in np.linspace(0, 1, len(listfile))]
-    basename = os.path.basename(listfile[0])[:-5]
+    basename = os.path.splitext(os.path.basename(listfile[0]))[0]
 
     fig, ax = plt.subplots(figsize=(12, 8))
     outfile = open(os.path.join(datadir, 'calcjitter-%s.txt' % basename), 'w')
@@ -130,11 +130,11 @@ def get_raft_integration_total(listfile, listsensor, datadir, RDstart, RDstop, R
 #tmjitterfile = "00_bias2.fits"
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RGhigh-longS1'
 #tmjitterfile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_tm.fits"
-datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RGhigh'
-tmjitterfile = "00_scan_tm_TS8_ITL_RGhigh_longS1_fix.fits"
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RGhigh'
+#tmjitterfile = "00_scan_tm_TS8_ITL_RGhigh_longS1_fix.fits"
 
 # returns tuple: (list of files, list of segments)
-l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
+#l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
 
 if False:
     #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(70, 85), ROjump=slice(90, 130))
@@ -155,13 +155,13 @@ datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images'
 tmpixelfile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
 dsipixelfile = "00_TS8_ITL_clockcross90_bias_scan_dsi.fits"
 
-li = raftstats.get_fits_raft(inputfile=tmpixelfile, datadir=datadir)
-ldsi = raftstats.get_fits_raft(inputfile=dsipixelfile, datadir=datadir)
+#li = raftstats.get_fits_raft(inputfile=tmpixelfile, datadir=datadir)
+#ldsi = raftstats.get_fits_raft(inputfile=dsipixelfile, datadir=datadir)
 
 # extracting "slope" (difference of waveform levels) from TM
-if True:
+if False:
     get_raft_integration_bounds(li[0], li[1], medianjitter, datadir, RDstart=60, RDstop=92, RUstart=133, RUstop=165)
 
 # extracting integrated levels from DSI
-if True:
+if False:
     get_raft_integration_total(ldsi[0], ldsi[1], datadir, RDstart=60, RDstop=92, RUstart=133, RUstop=165)
