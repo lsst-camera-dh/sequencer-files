@@ -1,0 +1,365 @@
+# REB timing for E2V CCD
+# 
+# 20170119, C. Juramy: initialized from seq-newflush-overp.txt (new baseline sequencer at LPNHE with overlap in parallel clocks)
+# 20170407, C.J.: modified Mains for TS8
+# 20170414, C.J.: increased parallel transfer times (TimeP and OverlapP) and decreased pixel time to match ITL at 2s read time
+# 20170426, C.J.: decreased parallel transfer times again to match new file from E2V that clears up the new tearing
+# 20170505, C.J.: fixed first pixel transfer, added FlushP parameter specific to fast flush
+# 20170516, C.J.: shortened CCD reset to reach nominal readout time, now using TimeS parameter
+# 20170724, C.J.: introduced flushing by bursts during exposure, keeping the naming conventions for ExposureFlush, ExposureNoFlush, 
+# SerialFlush, DarkNoFlush but turning them into subroutines. FlushPixel, FlushPixelOpen, NoFlushPixel, NoFlushPixelOpen replace 
+# them as functions. Set their duration to 1790 ns to match ReadPixel.
+# 20170914, C.J: increased BufferS2S3 and decreased TimeS/BufferS3 of ReadPixel to fix serial CTI. 
+# This puts ReadPixel at 1810 ns, but kept matching functions to 1790 ns for now.
+# 20180207, C.J.: slow down fast parallel clear, set default CleaningNumber to 1
+# 20180216, C.J.: testing increased read time, increased wait time, shortened BufferP (because of last pixel read)
+
+# NOTE that the RampTime is 1200 ns 
+# so the ASPIC RC parameters should be set to 12
+
+[constants]  # will be substituted in the code at compilation time, if used
+    SegRows:        2002    # Number of rows of the sensor
+    SegCols:         512    # Number of columns of the sensors
+    SerCols:         522    # Size of serial register
+    DetectorCols:    576    # Total number of columns in a full readout
+    DetectorRows:   2048    # Total number of rows in a full readout
+    TimeP:           4000 ns   # Base time element of parallel transfers  
+    OverlapP:        1000 ns   # Overlap at three phases in parallel transfer
+    BufferP:          700 ns   # Parallel transfer buffer time
+    FlushP:          6000 ns   # Fast parallel clear transfer time
+    TimeS:            140 ns   # Base element of serial transfers (minimal time for single clock phase up)
+    BufferS:           90 ns   # Buffer for serial clock crossing
+    BufferS2S3:       180 ns   # Longer buffer for S2S3 serial clock crossing
+    BufferS3:          60 ns   # Shorter buffer for S3 alone to compensate
+    RampTime:        1200 ns   # ASPIC ramp time
+    TimeC:            250 ns   # ASPIC Clamp time
+    ISO1:             150 ns   # Time between end of ASPIC clamp/reset and start of RD
+    ISO2:             320 ns   # Time between S3 down and start of ASPIC RU
+    FlushS:           490 ns   # Base element for flushing the serial register - do not change
+    BufferF:           90 ns   # Buffer for serial clock crossing in flush - do not change
+    clockperiod:      10 ns    # FPGA clock period (required by the interpreter)
+    ElemExposure:     25 ms    # Duration of the elementary exposure subroutine
+
+[clocks]  # clock channels
+    P1:   8  # Parallel clock 1
+    P2:   9  # Parallel clock 2
+    P3:  10  # Parallel clock 3
+    P4:  11  # Parallel clock 4
+    S1:   4  # Serial clock 1
+    S2:   5  # Serial clock 2
+    S3:   6  # Serial clock 3
+    RG:   7  # Serial reset clock
+    CL:   3  # ASPIC clamp
+    RST:  2  # ASPIC integrator reset
+    RD:   1  # ASPIC ramp-down integration
+    RU:   0  # ASPIC ramp-up integration
+    TRG: 12  # ADC sampling trigger
+    SOI: 13  # Start of image
+    EOI: 14  # End of image
+    SHU: 16  # Shutter TTL (for testing only)
+
+[pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
+    REP_FUNC    PreCols        0  # Number of columns to skip before readout window, including prescan
+    REP_FUNC    ReadCols     576  # Number of columns to read (set at 532 for nominal readout time)
+    REP_FUNC    PostCols       0  # Number of columns to discard after window (it is up to the user that total
+    # columns = 576)
+    REP_FUNC    OverCols       0  # Number of columns acquired after line is read for baseline subtraction
+    REP_FUNC    ReadCols2      0  # Number of columns in second part of ROI if split
+    REP_SUBR    ExposureTime   5  # Duration of exposure in units of 25 ms
+    REP_SUBR    PreRows        0  # Number of rows to skip before window
+    REP_SUBR    ReadRows    2048  # Number of rows of the window (set at 2012 for nominal readout time)
+    REP_SUBR    PostRows       0  # Number of rows after window (it is up to the user that total lines = 2048)
+    REP_SUBR    CleaningNumber 1  # Number of full CCD clears before acquiring a frame
+    PTR_SUBR    CleaningSubr    BulkFlushLine  # Subroutine to use for clearing the frame
+    PTR_SUBR    Exposure        ExposureFlush  # Elementary subroutine to use during exposure: SerialFlush or ExposureFlush
+    # or ExposureNoFlush or DarkNoFlush
+    PTR_SUBR    EExposure       ExposureFlush  # Elementary subroutine to use during exposure (SerialFlush or ExposureFlush)
+    REP_FUNC    FlushTime  50000  # Repetitions of FlushPixel function during FlushRegister
+    REP_SUBR    PumpNumber  1000  # Number of parallel pumps
+
+[functions]
+    Default:  # Default state when not operating
+      clocks:          P2, P3, S1, S2, RG, CL, RST
+      slices:
+         1 us        =  1,  1,  1,  1,  1,  1,  1
+
+    TransferLine:  # Single line transfer
+      clocks:          P1, P2, P3, P4
+      slices:
+         BufferP     = 0,  1,  1,  0
+         OverlapP    = 0,  1,  1,  1
+         TimeP       = 0,  0,  1,  1
+         OverlapP    = 1,  0,  1,  1
+         TimeP       = 1,  0,  0,  1
+         OverlapP    = 1,  1,  0,  1
+         TimeP       = 1,  1,  0,  0
+         OverlapP    = 1,  1,  1,  0
+         TimeP       = 0,  1,  1,  0 
+         5000 ns     = 0,  1,  1,  0 # made it longer to match e2v timing
+      constants:     S1=1, S2=1
+
+    ReverseLine:  # Single line transfer in reverse direction
+      clocks:          P1, P2, P3, P4
+      slices:
+         BufferP     = 0,  1,  1,  0
+         OverlapP    = 1,  1,  1,  0
+         TimeP       = 1,  1,  0,  0
+         OverlapP    = 1,  1,  0,  1
+         TimeP       = 1,  0,  0,  1
+         OverlapP    = 1,  0,  1,  1
+         TimeP       = 0,  0,  1,  1
+         OverlapP    = 0,  1,  1,  1
+         TimeP       = 0,  1,  1,  0
+      constants:     S1=1, S2=1
+
+    ParallelFlush: # Single line transfer with all serial register clocks high to flush it
+      clocks:          P1, P2, P3, P4
+      slices:
+         FlushP      = 0,  1,  1,  0
+         FlushP      = 0,  0,  1,  1
+         FlushP      = 1,  0,  0,  1
+         FlushP      = 1,  1,  0,  0
+         FlushP      = 0,  1,  1,  0  
+         FlushP      = 0,  1,  1,  0  # doubled to match E2V timing
+      constants: S1=1, S2=1, S3=1, RG=1, RST=1
+
+    ReadPixel:  # Single pixel read 
+      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
+      slices:
+         TimeS       = 1,  0,  1,  0,  0,  0,  0,  0,  1
+         BufferS2S3  = 1,  0,  1,  1,  0,  1,  0,  0,  0
+         BufferS3    = 0,  0,  0,  1,  0,  1,  0,  0,  0
+         TimeC       = 0,  0,  0,  1,  1,  1,  0,  0,  0
+         ISO1        = 0,  0,  0,  1,  0,  0,  0,  0,  0
+         RampTime    = 0,  0,  0,  1,  0,  0,  1,  0,  0
+         BufferS     = 0,  1,  0,  1,  0,  0,  0,  0,  0
+         ISO2        = 0,  1,  0,  0,  0,  0,  0,  0,  0
+         RampTime    = 0,  1,  0,  0,  0,  0,  0,  1,  0
+         BufferS     = 0,  1,  1,  0,  0,  0,  0,  0,  0
+      constants:     P2=1, P3=1
+
+    StartOfImage:  # Signals start of frame to be recorded
+      clocks:         SOI
+      slices:
+        4800 ns     = 0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1
+        100 ns      = 0
+      constants:    P2=1, P3=1, S1=1, S2=1, RG=1
+
+    EndOfImage:  # Signals end of frame to be recorded
+      clocks:         EOI
+      slices:
+        4800 ns     = 0  # lets ADC finish conversion and transfer
+        100 ns      = 1
+        100 ns      = 0
+      constants:    P2=1, P3=1, S1=1, S2=1, RG=1
+
+    FlushPixel:  # Single pixel flush with timing set by FlushS parameter
+      clocks:          RG, S1, S2, S3
+      slices:
+         FlushS      = 1,  0,  1,  0
+         BufferS     = 1,  0,  1,  1
+         50 ns       = 1,  0,  0,  1
+         FlushS      = 1,  0,  0,  1
+         BufferS     = 1,  1,  0,  1
+         FlushS      = 1,  1,  0,  0
+         BufferS     = 1,  1,  1,  0
+      constants:     P2=1, P3=1, RST=1
+
+    FlushPixelOpen:  # Exposure while flushing serial register (testing only), same timing as FlushPixel
+      clocks:          RG, S1, S2, S3
+      slices:
+         FlushS      = 1,  0,  1,  0
+         BufferF     = 1,  0,  1,  1
+         80 ns       = 1,  0,  0,  1
+         FlushS      = 1,  0,  0,  1
+         BufferF     = 1,  1,  0,  1
+         FlushS      = 1,  1,  0,  0
+         BufferF     = 1,  1,  1,  0
+      constants:     P2=1, P3=1, RST=1, SHU=1
+
+    NoFlushPixel:  # Dark without flushing serial register, same timing as FlushPixel, all clocks high to clear serial register
+      clocks:          RG, S1, S2, S3
+      slices:
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+         50 ns       = 1,  1,  1,  1
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+      constants:     P2=1, P3=1, RST=1
+
+    NoFlushPixelOpen:  # Exposure without flushing serial register (testing only), same timing as FlushPixel, all clocks high to clear serial register
+      clocks:          RG, S1, S2, S3
+      slices:
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+         50 ns       = 1,  1,  1,  1
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+         FlushS      = 1,  1,  1,  1
+         BufferS     = 1,  1,  1,  1
+      constants:     P2=1, P3=1, RST=1, SHU=1
+
+    SlowFlush:  # Simultaneous serial and parallel flush, slow (waiting pattern)
+      clocks:         RG, S1, S2, S3, P1, P2, P3, P4
+      slices:
+         TimeP       = 1,  0,  1,  0,  0,  1,  1,  0
+         TimeP       = 0,  0,  0,  1,  0,  1,  1,  0
+         TimeP       = 0,  1,  0,  0,  0,  1,  1,  0
+         TimeP       = 0,  0,  1,  0,  0,  1,  1,  0
+         TimeP       = 0,  0,  0,  1,  0,  1,  1,  0
+         TimeP       = 0,  1,  0,  0,  0,  1,  1,  0
+         TimeP       = 0,  0,  1,  0,  0,  1,  1,  0
+         TimeP       = 0,  0,  0,  1,  0,  1,  1,  0
+         TimeP       = 0,  1,  0,  0,  0,  1,  1,  0
+         TimeP       = 1,  0,  1,  0,  0,  1,  1,  0
+         200000 ns   = 1,  0,  1,  0,  0,  0,  1,  1
+         200000 ns   = 1,  0,  1,  0,  1,  0,  0,  1
+         200000 ns   = 1,  0,  1,  0,  1,  1,  0,  0
+         200000 ns   = 0,  0,  1,  0,  0,  1,  1,  0
+     constants:     CL=1, RST=1
+     
+[subroutines]
+#
+# Line-level operations ---------------------------------------------
+#
+# including several options to flush lines
+
+    BulkFlushLine:  # Transfer line with all serial clocks and reset high
+        CALL    ParallelFlush
+        RTS
+
+    FlushLine:  # Transfer line and flush it pixel by pixel
+        CALL    TransferLine
+        CALL    FlushPixel     repeat(DetectorCols)
+        RTS
+
+    WindowLine:  # Line readout
+        CALL    TransferLine
+        CALL    FlushPixel      repeat(@PreCols)
+        CALL    FlushPixel      repeat(1)  # for transferring first pixel
+        CALL    ReadPixel       repeat(@ReadCols)
+        CALL    FlushPixel      repeat(@PostCols)
+        RTS
+
+    WindowWithOverscan:  # Line readout with split ROI and overscan
+        CALL    TransferLine
+        CALL    FlushPixel      repeat(@PreCols)
+        CALL    FlushPixel      repeat(1)  # for transferring first pixel
+        CALL    ReadPixel       repeat(@ReadCols)
+        CALL    FlushPixel      repeat(@PostCols)
+        CALL    ReadPixel       repeat(@ReadCols2)
+        CALL    ReadPixel       repeat(@OverCols)
+        RTS
+
+    PumpLine:  # Transfer line back and forth
+        CALL    TransferLine
+        CALL    ReverseLine
+        RTS
+
+
+#
+# Frame-level readout operations ------------------------------------
+#
+
+    CloseShutter:  # Gives time for shutter to close (to be adapted depending on setup)
+        CALL    FlushPixel     repeat(50000)
+        RTS
+
+    FlushRegister:  # Flushing serial register from accumulated charges (solving E2V DC issue)
+        CALL    FlushPixel     repeat(@FlushTime)
+        RTS
+
+    ReadFrame:  # Readout and acquisition of a CCD frame (window)
+        JSR     FlushLine       repeat(@PreRows)
+        JSR     FlushRegister
+        CALL    StartOfImage
+        JSR     WindowLine      repeat(@ReadRows)
+        CALL    EndOfImage
+        JSR     FlushLine       repeat(@PostRows)
+        RTS
+
+    FakeFrame:  # Readout of a CCD frame (window) with no data output
+        JSR     FlushLine       repeat(@PreRows)
+        JSR     FlushRegister
+        JSR     WindowLine      repeat(@ReadRows)
+        JSR     FlushLine       repeat(@PostRows)
+        RTS
+
+#
+# Exposure operations -----------------------------------------------
+#
+
+    ExposureFlush:  # Elementary exposure with burst of flushing, 25 ms duration
+        CALL    NoFlushPixelOpen   repeat(13390)
+        CALL    FlushPixelOpen     repeat(576)
+        RTS
+
+    ExposureNoFlush:  # Elementary exposure without flushing, 25 ms duration
+        CALL    NoFlushPixelOpen   repeat(13966)
+        RTS
+
+    SerialFlush:  # Elementary dark with burst of flushing, 25 ms duration
+        CALL    NoFlushPixel       repeat(13390)
+        CALL    FlushPixel         repeat(576)
+        RTS
+
+    DarkNoFlush:  # Elementary dark without flushing, 25 ms duration
+        CALL    NoFlushPixel       repeat(13966)
+        RTS
+
+    Exposure25ms:  # Selects exposure subroutine, 25 ms duration
+        JSR     @Exposure          repeat(1)
+        RTS
+        
+    ClearCCD:  # Clear CCD once
+        JSR     @CleaningSubr      repeat(DetectorRows)
+        RTS
+
+    ExposeFrame:  # Operations to expose (or not) a CCD frame
+        JSR     ClearCCD           repeat(@CleaningNumber)
+        JSR     Exposure25ms       repeat(@ExposureTime)
+        JSR     CloseShutter
+        RTS
+
+    PumpFrame:  # Parallel pumping
+        JSR     PumpLine       repeat(@PumpNumber)
+        RTS
+
+
+[mains]
+    Bias:  # Bias after clearing up CCD content
+        JSR     ClearCCD        repeat(@CleaningNumber)
+        JSR     ReadFrame
+        END
+
+    Expose:  # One acquisition exposure
+        JSR     ExposeFrame
+        END
+
+    PocketPump:  # One acquisition followed by pocket pumping
+        JSR     ExposeFrame
+#        JSR     CloseShutter  # this is not needed (included in ExposeFrame)
+        JSR     PumpFrame
+        END
+
+    Acquire:  # Readout only
+        JSR     ReadFrame
+        END
+
+    PseudoAcquisition:  # Simulates acquisition without storing image (for debugging)
+        JSR     ExposeFrame
+        JSR     FakeFrame
+        END
+
+    InfiniteWait:  # Slow flushing on infinite loop
+        CALL    SlowFlush   repeat(infinity)
+        END
+        
+    Clear:  # Clear
+        JSR     ClearCCD    repeat(@CleaningNumber)
+        END
+
+ 
