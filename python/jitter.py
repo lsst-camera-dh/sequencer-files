@@ -13,10 +13,11 @@ def get_scan_data(hfile, datadir, ROI=slice(1, 1000)):
     """
     Produces arrays with average and standard deviation of scans.
     """
-
+    fitsfile = os.path.join(datadir, hfile)
     try:
-        h = pyfits.open(os.path.join(datadir, hfile))
+        h = pyfits.open(fitsfile)
     except:
+        print("Failed to open %s" % fitsfile)
         return [], []
 
     imax = h[1].data.shape[1]
