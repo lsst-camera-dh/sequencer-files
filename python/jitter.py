@@ -132,14 +132,17 @@ def get_raft_integration_total(listfile, listsensor, datadir, RDstart, RDstop, R
 #tmjitterfile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_tm.fits"
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RGhigh'
 #tmjitterfile = "00_scan_tm_TS8_ITL_RGhigh_longS1_fix.fits"
+datadir = "/data/eotest/091/scan/scan-v0/20180220"
+tmjitterfile = "tm_scan_10_CCD1_20180220102551.fz"
 
 # returns tuple: (list of files, list of segments)
 #l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
 
-if False:
+if True:
     #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(70, 85), ROjump=slice(90, 130))
-    medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(60, 80), ROjump=slice(90, 100))
+    #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(60, 80), ROjump=slice(90, 100))
     #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(130, 150), ROjump=slice(160, 170))
+    medianjitter = get_raft_jitter([tmjitterfile], "091", datadir, RObaseline=slice(80, 90), ROjump=slice(95, 120))
 
     print medianjitter
 
