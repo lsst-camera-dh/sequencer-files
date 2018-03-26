@@ -16,6 +16,7 @@
 # 20171118, C.J.: modified parallel transfer to transfer with S1 and S2 high
 # 20180214, C.J.: slowed down fast parallel flush to below 30 kHz
 # 20180319, C.J.: set BufferS to 90 ns, split with BufferF for flushing, removed BufferP and last slice but one from TransferLine, slowed down waiting function, shortened TimeC to 140 ns, increased TimeS to 130 ns
+# 20180326, C.J.: decreased BufferS back to 80 ns, increased ISO1 to 200 ns and ISO2 to 350 ns
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -26,10 +27,10 @@
     TimeP:          5000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
     FlushP:         6000 ns   # Fast parallel clear transfer time
-    ISO1:            180 ns   # Time between ASPIC clamp and first ramp
-    ISO2:            340 ns   # Time between ASPIC ramps
+    ISO1:            200 ns   # Time between ASPIC clamp and first ramp
+    ISO2:            350 ns   # Time between ASPIC ramps
     TimeS:           130 ns   # Base element of serial transfers
-    BufferS:          90 ns   # Buffer for serial clock crossing
+    BufferS:          80 ns   # Buffer for serial clock crossing
     FlushS:          480 ns   # Base element of serial flush
     BufferF:          90 ns   # Buffer for serial clock crossing in flushing functions (FlushS + BufferF must be 570 ns)
     RampTime:        320 ns   # ASPIC ramp time
@@ -130,7 +131,7 @@
          BufferS     = 1,  1,  0,  1,  0,  0,  0,  0,  0,  0
          TimeS       = 1,  0,  0,  1,  0,  0,  0,  0,  0,  0
          40 ns       = 0,  0,  1,  1,  0,  0,  0,  0,  1,  0
-         50 ns       = 0,  0,  1,  1,  0,  1,  0,  0,  0,  0
+         40 ns       = 0,  0,  1,  1,  0,  1,  0,  0,  0,  0
          TimeS       = 0,  0,  1,  0,  0,  1,  0,  0,  0,  0
          TimeC       = 0,  0,  1,  0,  1,  1,  0,  0,  0,  0
          ISO1        = 0,  0,  1,  0,  0,  0,  0,  0,  0,  0
