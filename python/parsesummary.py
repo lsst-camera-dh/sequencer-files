@@ -7,6 +7,7 @@
 
 import os
 import sys
+import numpy as np
 
 def half_median(table):
     """
@@ -84,7 +85,7 @@ def parse_all_directory(datadir, Nfits=1):
     :param Nfits:
     :return:
     """
-    outf = open(os.path.join(datadir, "allsummary.txt"), 'w')
+    outf = open(os.path.join(datadir, "allsummary-average.txt"), 'w')
 
     for f in sorted(os.listdir(datadir)):
         if f[:7] != "summary":
@@ -92,8 +93,8 @@ def parse_all_directory(datadir, Nfits=1):
 
         print("Opening %s" % f)
         table = parse_summary(os.path.join(datadir, f), 1, Nfits)
-        outf.write("%s\t %.2f\t%s\n" % (f[8:11], max(table[:7] + table[9:]), half_median(table)))
-
+        #outf.write("%s\t %.2f\t%s\n" % (f[8:11], max(table[:7] + table[9:]), half_median(table)))
+        outf.write("%s\t %.2f\n" % (f[8:11], np.array(table).mean() ))
     outf.close()
 
 if __name__ == '__main__':
