@@ -39,21 +39,27 @@
     EOI: 14  # End of image
 
 [pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
-    REP_FUNC    PreCols        0  # Number of columns to skip before readout window, including prescan
-    REP_FUNC    ReadCols     576  # Number of columns to read
-    REP_FUNC    PostCols       0  # Number of columns to discard after window (it is up to the user that total columns = 576)
-    REP_FUNC    OverCols       0  # Number of columns acquired after line is read for baseline subtraction
-    REP_FUNC    ReadCols2      0  # Number of columns in second part of ROI if split
-    REP_SUBR    ExposureTime   5 # Duration of exposure in units of 25 ms
-    REP_SUBR    PreRows        0  # Number of rows to skip before window
-    REP_SUBR    ReadRows     2048 # Number of rows of the window
-    REP_SUBR    PostRows        0 # Number of rows after window (it is up to the user that total lines = 2048)
-    REP_SUBR    ClearCount      1 # Number of full CCD clears executed by the Clear main
-    REP_SUBR    ShiftCount      1 # Number of shifts for pumping
-    REP_FUNC    FlushTime   50000  # Repetitions of FlushPixel function during FlushRegister
-    REP_FUNC    ParallelBin     2  # Repetitions TransferLine
-    REP_SUBR    BinnedParLen 1024  # Psize when binned 2048/ParallelBin
+    #- parameters defining serial readout (columns)
+    REP_FUNC    PreCols        0  # Number of cols to discard before
+    REP_FUNC    UnderCols      3  # Number of cols to read (pre-scan pixels)
+    REP_FUNC    ReadCols     509  # Number of cols to read
+    REP_FUNC    PostCols       0  # Number of cols to discard after
+    REP_FUNC    ReadCols2      0  # Number of cols in 2nd part of split ROI
+    REP_FUNC    OverCols      64  # Number of cols overscan (total cols = 576)
+    #- parameters defining parallel readout (rows)
+    REP_SUBR    PreRows        0  # Number of rows to discard before
+    REP_SUBR    ReadRows    2000  # Number of rows to read
+    REP_SUBR    PostRows       0  # Number of rows discard after
+    REP_SUBR    OverRows      48  # Number of rows overscan
+    #- Clearing related parameters
+    REP_SUBR    ClearCount     1  # Repeat count for Clear main
+    REP_FUNC    ParallelBin    2  # Repeat count for BinnedFlushLine
+    REP_SUBR    BinnedParLen 1024 # Number of rows in binned clear
+    #-
+    REP_SUBR    ShiftCount     1  # Number of shifts for pumping
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
+    REP_FUNC    FlushTime  50000  # Repeat count for FlushRegister() sub
+    REP_SUBR    ExposureTime   5  # Repeat for exposure in units of 25 ms
 
 [functions]
     Default:  # Default state when not operating
@@ -142,7 +148,7 @@
          80 ns       = 0,  1,  0,  0
       constants:     P2=1, RST=1
 
-    SlowFlushPixel:  # Single pixel flush, same duration as ReadPixel
+    SlowFlushPixel:  # Single pixel flush with 1/25 duty cycle
       clocks:          RG, S1, S2, S3
       slices:
          BufferS     = 1,  1,  0,  1
@@ -194,7 +200,7 @@
          80000 ns    = 1,  1,  1,  0,  1,  1,  0
          80000 ns    = 1,  1,  1,  0,  0,  1,  0
          80000 ns    = 0,  1,  0,  0,  0,  1,  0
-      #constants:     RST=1
+      constants:     RST=1
 
 [subroutines]
 #
@@ -218,18 +224,19 @@
 
     WindowLine:  # Line readout
         CALL    TransferLine
-        CALL    FastFlushPixel repeat(@PreCols)
-        CALL    FlushPixel   # because trigger is at the start of ReadPixel
+        CALL    FastFlushPixel  repeat(@PreCols)
+        CALL    FlushPixel      # trigger is at the start of ReadPixel
         CALL    ReadPixel       repeat(@ReadCols)
-        CALL    FastFlushPixel repeat(@PostCols)
+        CALL    FastFlushPixel  repeat(@PostCols)
         RTS
 
     WindowWithOverscan:  # Line readout with split ROI and overscan
         CALL    TransferLine
-        CALL    FastFlushPixel repeat(@PreCols)
-        CALL    FlushPixel     repeat(1)  # for transferring first pixel
+        CALL    FastFlushPixel  repeat(@PreCols)
+        CALL    FlushPixel      repeat(1)  # for transferring first pixel
+        CALL    ReadPixel       repeat(@UnderCols)
         CALL    ReadPixel       repeat(@ReadCols)
-        CALL    FastFlushPixel repeat(@PostCols)
+        CALL    FastFlushPixel  repeat(@PostCols)
         CALL    ReadPixel       repeat(@ReadCols2)
         CALL    ReadPixel       repeat(@OverCols)
         RTS
@@ -252,8 +259,9 @@
         JSR     FlushRegister
         CALL    StartOfImage
         JSR     WindowLine      repeat(@ReadRows)
-        CALL    EndOfImage
         JSR     FlushLine       repeat(@PostRows)
+        JSR     WindowLine      repeat(@OverRows)
+        CALL    EndOfImage
         RTS
 
     PsuedoFrame:  # Readout of a CCD frame (window) with no data output
@@ -261,6 +269,7 @@
         JSR     FlushRegister
         JSR     WindowLine      repeat(@ReadRows)
         JSR     FlushLine       repeat(@PostRows)
+        JSR     WindowLine      repeat(@OverRows)
         RTS
 
 #
@@ -273,14 +282,14 @@
 
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(DetectorRows)
-        CALL    FastFlushPixel     repeat(576)
+        CALL    FastFlushPixel     repeat(DetectorCols)
         RTS
 
     ClearCCDSlow:  # Clear CCD once well (will this work)
         JSR     BinnedFlushLine    repeat(@BinnedParLen)
         RTS
 
-    IdleFlush:  # interruptible
+    IdleFlush:  # would be interruptible, but not available
         JSR     BinnedFlushLine
         CALL    Default        repeat(900)
         RTS
