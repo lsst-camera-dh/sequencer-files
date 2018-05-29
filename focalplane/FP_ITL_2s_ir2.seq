@@ -222,7 +222,7 @@
         CALL    FastFlushPixel repeat(DetectorCols)
         RTS
 
-    WindowLine:  # Line readout
+    WindowLineOld:  # Line readout
         CALL    TransferLine
         CALL    FastFlushPixel  repeat(@PreCols)
         CALL    FlushPixel      # trigger is at the start of ReadPixel
@@ -230,11 +230,11 @@
         CALL    FastFlushPixel  repeat(@PostCols)
         RTS
 
-    WindowWithOverscan:  # Line readout with split ROI and overscan
+    WindowLine:  # Line readout with split ROI and overscan
         CALL    TransferLine
-        CALL    FastFlushPixel  repeat(@PreCols)
         CALL    FlushPixel      repeat(1)  # for transferring first pixel
         CALL    ReadPixel       repeat(@UnderCols)
+        CALL    FastFlushPixel  repeat(@PreCols)
         CALL    ReadPixel       repeat(@ReadCols)
         CALL    FastFlushPixel  repeat(@PostCols)
         CALL    ReadPixel       repeat(@ReadCols2)
