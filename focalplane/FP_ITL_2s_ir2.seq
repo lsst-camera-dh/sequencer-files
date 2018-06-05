@@ -215,6 +215,7 @@
 
     FlushLineR:  # Transfer line and flush it
         CALL    ReverseLine
+        CALL    FlushPixel repeat(DetectorCols)
         RTS
 
     BinnedFlushLine:  # for binned clearing
@@ -321,6 +322,7 @@
 
     RowShiftR:  # reverse row shift by ShiftCount
         JSR     FlushLineR repeat(@ShiftCount)
+        END
 
     Read:       # readout that produces data
         JSR     ReadFrame
