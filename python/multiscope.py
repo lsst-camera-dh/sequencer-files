@@ -37,9 +37,13 @@ def get_scandata_raft(inputfile, datadir=''):
         # when REB2 data is missing
         #seglist = ["%d%d" % (i, j) for i in range(2) for j in range(3)]
 
-        #raftfits = [inputfile.replace("00", s) for s in seglist]
         # if there is "00" elsewhere in the file name, modify as appropriate
-        raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+        if '00_0_' in inputfile:  # new numbering scheme from eTraveler
+            raftfits = [os.path.join(datadir, inputfile.replace("00_0", s + '_' + s[1:])) for s in seglist]
+        elif '00_' in inputfile:
+            raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+        else:
+            raftfits = [inputfile.replace("00-", s + '-') for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     else:

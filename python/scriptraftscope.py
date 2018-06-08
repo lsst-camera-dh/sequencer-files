@@ -2,15 +2,17 @@ import scope
 import raftstats
 import multiscope
 
-rtm = "RTM10-R200"
-c = "S3"
+rtm = "RTM1"
+#c = "S3"
 
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/camel_v3" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
 #datadir = '/Users/nayman/Documents/REB/TS8/%s/singleclockscans/single%s' % (rtm, c)
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/superscan'
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/RGhigh" % rtm
-datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm10-rebuilt-scans" % rtm
+#datadir = "/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images/"
+#datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm10-rebuilt-scans" % rtm
+datadir = "/Users/nayman/Documents/REB/TS8/%s/Ter/run-7998" % rtm
 
 #seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'ITL/TS8_ITL_2s_newflush_v4.seq'
@@ -25,21 +27,23 @@ seqfile = "RTM10/TS8_ITL_clockcross90.seq"
 #tmbasefile = "00_RTM10_scan_tm_TS8_ITL_RGhigh_allS.fits"
 #tmbasefile = "basescan/00_TS8_ITL_longS1_scan_tm_2.fits"
 #tmbasefile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_dsi.fits"
-tmbasefile = "00_TS8_ITL_clockcross90_bias_scan_tm_2.fits"
+#tmbasefile = "00_TS8_ITL_clockcross90_bias_scan_tm_2.fits"
 #tmbasefile = "00_bias2.fits"
 #tmbasefile = "00_seq-e2v-RGhigh_scan_tm_2.fits"
 #tmbasefile = "00_2s_camel_v3_scan_tm_1.fits"
+tmbasefile = "00_0_scan_20180522052418_TM.fits"
+
 #dsibasefile = "00_2s_camel_v3_scan_dsi_1.fits"
-dsibasefile = "00_TS8_ITL_clockcross90_bias_scan_dsi_2.fits"
+#dsibasefile = "00_TS8_ITL_clockcross90_bias_scan_dsi_2.fits"
 
 # returns tuple: (list of files, list of segments)
 l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
-ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
+#ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
 
 
 #---- Scan display for all raft channels
 
-#multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM-13 reconstructed')
+multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM-004 run-7998')
 
 #---- Combined display of single channel with clock sequences
 
@@ -87,8 +91,8 @@ ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
 
 #scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
 
-#for f in l[0]:
-#    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
+for f in l[0]:
+    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
     #scope.stats_scan_plot(f, datadir=datadir, basecols=slice(70, 90), signalcols=slice(140, 160))
 
 #multiscope.plot_corrcoef_raftscope(l[0], ROIrows=slice(10,1000), ROIcols=slice(150,170),
@@ -99,16 +103,16 @@ ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
 
 #---- Comparing scans channel per channel for a single CCD
 
-datadir = "/Users/nayman/Documents/REB/TS8"
+#datadir = "/Users/nayman/Documents/REB/TS8"
 
 #listlabels = [s for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]]
-listlabels = ["R50", "R200"]
+#listlabels = ["R50", "R200"]
 
 #listscans = ["rtm8scanmodetm1/%s_rtm8_tm_1_bias.fits" % s for s in listlabels]
-listscans =["RTM10/RTM10-scan-mode-images/%s_TS8_ITL_clockcross90_bias_scan_tm.fits",
-             "RTM10-R200/rtm10-rebuilt-scans/%s_TS8_ITL_clockcross90_bias_scan_tm_2.fits"]
+#listscans =["RTM10/RTM10-scan-mode-images/%s_TS8_ITL_clockcross90_bias_scan_tm.fits",
+#             "RTM10-R200/rtm10-rebuilt-scans/%s_TS8_ITL_clockcross90_bias_scan_tm_2.fits"]
 
 #scope.compare_scope_display(listscans, listlabels, datadir, title='Channels of S01', diff=False)
 
-for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]:
-    scope.compare_scope_display([listscans[0] % s, listscans[1] % s], listlabels, datadir, title='Channels of S%s' % s, diff=False)
+#for s in ["%d%d" % (i, j) for i in range(3) for j in range(3)]:
+#    scope.compare_scope_display([listscans[0] % s, listscans[1] % s], listlabels, datadir, title='Channels of S%s' % s, diff=False)

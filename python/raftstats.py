@@ -22,7 +22,9 @@ def get_fits_raft(inputfile='', datadir=''):
 
     # if all files in same directory
     if inputfile:
-        if '00_' in inputfile:
+        if '00_0_' in inputfile:  # new numbering scheme from eTraveler
+            raftfits = [os.path.join(datadir, inputfile.replace("00_0", s + '_' + s[1:])) for s in seglist]
+        elif '00_' in inputfile:
             raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_')) for s in seglist]
         else:
             raftfits = [os.path.join(datadir, inputfile.replace("00-", s + '-')) for s in seglist]
@@ -86,13 +88,13 @@ def plothisto_overscan(fitsfile):
     """
     hdulist = pyfits.open(fitsfile)
 
-    fig, axes = plt.subplots(nrows = 4, ncols = 4, figsize=(12, 9))
+    fig, axes = plt.subplots(nrows = 4, ncols = 4, figsize=(13, 9))
     #color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
 
     # single CCD plot
     for i in range(16):
         h = hdulist[i + 1].header
-        d = hdulist[i + 1].data[10: , 530:].flatten()
+        d = hdulist[i + 1].data[100: , 540:].flatten()
         #print h['EXTNAME'], h['AVGBIAS'], d.mean(), h['STDVBIAS'], d.std()
 
         ax = axes[i / 4, i % 4]
@@ -102,9 +104,10 @@ def plothisto_overscan(fitsfile):
         num_bins = np.amax(d) - np.amin(d)
         n, bins, patches = ax.hist(d, num_bins)
         #print bins[num_bins/2 : num_bins/2 + 10]
-
-        ax.set_xlabel('ADU')
-        ax.set_ylabel('Number of pixels')
+        if i/4 == 3:
+            ax.set_xlabel('ADU')
+        if i%4 == 0:
+            ax.set_ylabel('Number of pixels')
         ax.set_title(h['EXTNAME'])
 
     hdulist.close()
@@ -205,7 +208,7 @@ def corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521)):
     return a
 
 
-def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521), xylabels=None, title=''):
+def plot_corrcoef_raft(raftfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521), xylabels=None, title=''):
     """
     Plot of correlation coefficients over list of CCD images.
     :param raftsfits:
@@ -213,18 +216,18 @@ def plot_corrcoef_raft(raftsfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 52
     :param ROIcols:
     :return:
     """
-    datadir, dataname = os.path.split(raftsfits[0])
+    datadir, dataname = os.path.split(raftfits[0])
     dataname = os.path.splitext(dataname)[0]
 
-    a = corrcoef_raft(raftsfits, ROIrows, ROIcols)
+    a = corrcoef_raft(raftfits, ROIrows, ROIcols)
     fig, ax = plt.subplots(figsize=(8, 8))
     cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=1, clip=True), interpolation='none')
     if title:
         ax.set_title('Correlation for %s' % title)
     else:
         ax.set_title('Correlation for %s' % dataname)
-    ax.set_xticks(np.arange(0, 16*len(raftsfits), 16))
-    ax.set_yticks(np.arange(0, 16*len(raftsfits), 16))
+    ax.set_xticks(np.arange(0, 16*len(raftfits), 16))
+    ax.set_yticks(np.arange(0, 16*len(raftfits), 16))
     if xylabels:
         ax.set_xticklabels(xylabels)
         ax.set_yticklabels(xylabels)
@@ -252,5 +255,7 @@ if __name__ == '__main__':
 
     outstats.close()
 
-#ld = [os.path.join(datadir, 'S%d%d' % (i, j)) for i in range(3) for j in range(3)]
-#raftfits = [os.path.join(d, f) for d in ld for f in os.listdir(d)]
+#ls = ['S%d%d' % (i, j)) for i in range(3) for j in range(3)]
+#ld = [os.path.join(datadir, '%s' % seg) for seg in ls]
+#raftfits = [os.path.join(d, f) for d in ld for f in os.listdir(d) if ".fits" in f]
+#raftstats.plot_corrcoef_raft(raftfits, ROIcols=slice(530,576), xylabels=ls,title='run-8000 for modified RTM10')

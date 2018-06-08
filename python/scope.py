@@ -391,6 +391,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         plt.savefig(os.path.join(datadir, "scandiff-%s.png" % dataname))
     else:
         plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
+    plt.tight_layout()
     plt.show()
 
 
@@ -478,7 +479,7 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         axes[1].set_ylabel('Dispersion of scan (ADU)')
         axes[1].grid(True)
         # single legend and title
-        axes[1].legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+        axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
         plt.suptitle('Scan statistics for %s' % rootname, fontsize='large')
         plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
 
