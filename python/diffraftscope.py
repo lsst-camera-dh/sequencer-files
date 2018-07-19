@@ -6,18 +6,21 @@ import numpy as np
 from matplotlib import pyplot as plt
 import multiscope
 
-datadir = '/Users/nayman/Documents/REB/TS8/'
+datadir = '/Users/nayman/Documents/REB/TS8/RTM13'
 
 #seqfile = 'RTM1/TS8_ITL_2s_newflush_v2.seq'
 
 #listlabels = ["Baseline", "BSS=0", "REB0"]
-listlabels = ["R50", "R200"]
+#listlabels = ["R50", "R200"]
+listlabels = ["Unipolar", "Bipolar"]
 
 #listscans = ["rtm8scanmodetm1/00_rtm8_tm_1_bias.fits",
 #            "specscans/BSS0/00_bias2.fits",
 #             "specscans/REB0/00_bias2.fits"]
-listscans = ["RTM10/RTM10-scan-mode-images/00_TS8_ITL_clockcross90_bias_scan_tm.fits",
-             "RTM10-R200/rtm10-rebuilt-scans/00_TS8_ITL_clockcross90_bias_scan_tm_2.fits"]
+#listscans = ["RTM10/RTM10-scan-mode-images/00_TS8_ITL_clockcross90_bias_scan_tm.fits",
+#             "RTM10-R200/rtm10-rebuilt-scans/00_TS8_ITL_clockcross90_bias_scan_tm_2.fits"]
+listscans = ["run-8442/00_0_scan_20180626200634_TM.fits",
+             "run-8499/00_0_scan_20180701021633_TM.fits"]
 
 fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(17, 12))
 
@@ -44,7 +47,7 @@ for j in range(3):
             ax.set_title(seglist[num * 3 + j])
 
             if num == 0:
-                ax.set_ylabel('R50 scan (ADU)')
+                ax.set_ylabel('%s scan (ADU)' % listlabels[0])
             ax.grid(True)
 
 
@@ -63,7 +66,7 @@ for j in range(3):
             ax.set_title(seglist[num * 3 + j])
 
             if num == 0:
-                ax.set_ylabel('R200 scan (ADU)')
+                ax.set_ylabel('%s scan (ADU)' % listlabels[1])
             ax.grid(True)
 
     # subtract first scan from second scan
@@ -83,7 +86,7 @@ for j in range(3):
             ax.set_ylim(-5000, 5000)
 
             if num == 0:
-                ax.set_ylabel('RD200 - RD50 (ADU)')
+                ax.set_ylabel('%s - %s (ADU)' % (listlabels[1], listlabels[0]))
             ax.set_xlabel('Time increment (10 ns)')
             ax.grid(True)
 

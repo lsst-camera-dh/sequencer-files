@@ -508,6 +508,66 @@ def stats_scan_plot(scanfile, datadir='', basecols=slice(70, 90), signalcols=sli
               (c, basedata.mean(), basedata.std(axis=0).mean(), signaldata.mean(), signaldata.std(axis=0).mean()))
 
 
+def plot_time_corr_scan(scanfile, datadir='', norm=True):
+    """
+    Computes correlation or covariance from one scan point to the next (test specific to kTC noise).
+     :return:
+    """
+    img = get_scandata_fromfile(scanfile, datadir, selectchannels=range(16))
+    rootname = os.path.splitext(os.path.basename(scanfile))[0]
+
+    Nlines = img.shape[1]
+    Nbins = img.shape[2]
+    Nchan = 16
+    cov_t = np.zeros((Nchan, Nbins-1))
+
+    # plots mean and standard deviation along line direction
+    for c in range(Nchan):
+        data = img[c]
+        basedata = data[1:, :].mean(axis=0)  # remove first line from stats
+        signaldata= data[1:, :] - basedata  # subtract average as baseline scan
+
+        for t in range(Nbins-1):
+            # build up matrix with index and index+1
+            m_time = np.stack((signaldata[:, t], signaldata[:, t+1]), axis=0)
+            if norm:
+                cov_t[c,t] = np.corrcoef(m_time).mean()
+            else:
+                cov_t[c, t] = np.cov(m_time).mean()
+
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, Nchan)]
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
+
+    # plots mean and standard deviation along line direction
+    axes[0].set_title(rootname)
+    axes[0].set_xlim(0, Nbins)
+    axes[0].set_ylim(0, img[:, 2:-2].max())
+    for c in range(Nchan):
+        axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
+    axes[0].set_xlabel('Time index (10 ns)')
+    axes[0].set_ylabel('Average of scan (ADU)')
+    axes[0].grid(True)
+
+    axes[1].set_xlim(0, Nbins)
+    axes[1].set_xlabel('Time index (10 ns)')
+    for c in range(Nchan):
+        if norm:
+            axes[1].plot(cov_t[c], color=color_idx[c], label="Ch%02d" % c)
+            axes[1].set_ylabel('Correlation coefficient with next time index (ADU)')
+        else:
+            axes[1].plot(np.sqrt(cov_t[c]), color=color_idx[c], label="Ch%02d" % c)
+            axes[1].set_ylabel('Square root of covariance with next time index (ADU)')
+    axes[1].grid(True)
+    # single legend and title
+    axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
+    plt.suptitle('Scan correlation for %s' % rootname, fontsize='large')
+    if norm:
+        plt.savefig(os.path.join(datadir, 'scancorr' + rootname + '.png'))
+    else:
+        plt.savefig(os.path.join(datadir, 'scancov' + rootname + '.png'))
+    plt.show()
+
+
 def stitch_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
     """
     Stitches segments of long scan file into array

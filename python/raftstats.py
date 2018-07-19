@@ -80,7 +80,7 @@ def print_header_stats(fitsfile, recalc=False):
     print repr_stats(fitsfile, recalc=recalc)
 
 
-def plothisto_overscan(fitsfile):
+def plothisto_overscan(fitsfile, ROIrows=slice(100, 1900), ROIcols=slice(540, 576)):
     """
     Display distribution of data in overscan region for each channel of a CCD file.
     :param fitsfile:
@@ -94,7 +94,7 @@ def plothisto_overscan(fitsfile):
     # single CCD plot
     for i in range(16):
         h = hdulist[i + 1].header
-        d = hdulist[i + 1].data[100: , 540:].flatten()
+        d = hdulist[i + 1].data[ROIrows , ROIcols].flatten()
         #print h['EXTNAME'], h['AVGBIAS'], d.mean(), h['STDVBIAS'], d.std()
 
         ax = axes[i / 4, i % 4]

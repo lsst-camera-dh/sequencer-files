@@ -1,10 +1,13 @@
 import scope
 import raftstats
 import multiscope
+import os
 
-rtm = "RTM1"
+rtm = "RTM2"
+run = ""
 #c = "S3"
 
+datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm-scan-mode-data/rtm2-scan-tm-bias" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/camel_v3" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
 #datadir = '/Users/nayman/Documents/REB/TS8/%s/singleclockscans/single%s' % (rtm, c)
@@ -12,13 +15,10 @@ rtm = "RTM1"
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/RGhigh" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images/"
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm10-rebuilt-scans" % rtm
-datadir = "/Users/nayman/Documents/REB/TS8/%s/Ter/run-7998" % rtm
+#datadir = "/Users/nayman/Documents/REB/TS8/RTM13/%s" % (run,)
 
-#seqfile = 'TS8_ITL_ResetFirst_CJ_20170321_mod3.seq'
 #seqfile = 'ITL/TS8_ITL_2s_newflush_v4.seq'
-#seqfile = 'RTM8/TS8_ITL_longS1_scan.seq'
-#seqfile = "E2V/seq-e2v-RGhigh.seq"
-seqfile = "RTM10/TS8_ITL_clockcross90.seq"
+seqfile = "E2V/seq-e2v-2s.seq"
 
 #tmbasefile = "rtm8run2scan1/00_rtm8_tm_scan_2.fits"
 #tmbasefile = "00_scan_tm_TS8_ITL_injectRD_fix_2.fits"
@@ -31,7 +31,7 @@ seqfile = "RTM10/TS8_ITL_clockcross90.seq"
 #tmbasefile = "00_bias2.fits"
 #tmbasefile = "00_seq-e2v-RGhigh_scan_tm_2.fits"
 #tmbasefile = "00_2s_camel_v3_scan_tm_1.fits"
-tmbasefile = "00_0_scan_20180522052418_TM.fits"
+tmbasefile = sorted(os.listdir(datadir))[0]
 
 #dsibasefile = "00_2s_camel_v3_scan_dsi_1.fits"
 #dsibasefile = "00_TS8_ITL_clockcross90_bias_scan_dsi_2.fits"
@@ -43,12 +43,12 @@ l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 
 #---- Scan display for all raft channels
 
-multiscope.raft_display_allchans(tmbasefile, datadir, 'RTM-004 run-7998')
+multiscope.raft_display_allchans(tmbasefile, datadir, '%s %s' % (rtm, run))
 
 #---- Combined display of single channel with clock sequences
 
-#scope.combined_scope_display("rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits", "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits",
-#                             seqfile=seqfile, c=12, datadir=datadir, loc="00")
+#scope.combined_scope_display("02_2_scan_20180522052851_DSI.fits", "02_2_scan_20180522052418_TM.fits",
+#                             seqfile=seqfile, c=10, datadir=datadir, loc="02")
 
 #for f,s,d in zip(l[0],l[1],ldsi[0]):
 #    scope.combined_scope_display(d, f,

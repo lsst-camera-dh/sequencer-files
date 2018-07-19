@@ -57,6 +57,7 @@ def get_raft_jitter(listfile, listsensor, datadir, RObaseline, ROjump):
         for c in range(16):
             allslope[c + num * 16] = (linedata[c, indexmax[c] + 1] - linedata[c, indexmax[c] - 1]) * 0.05  # in ADU/ns
             peakstd = linestd[c, indexmax[c]]
+            #print indexmax[c], peakstd
             alljitter[c + num * 16] = np.sqrt((peakstd ** 2) - (stdbase[c] ** 2))
             timejitter[c] = alljitter[c + num * 16]/allslope[c + num * 16]
             outfile.write("S%s-%02d %.2f %d %.2f %.2f %.2f %.3f\n" % \
@@ -126,23 +127,28 @@ def get_raft_integration_total(listfile, listsensor, datadir, RDstart, RDstop, R
     outfile.close()
 
 
+datadir = "/Users/nayman/Documents/REB/TS8/RTM2/rtm-scan-mode-data/rtm2-scan-tm-bias"
+
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/singleclockscans/singleS1'
 #tmjitterfile = "00_bias2.fits"
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/RGhigh-longS1'
 #tmjitterfile = "00_TS8_ITL_RGhigh_longS1_fix_bias_scan_tm.fits"
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RGhigh'
 #tmjitterfile = "00_scan_tm_TS8_ITL_RGhigh_longS1_fix.fits"
-datadir = "/data/eotest/091/scan/scan-v0/20180227"
-tmjitterfile = "tm_scan_10_CCD1_20180227112029.fz"
+#datadir = "/data/eotest/091/scan/scan-v0/20180227"
+#tmjitterfile = "tm_scan_10_CCD1_20180227112029.fz"
+#datadir = "/Users/nayman/Documents/REB/TS8/RTM13/run-8499"
+#tmjitterfile = "00_0_scan_20180701021633_TM.fits"
+tmjitterfile = sorted(os.listdir(datadir))[0]
 
 # returns tuple: (list of files, list of segments)
-#l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
+l = raftstats.get_fits_raft(inputfile=tmjitterfile, datadir=datadir)
 
 if True:
     #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(70, 85), ROjump=slice(90, 130))
     #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(60, 80), ROjump=slice(90, 100))
-    #medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(130, 150), ROjump=slice(160, 170))
-    medianjitter = get_raft_jitter([tmjitterfile], "091", datadir, RObaseline=slice(80, 90), ROjump=slice(100, 130))
+    medianjitter = get_raft_jitter(l[0], l[1], datadir, RObaseline=slice(80, 100), ROjump=slice(121, 135))
+    #medianjitter = get_raft_jitter([tmjitterfile], "091", datadir, RObaseline=slice(80, 90), ROjump=slice(100, 130))
 
     print medianjitter
 
@@ -152,11 +158,11 @@ else:
   0.23564675,  0.16540295,  0.14028727]
 
 #datadir = '/Users/nayman/Documents/REB/TS8/RTM8/'
-datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images'
+#datadir = '/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images'
 #tmpixelfile = "rtm8scanmodetm1/00_rtm8_tm_1_bias.fits"
 #dsipixelfile = "rtm8scanmodedsi1/00_rtm8_dsi_1_bias.fits"
-tmpixelfile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
-dsipixelfile = "00_TS8_ITL_clockcross90_bias_scan_dsi.fits"
+#tmpixelfile = "00_TS8_ITL_clockcross90_bias_scan_tm.fits"
+#dsipixelfile = "00_TS8_ITL_clockcross90_bias_scan_dsi.fits"
 
 #li = raftstats.get_fits_raft(inputfile=tmpixelfile, datadir=datadir)
 #ldsi = raftstats.get_fits_raft(inputfile=dsipixelfile, datadir=datadir)
