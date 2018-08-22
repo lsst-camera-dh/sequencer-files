@@ -163,6 +163,40 @@ def average_1D_tofile(listfile, listsensor, datadir, axis, ROI, norm=False):
     outfile.close()
 
 
+def average_1D_toplot(fitsfile, datadir, axis, ROIlines, ROIcols, norm=False, title=''):
+    """
+    Output to plot of averaging over one direction for a single frame.
+    0 = average over lines
+    1 = average over columns
+    """
+    h = pyfits.open(os.path.join(datadir, fitsfile))
+
+    fig, axes = plt.subplots(nrows = 2, ncols = 1, figsize=(10, 10))
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, 16)]
+
+    for channel in range(16):
+        if norm:
+            axes[0].plot(h[channel + 1].data[ROIlines, ROIcols].mean(axis=axis)
+                         -  h[channel + 1].data[-30:, -30:].mean(), color=color_idx[channel], label="%d" % channel)
+        else:
+            axes[0].plot(h[channel + 1].data[ROIlines, ROIcols].mean(axis=axis), color=color_idx[channel], label="%d" % channel)
+        axes[1].plot(h[channel + 1].data[ROIlines, ROIcols].std(axis=axis), color=color_idx[channel], label="%d" % channel)
+
+    if title:
+        plt.suptitle(title)
+    axes[0].grid(True)
+    axes[1].grid(True)
+    if norm:
+        axes[0].set_ylabel("Average, normalized  (ADU)")
+    else:
+        axes[0].set_ylabel("Average (ADU)")
+
+    axes[1].legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+
+    plt.savefig(os.path.join(datadir, 'average1D-%s.png' % title))
+    plt.show()
+
+
 def roistats_raft(raftsfits, ROIrows=slice(100, 1900), ROIcols=slice(530, 576)):
     """
     Statistics in ROI for raft.
