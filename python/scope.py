@@ -169,7 +169,7 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
     Will detect automatically the function used and the offset of the ADC.
     :param seqfile: sequencer file, needs full path from seqpath global variable.
     :param readout: function or program used during fits file acquisition
-    :param trigname: name of the ADC trigger clock in the sequencer file
+    :param trigname: name of the ADC trigger clock in the sequencer file (if exists)
     """
 
     # gets sequencer object
@@ -182,13 +182,17 @@ def sequencer_display(seqfile, readout='Acquisition', trigname='TRG'):
         readfunction = seq.find_function_withclock(readout, trigname)
 
     # find offset between start of function and trigger of ADC
-    clockline = seq.channels[trigname]
-    funcscope = seq.functions_desc[readfunction]['function']  # function object
-    offset = funcscope.scope(clockline).index(1)
+    try:
+        clockline = seq.channels[trigname]
+        funcscope = seq.functions_desc[readfunction]['function']  # function object
+        offset = funcscope.scope(clockline).index(1)
+    except:
+        offset = 0
+    extend = funcscope.total_time()/256 + 1
 
     fig, ax = plt.subplots(figsize=(13, 6))
-    plot_scan_states(ax, seq, readfunction, offset)
-    ax.set_xlim(0, 255)
+    plot_scan_states(ax, seq, readfunction, offset, extend)
+    ax.set_xlim(0, extend * 256)
     seqroot = os.path.splitext(seqfile)[0]
     plt.title("%s in %s" % (funcscope.name, seqroot)) 
     plt.savefig(os.path.join(seqpath, "%s-statesplot.png" % seqroot))

@@ -7,6 +7,7 @@
 
 import re
 import bidi
+import numpy as np
 
 ## -----------------------------------------------------------------------
 
@@ -47,7 +48,7 @@ class Program(object):
 
         return s
 
-    def bytecode(self):
+    def bytecode(self, program_base_addr = 0x0):
         """
         Return the 32 bits byte code for the FPGA compiled program.
         (with relative memory addresses)
@@ -61,7 +62,7 @@ class Program(object):
         for addr in addrs:
             instr = instrs[addr]
             bc = instr.bytecode()
-            bcs[addr] = bc
+            bcs[addr | program_base_addr] = bc
 
         return bcs
 
@@ -291,18 +292,54 @@ class Instruction(object):
         s = ""
         s += "%-8s" % self.name
 
+        # Call_codes = [OP_CallFunction,          OP_CallPointerFunction,
+        #               OP_CallFuncPointerRepeat, OP_CallPointerFuncPointerRepeat]
+
         if self.opcode in self.Call_codes:
-            s += "  %-10s" % ("func(%d)" % self.function_id)
-            if self.infinite_loop:
-                s += "repeat(infinity)"
-            else:
-                s += "repeat(%d)" % self.repeat
+            # is function called directly or indirectly
+            if self.opcode in [self.OP_CallFunction,
+                               self.OP_CallFuncPointerRepeat]:  # direct func
+                s += "  %-10s" % ("func(%d)" % self.function_id)
+            elif self.opcode in [self.OP_CallPointerFunction,
+                                 self.OP_CallPointerFuncPointerRepeat]:  # indirect
+                s += "  %-10s" % ("func(@%d)" % self.function_id)
+
+            # function repetition (direct or indirect)
+            if self.opcode in [self.OP_CallFunction, self.OP_CallPointerFunction]:  # direct repeat
+                if self.infinite_loop:
+                    s += "repeat(infinity)"
+                else:
+                    s += "repeat(%d)" % self.repeat
+            elif self.opcode in [self.OP_CallFuncPointerRepeat,
+                                 self.OP_CallPointerFuncPointerRepeat]:  # indirect repeat
+                s += "repeat(@%d)" % self.repeat
+
+        # Jsr_codes = [OP_JumpToSubroutine,     OP_JumpPointerSubroutine,
+        #              OP_JumpSubPointerRepeat, OP_JumpPointerSubPointerRepeat]
+
         elif self.opcode in self.Jsr_codes:
-            if self.address is not None:
-                s += "  %-8s" % ("0x%03x" % self.address)
-            s += "repeat(%d)" % self.repeat
-            if self.subroutine is not None:
-                s += " -> " + self.subroutine
+            # is subroutine called directly or indirectly
+            comment = ""
+            if self.opcode in [self.OP_JumpToSubroutine,
+                               self.OP_JumpSubPointerRepeat]:  # direct subr
+                if self.address is not None:
+                    s += "  %-8s" % ("0x%03x" % self.address)
+                if self.subroutine is not None:
+                    comment = " # -> " + self.subroutine
+            elif self.opcode in [self.OP_JumpPointerSubroutine,
+                                 self.OP_JumpPointerSubPointerRepeat]:  # indirect subr
+                if self.address is not None:
+                    s += "  %-8s" % ("@0x%03x" % self.address)
+
+            # subroutine repetition (direct or indirect)
+            if self.opcode in [self.OP_JumpToSubroutine,
+                               self.OP_JumpPointerSubroutine]:  # direct repeat
+                s += "repeat(%d)" % self.repeat
+            elif self.opcode in [self.OP_JumpSubPointerRepeat,
+                                 self.OP_JumpPointerSubPointerRepeat]:  # indirect repeat
+                s += "repeat(@%d)" % self.repeat
+
+            s += comment
 
         return s
 
@@ -738,6 +775,32 @@ class Sequencer(object):
                 else:
                     return "%d: %s -> %s" % (numptr, pname, p.target)
 
+    def get_pointers_kvc(self):
+        """
+        Returns a tuple suitable for populating a fits header, containing the current values of pointers.
+        Includes also parameters.
+        :return:
+        """
+        keys = []
+        values = {}
+        comments = {}
+
+        for pname in self.pointers:
+            p = self.pointers[pname]
+            keys.append(pname)
+            if p.value is not None:
+                values[pname] = p.value
+            else:
+                values[pname] = p.target
+            comments[pname] = "Current value of %s pointer" % p.pointer_type
+
+        for pname in self.parameters:
+            keys.append(pname)
+            values[pname] = self.parameters[pname]
+            comments[pname] = "Fixed sequencer parameter"
+
+        return keys, values, comments
+
     def repr_instruction(self, address):
         """
         Improved representation of an instruction, with names for functions, pointers, and subroutines.
@@ -768,7 +831,7 @@ class Sequencer(object):
             if instr.name in ["JSR", "JSREP"]:
                 s += "  0x%03x" % instr.address
                 if instr.subroutine is not None:
-                    s += " -> " + instr.subroutine
+                    s += " # -> " + instr.subroutine
             else:
                 s += self.repr_pointer('PTR_SUBR', instr.address)
 
@@ -977,7 +1040,10 @@ class Sequencer(object):
 
     def find_function_withclock(self, subr, clockname):
         """
-        Finds the function that does the actual readout in a given subroutine/main.
+        Finds the function that does the actual readout in a given subroutine/main,
+        if set to look for 'TRG'. In general, finds the first function that has the given
+        clock set to 1 when unrolling the given subroutine/main. Returns empty string if
+        not found.
         :param subr:
         :return:
         """
@@ -997,9 +1063,8 @@ class Sequencer(object):
                     funcnum = instr.function_id
                 else:
                     funcnum = self.pointer_value('PTR_FUNC', instr.function_id)
-                funcname = self.functions[funcnum].name
-                if clockname in self.functions_desc[funcname]['clocks']:
-                    return funcname
+                if self.functions[funcnum].is_on_anytime(clockname):
+                    return self.functions[funcnum].name
                 # moves on to next instruction
                 current_address += 1
 
@@ -1012,10 +1077,42 @@ class Sequencer(object):
                 else:
                     current_address = self.pointer_value('PTR_SUBR', instr.address)
             else:
+                if not saved_address:
+                    # reached end of program without finding clock
+                    return ''
                 # returns from end of subroutine
                 current_address = saved_address.pop()
 
         return ''
+
+    def get_sequencer_string(self, subr=''):
+        """
+        Builds a string table representation of the sequencer content (for insertion in FITS table extension).
+        If a subroutine name is given, rebuilds the actual sequence executed.
+        :return: np.array
+        """
+        reprarray = np.zeros(shape=(0,), dtype=np.dtype('l', 'S73'))
+
+        # all functions
+        for ifunc in self.functions:
+            reprfunc = self.functions[ifunc].__repr__()
+            for l in reprfunc.splitlines():
+                if l:
+                    reprarray = np.append(reprarray, l.expandtabs(8))
+
+        if subr:
+            reprprog = self.sequence(subr, verbose=False)
+        else:
+            # splitting the subroutine stack into array lines
+            reprprog = self.program.__repr__().splitlines()
+        for l in reprprog:
+            reprarray = np.append(reprarray, l)
+
+        # adding the pointer values if any
+        for p in self.pointers:
+            reprarray = np.append(reprarray, self.pointers[p].__repr__())
+
+        return reprarray
 
 
 ## -----------------------------------------------------------------------
@@ -1088,6 +1185,22 @@ class Function(object):
             return state
 
         return None
+
+    def is_on_anytime(self, channel):
+        """
+        Tests if the given clock channel #channel is on at any time during the function.
+        """
+        if isinstance(channel, str):
+            c = self.channels[channel]
+        else:
+            c = channel
+
+        bc = (1 << c)
+        for timeslice in self.outputs:
+            if (self.outputs[timeslice] & bc):
+                return True
+
+        return False
 
     def set_output_channel(self, value, channel, timeslice=None):
         """
@@ -1236,4 +1349,36 @@ class Function(object):
             i += duration
 
         return timescope
+
+    def bytecode(self, function_id, slices_base_addr=0x200000, outputs_base_addr=0x100000):
+        """
+        Compute the function bytecode to be sent to the FPGA memory
+        at the function #function_dd slot.
+        Be careful: addresses are relative
+        """
+        if function_id not in range(16):
+            raise ValueError("Invalid Function ID")
+
+        slices_addr = slices_base_addr | (function_id << 4)
+        outputs_addr = outputs_base_addr | (function_id << 4)
+
+        bcodes = {}
+
+        # Set the given function slices and outputs
+        # function #0 -> special case, only the first slice has meaning
+
+        for sl in xrange(16):
+            slice_addr = slices_addr | sl
+            duration = self.timelengths.get(sl, 0) & 0xffff
+            if (function_id == 0) and (sl > 0):
+                duration = 0
+            bcodes[slice_addr] = duration
+
+            output_addr = outputs_addr | sl
+            output = self.outputs.get(sl, 0) & 0xffffffff
+            if (function_id == 0) and (sl > 0):
+                output = 0
+            bcodes[output_addr] = output
+
+        return bcodes
 
