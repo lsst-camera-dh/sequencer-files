@@ -20,7 +20,7 @@
 # 20180913, C.J: copied from ts8-itl-2s-v6 
 # 20180914, C.J: removed P1 high from readout sequence and line transfers to test FPGA bug, removed FastFlushPixel and split FlushPixel from FlushPixelClose
 
-# NOTE that the RampTime is 610 ns, all ASPIC RC time constants should be set to 14 (0b1110)
+# NOTE that the RampTime is 320 ns, all ASPIC RC time constants should be set to 15 (0b1111)
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
