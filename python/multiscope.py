@@ -42,11 +42,13 @@ def get_scandata_raft(inputfile, datadir=''):
             raftfits = [os.path.join(datadir, inputfile.replace("00_0", s + '_' + s[1:])) for s in seglist]
         elif '00_' in inputfile:
             raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+        elif 'S00' in inputfile:
+            raftfits = [inputfile.replace("S00", 'S' + s) for s in seglist]
         else:
             raftfits = [inputfile.replace("00-", s + '-') for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
-    else:
+    elif os.path.splitext(inputfile)[1] == ".dat":
         # starts with Reb0 through Reb2
         reblist = ["Reb0", "Reb1", "Reb2"]
         rebraws = [inputfile.replace("Reb0", s) for s in reblist]
@@ -55,6 +57,18 @@ def get_scandata_raft(inputfile, datadir=''):
             fullreb = scope.get_scandata_fromfile(f, datadir)  # 3D array: 48 channels, lines, columns
             #print fullreb.shape
             raftarrays.extend([a for a in np.split(fullreb, 3, axis=0)])  # splits REB data into 3 CCDs
+    elif inputfile == '':
+        seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+        for segstr in seglist:
+            d = os.path.join(datadir, 'S%s' % segstr)
+            for f in os.listdir(d):
+                #print f
+                if os.path.splitext(f)[1] in [".fits", ".fz"]  and os.stat(os.path.join(d, f)).st_size > 1e6:
+                    # one file per directory
+                    raftarrays.append(scope.get_scandata_fromfile(f, d))
+                    break
+    else:
+        seglist = []
 
     return raftarrays, seglist
 
@@ -62,7 +76,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
     """
     Builds up data from all raft files and display scans.
     :param datadir: optional, directory where data is stored
-    :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given
+    :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given. If empty, will scan datadir.
     :param suptitle: personalized title
     :return:
     """
@@ -103,11 +117,16 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
         ax = axes[num / 3, num % 3]
         # common scale for all subplots
         ax.set_ylim(0, maxplot * 1.02)
+        #ax.set_ylim(10000, 40000)
         #ax.set_ylim(minplot * 0.95, maxplot * 1.02)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
 
-    dataname = scope.get_rootfile(inputfile)
+    if inputfile:
+        dataname = scope.get_rootfile(inputfile)
+    else:
+        dataname = os.path.split(datadir)[-1]
+
     if suptitle:
         plt.suptitle(suptitle, fontsize='x-large')
     else:

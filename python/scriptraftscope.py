@@ -3,22 +3,21 @@ import raftstats
 import multiscope
 import os
 
-rtm = "RTM2"
-run = ""
+rtm = "RTM11"
+run = "8263"
 #c = "S3"
 
-datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm-scan-mode-data/rtm2-scan-tm-bias" % rtm
+#datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm-scan-mode-data/rtm2-scan-tm-bias" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/camel_v3" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm9scans1" % rtm
 #datadir = '/Users/nayman/Documents/REB/TS8/%s/singleclockscans/single%s' % (rtm, c)
-#datadir = '/Users/nayman/Documents/REB/TS8/RTM8/superscan'
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/RGhigh" % rtm
 #datadir = "/Users/nayman/Documents/REB/TS8/RTM10/RTM10-scan-mode-images/"
 #datadir = "/Users/nayman/Documents/REB/TS8/%s/rtm10-rebuilt-scans" % rtm
-#datadir = "/Users/nayman/Documents/REB/TS8/RTM13/%s" % (run,)
+datadir = "/Users/nayman/Documents/REB/TS8/%s/run-%s" % (rtm, run)
 
-#seqfile = 'ITL/TS8_ITL_2s_newflush_v4.seq'
-seqfile = "E2V/seq-e2v-2s.seq"
+seqfile = 'ITL/TS8_ITL_2s_newflush_v4.seq'
+#seqfile = "E2V/seq-e2v-2s.seq"
 
 #tmbasefile = "rtm8run2scan1/00_rtm8_tm_scan_2.fits"
 #tmbasefile = "00_scan_tm_TS8_ITL_injectRD_fix_2.fits"
@@ -37,6 +36,7 @@ tmbasefile = sorted(os.listdir(datadir))[0]
 #dsibasefile = "00_TS8_ITL_clockcross90_bias_scan_dsi_2.fits"
 
 # returns tuple: (list of files, list of segments)
+#l = raftstats.get_fits_raft(inputfile='', datadir=datadir)
 l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 #ldsi = raftstats.get_fits_raft(inputfile=dsibasefile, datadir=datadir)
 
@@ -44,6 +44,7 @@ l = raftstats.get_fits_raft(inputfile=tmbasefile, datadir=datadir)
 #---- Scan display for all raft channels
 
 multiscope.raft_display_allchans(tmbasefile, datadir, '%s %s' % (rtm, run))
+#multiscope.raft_display_allchans("", datadir, '%s %s' % (rtm, run))
 
 #---- Combined display of single channel with clock sequences
 
@@ -91,8 +92,8 @@ multiscope.raft_display_allchans(tmbasefile, datadir, '%s %s' % (rtm, run))
 
 #scope.cut_scan_plot(l[0][1], cutcolumns=[120], datadir=datadir, polynomfit=True, displayamps=range(16))
 
-for f in l[0]:
-    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
+#for f in l[0]:
+#    scope.cut_scan_plot(f, datadir=datadir, polynomfit=False, displayamps=range(16))
     #scope.stats_scan_plot(f, datadir=datadir, basecols=slice(70, 90), signalcols=slice(140, 160))
 
 #multiscope.plot_corrcoef_raftscope(l[0], ROIrows=slice(10,1000), ROIcols=slice(150,170),
