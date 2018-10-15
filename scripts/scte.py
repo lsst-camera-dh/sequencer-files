@@ -48,8 +48,8 @@ for Lo_Volts in np.arange(Lo_Start, Lo_End +0.1, Lo_Step):
              for Par_Lo_Volts in np.arange(Par_Lo_Start, Par_Lo_End +0.1, Par_Lo_Step) :
                  # check that charges can flow into the serial register : 
                  if Par_Lo_Volts > Lo_Volts -0.9 : continue
-                 vsetParLo('w', Pat_Lo_Volts)
-                 vsetParLo('g', Pat_Lo_Volts)
+                 vsetParLo('w', Par_Lo_Volts)
+                 vsetParLo('g', Par_Lo_Volts)
                  for Par_Swing in np.arange(Par_Swing_Start, Par_Swing_End +0.1, Par_Swing_Step) :
                      Par_Hi = Par_Lo_Volts + Par_Swing
                      # check that charges can flow into the serial register : 
