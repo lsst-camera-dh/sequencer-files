@@ -460,34 +460,41 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         figY.savefig(os.path.join(datadir, 'plotscanfit' + rootname + '.png'))
 
     else:
-        fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
-
-        # plots mean and standard deviation along line direction
-        axes[0].set_title(rootname)
-        axes[0].set_xlim(0, Nbins)
-        axes[0].set_ylim(0, img[:, 5:-2].max())
-        for c in range(Nchan):
-            axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
-        axes[0].set_xlabel('Time increment (10 ns)')
-        axes[0].set_ylabel('Average (ADU)')
-        axes[0].grid(True)
-
-        axes[1].set_xlim(0, Nbins)
-        maxstd = 0
-        for c in range(Nchan):
-            stdscan = img[c].std(axis=0)
-            maxstd = max(maxstd, stdscan[5:-1].max())
-            axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
-        axes[1].set_ylim(0, maxstd)
-        axes[1].set_xlabel('Time increment (10 ns)')
-        axes[1].set_ylabel('Dispersion (ADU)')
-        axes[1].grid(True)
-        # single legend and title
-        axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
+        plot_scan_dispersion(img, len(displayamps), title=rootname)
         plt.suptitle('Statistics for %s' % rootname, fontsize='large')
         plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
 
     plt.show()
+
+
+def plot_scan_dispersion(img, Nchan=16, title=''):
+    Nlines = img.shape[1]
+    Nbins = img.shape[2]
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, Nchan)]
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
+
+    # plots mean and standard deviation along line direction
+    axes[0].set_title(title)
+    axes[0].set_xlim(0, Nbins)
+    axes[0].set_ylim(0, img[:, 5:-2].max())
+    for c in range(Nchan):
+        axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
+    axes[0].set_xlabel('Time increment (10 ns)')
+    axes[0].set_ylabel('Average (ADU)')
+    axes[0].grid(True)
+
+    axes[1].set_xlim(0, Nbins)
+    maxstd = 0
+    for c in range(Nchan):
+        stdscan = img[c].std(axis=0)
+        maxstd = max(maxstd, stdscan[5:-1].max())
+        axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
+    axes[1].set_ylim(0, maxstd)
+    axes[1].set_xlabel('Time increment (10 ns)')
+    axes[1].set_ylabel('Dispersion (ADU)')
+    axes[1].grid(True)
+    # single legend and title
+    axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
 
 
 def stats_scan_plot(scanfile, datadir='', basecols=slice(70, 90), signalcols=slice(140, 160)):
