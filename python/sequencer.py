@@ -4,7 +4,7 @@
 # Python objects for the FPGA sequencer
 #
 # Authors: Laurent Le Guillou, Claire Juramy
-
+from __future__ import print_function
 import re
 import bidi
 import numpy as np
@@ -412,7 +412,7 @@ class Instruction(object):
         # JSR addr
         m = cls.pattern_JSR_addr.match(s)
         if m is not None:
-            print m.groups()
+            print(m.groups())
             address = int(m.group(1), base=16)
             repeat = int(m.group(3))
             return Instruction(opcode="JSR",
@@ -421,7 +421,7 @@ class Instruction(object):
 
         # JSR name
         m = cls.pattern_JSR_name.match(s)
-        print m, s
+        print(m, s)
         if m is not None:
             subroutine = m.group(1)
             repeat = int(m.group(2))
@@ -569,12 +569,12 @@ class Program_UnAssembled(object):
 
         prg = Program_UnAssembled()
 
-        print lines
+        print(lines)
 
         for iline in xrange(nlines):
-            print iline + 1
+            print(iline + 1)
             line = lines[iline]
-            print line
+            print(line)
             elts = line.split()
 
             if len(elts) < 1:
@@ -597,7 +597,7 @@ class Program_UnAssembled(object):
             s = " ".join(elts)
 
             instr = Instruction.fromstring(s)
-            print "INSTR = ", instr
+            print("INSTR = ", instr)
             if instr is None:
                 continue
 

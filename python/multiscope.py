@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#!/usr/bin/env python
 
 # Displays a scope-like view of the CCD output waveforms for the whole raft.
 #
@@ -12,15 +12,15 @@
 #
 # Syntax in a script:
 # import multiscope
-# multiscope.raft_display("tm-scan.fits")
-
+# multiscope.raft_display_allchans("tm-scan.fits")
+from __future__ import print_function
 import sys
 import os.path
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors as mplcol
 import scope
-import pyfits
+from astropy.io import fits
 
 
 def get_scandata_raft(inputfile, datadir=''):
@@ -33,7 +33,7 @@ def get_scandata_raft(inputfile, datadir=''):
     raftarrays = []
     if os.path.splitext(inputfile)[1] in [".fits", ".fz"]:
         # starts with 00 through 22
-        seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+        seglist = slot_ids()
         # when REB2 data is missing
         #seglist = ["%d%d" % (i, j) for i in range(2) for j in range(3)]
 
@@ -58,7 +58,7 @@ def get_scandata_raft(inputfile, datadir=''):
             #print fullreb.shape
             raftarrays.extend([a for a in np.split(fullreb, 3, axis=0)])  # splits REB data into 3 CCDs
     elif inputfile == '':
-        seglist = ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+        seglist = slot_ids()
         for segstr in seglist:
             d = os.path.join(datadir, 'S%s' % segstr)
             for f in os.listdir(d):
@@ -72,6 +72,7 @@ def get_scandata_raft(inputfile, datadir=''):
 
     return raftarrays, seglist
 
+
 def raft_display_allchans(inputfile, datadir='', suptitle=''):
     """
     Builds up data from all raft files and display scans.
@@ -81,7 +82,36 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
     :return:
     """
     raftarrays, seglist = get_scandata_raft(inputfile, datadir)
+    if inputfile:
+        dataname = scope.get_rootfile(inputfile)
+    else:
+        dataname = os.path.split(datadir)[-1]
+    if not suptitle:
+        suptitle = dataname
+    outfile = os.path.join(datadir, "multiscope-%s.png" % dataname)
+    plot_raft_allchans(raftarrays, seglist, suptitle)
+    plt.savefig(outfile)
+    plt.show()
 
+
+def slot_ids():
+    return ["%d%d" % (i, j) for i in range(3) for j in range(3)]
+
+
+def plot_raft_allchans(raftarrays, seglist, suptitle=''):
+    """
+    Builds up data from all raft files and display scans.
+
+    Parameters
+    ----------
+    raftarrays: list
+        list of channel data for a single CCD.
+    seglist: list
+        list of CCD slot ids, e.g.,
+        ['00', '01', '02', '10', '11', '12', '20', '21', '22']
+    suptitle: str ['']
+        Title of the plot.
+    """
     fig, axes = plt.subplots(nrows = 3, ncols = 3, figsize=(15, 9))
     # when REB2 data is missing
     # fig, axes = plt.subplots(nrows = 2, ncols = 3, figsize=(15, 9))
@@ -91,7 +121,7 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
     maxplot = 0
     minplot = 25000
     for num,tmscope in enumerate(raftarrays):
-        ax = axes[num  / 3, num  % 3 ]
+        ax = axes[num // 3, num  % 3 ]
 
         # single CCD plot
         for c in range(16):
@@ -109,30 +139,19 @@ def raft_display_allchans(inputfile, datadir='', suptitle=''):
 
         if num%3 == 0:
             ax.set_ylabel('Scan (ADU)')
-        if num/3 == 2:
+        if num//3 == 2:
             ax.set_xlabel('Time increment (10 ns)')
         ax.grid(True)
 
     for num in range(len(raftarrays)):
-        ax = axes[num / 3, num % 3]
+        ax = axes[num // 3, num % 3]
         # common scale for all subplots
         ax.set_ylim(0, maxplot * 1.02)
         #ax.set_ylim(10000, 40000)
         #ax.set_ylim(minplot * 0.95, maxplot * 1.02)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
-
-    if inputfile:
-        dataname = scope.get_rootfile(inputfile)
-    else:
-        dataname = os.path.split(datadir)[-1]
-
-    if suptitle:
-        plt.suptitle(suptitle, fontsize='x-large')
-    else:
-        plt.suptitle(dataname)
-    plt.savefig(os.path.join(datadir, "multiscope-%s.png" % dataname))
-    plt.show()
+    plt.suptitle(suptitle, fontsize='x-large')
 
 
 def raft_display_longscan(inputfile, niter, datadir='', suptitle=''):
@@ -153,7 +172,7 @@ def raft_display_longscan(inputfile, niter, datadir='', suptitle=''):
 
     # plot all channels, with one subplot per CCD
     for num in range(len(raftfits)):
-        ax = axes[num  / 3, num  % 3 ]
+        ax = axes[num // 3, num  % 3 ]
         tmscope = scope.stitch_long_scan(raftfits[num], niter, datadir)
 
         # single CCD plot
@@ -228,19 +247,19 @@ def reframe_scope_frames(listfits):
     :return:
     """
     for f in listfits:
-        h = pyfits.open(f)
+        h = fits.open(f)
         imgcols = h[1].header['naxis1']
         imglines = h[1].header['naxis2']
         detstring = '[1:%d,1:%d]' % (imgcols * 8, 2 * imglines)
         # Create HDU list
-        primaryhdu = pyfits.PrimaryHDU()
+        primaryhdu = fits.PrimaryHDU()
         primaryhdu.header = h[0].header.copy()
         primaryhdu.header['DETSIZE'] = (detstring, 'NOAO MOSAIC keywords')
-        hcopy = pyfits.HDUList([primaryhdu])
+        hcopy = fits.HDUList([primaryhdu])
 
         #print h.info()
         for extnum in range(1,17,1):
-            exthdu = pyfits.ImageHDU(data=h[extnum].data)
+            exthdu = fits.ImageHDU(data=h[extnum].data)
             get_extension_header(imgcols, imgcols, extnum-1, exthdu, detstring)
             hcopy.append(exthdu)
 
@@ -260,13 +279,13 @@ def corrcoef_raftscope(raftsfits, ROIrows, ROIcols, norm=True):
     stackh = []
 
     for fl in raftsfits:
-        h = pyfits.open(fl)
+        h = fits.open(fl)
         for i in range(1, 17):
             stackh.append(h[i].data[ROIrows, ROIcols])
         h.close()
         del h
     stackh = np.stack(stackh)
-    print stackh.shape
+    print(stackh.shape)
 
     a = []
 
@@ -276,7 +295,7 @@ def corrcoef_raftscope(raftsfits, ROIrows, ROIcols, norm=True):
         else:
             a.append(np.cov(stackh[:, :, numcol]))
     a = np.stack(a)
-    print a.shape
+    print(a.shape)
 
     return a.mean(axis=0)
 

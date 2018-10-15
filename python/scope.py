@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#! /usr/bin/env python
 
 # Displays a scope-like view of the CCD output waveform, matched with the clock states of the sequencer function
 # used to acquire it.
@@ -19,10 +19,10 @@
 # Syntax in a script:
 # import scope
 # scope.combined_scope_display("dsi-scan.fits", "tm-scan.fits", "seq-newflush.txt", "Segment00", "Bias")
-
+from __future__ import print_function
 import sys
 import os.path
-import pyfits
+from astropy.io import fits
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -69,7 +69,7 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         else:
             displayamps = selectchannels
 
-        hdulist = pyfits.open(os.path.join(datadir, inputfile))
+        hdulist = fits.open(os.path.join(datadir, inputfile))
         imgdata = []
         for i in displayamps:
             imgdata.append(hdulist[i + 1].data)
@@ -356,7 +356,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         except:
             ndisplay -= 1
             continue
-    print "Found %d scan files to display" % ndisplay
+    print("Found %d scan files to display" % ndisplay)
     # plot
     fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(14, 9))
 
@@ -579,7 +579,7 @@ def stitch_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
     """
     nchan = len(displayamps)
 
-    itm = pyfits.open(os.path.join(datadir,scanfile))
+    itm = fits.open(os.path.join(datadir,scanfile))
     tmscope = np.zeros((nchan, 256 * niter))
 
     for chan in range(nchan):
@@ -645,7 +645,7 @@ def stats_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
 
     nchan = len(displayamps)
 
-    itm = pyfits.open(os.path.join(datadir, scanfile))
+    itm = fits.open(os.path.join(datadir, scanfile))
     nsplitlines = itm[1].header["NAXIS2"] / niter
     tmscope = np.zeros((nchan, nsplitlines, 256 * niter))
 
