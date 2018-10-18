@@ -1,1 +1,0 @@
-# This repository is for teststand acquisition scripts.
