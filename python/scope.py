@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#! /usr/bin/env python
 
 # Displays a scope-like view of the CCD output waveform, matched with the clock states of the sequencer function
 # used to acquire it.
@@ -19,10 +19,10 @@
 # Syntax in a script:
 # import scope
 # scope.combined_scope_display("dsi-scan.fits", "tm-scan.fits", "seq-newflush.txt", "Segment00", "Bias")
-
+from __future__ import print_function
 import sys
 import os.path
-import pyfits
+from astropy.io import fits
 import numpy as np
 from matplotlib import pyplot as plt
 
@@ -69,7 +69,7 @@ def get_scandata_fromfile(inputfile, datadir='', selectchannels=None):
         else:
             displayamps = selectchannels
 
-        hdulist = pyfits.open(os.path.join(datadir, inputfile))
+        hdulist = fits.open(os.path.join(datadir, inputfile))
         imgdata = []
         for i in displayamps:
             imgdata.append(hdulist[i + 1].data)
@@ -356,7 +356,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         except:
             ndisplay -= 1
             continue
-    print "Found %d scan files to display" % ndisplay
+    print("Found %d scan files to display" % ndisplay)
     # plot
     fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(14, 9))
 
@@ -460,34 +460,41 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
         figY.savefig(os.path.join(datadir, 'plotscanfit' + rootname + '.png'))
 
     else:
-        fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
-
-        # plots mean and standard deviation along line direction
-        axes[0].set_title(rootname)
-        axes[0].set_xlim(0, Nbins)
-        axes[0].set_ylim(0, img[:, 5:-2].max())
-        for c in range(Nchan):
-            axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
-        axes[0].set_xlabel('Time increment (10 ns)')
-        axes[0].set_ylabel('Average (ADU)')
-        axes[0].grid(True)
-
-        axes[1].set_xlim(0, Nbins)
-        maxstd = 0
-        for c in range(Nchan):
-            stdscan = img[c].std(axis=0)
-            maxstd = max(maxstd, stdscan[5:-1].max())
-            axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
-        axes[1].set_ylim(0, maxstd)
-        axes[1].set_xlabel('Time increment (10 ns)')
-        axes[1].set_ylabel('Dispersion (ADU)')
-        axes[1].grid(True)
-        # single legend and title
-        axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
+        plot_scan_dispersion(img, len(displayamps), title=rootname)
         plt.suptitle('Statistics for %s' % rootname, fontsize='large')
         plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
 
     plt.show()
+
+
+def plot_scan_dispersion(img, Nchan=16, title=''):
+    Nlines = img.shape[1]
+    Nbins = img.shape[2]
+    color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, Nchan)]
+    fig, axes = plt.subplots(nrows=2, ncols=1, figsize=(9, 12))
+
+    # plots mean and standard deviation along line direction
+    axes[0].set_title(title)
+    axes[0].set_xlim(0, Nbins)
+    axes[0].set_ylim(0, img[:, 5:-2].max())
+    for c in range(Nchan):
+        axes[0].plot(img[c].mean(axis=0), color=color_idx[c])
+    axes[0].set_xlabel('Time increment (10 ns)')
+    axes[0].set_ylabel('Average (ADU)')
+    axes[0].grid(True)
+
+    axes[1].set_xlim(0, Nbins)
+    maxstd = 0
+    for c in range(Nchan):
+        stdscan = img[c].std(axis=0)
+        maxstd = max(maxstd, stdscan[5:-1].max())
+        axes[1].plot(stdscan, color=color_idx[c], label="Ch%02d" % c)
+    axes[1].set_ylim(0, maxstd)
+    axes[1].set_xlabel('Time increment (10 ns)')
+    axes[1].set_ylabel('Dispersion (ADU)')
+    axes[1].grid(True)
+    # single legend and title
+    axes[1].legend(bbox_to_anchor=(1.02, 0), loc='lower left', borderaxespad=0.)
 
 
 def stats_scan_plot(scanfile, datadir='', basecols=slice(70, 90), signalcols=slice(140, 160)):
@@ -579,7 +586,7 @@ def stitch_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
     """
     nchan = len(displayamps)
 
-    itm = pyfits.open(os.path.join(datadir,scanfile))
+    itm = fits.open(os.path.join(datadir,scanfile))
     tmscope = np.zeros((nchan, 256 * niter))
 
     for chan in range(nchan):
@@ -645,7 +652,7 @@ def stats_long_scan(scanfile, niter, datadir='', displayamps=range(16)):
 
     nchan = len(displayamps)
 
-    itm = pyfits.open(os.path.join(datadir, scanfile))
+    itm = fits.open(os.path.join(datadir, scanfile))
     nsplitlines = itm[1].header["NAXIS2"] / niter
     tmscope = np.zeros((nchan, nsplitlines, 256 * niter))
 

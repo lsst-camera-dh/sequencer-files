@@ -4,7 +4,7 @@
 # Python minimal interface for the REB FPGA
 # TXT assembler-style IO
 #
-
+from __future__ import print_function
 from sequencer import *
 import grammar
 
@@ -148,7 +148,7 @@ class TxtParser(object):
             self.functions_desc[name] = dict(func_dict)
 
             if self.verbose:
-                print name, fullname
+                print(name, fullname)
 
             function = Function(name=name,
                                 fullname=fullname,
@@ -173,7 +173,7 @@ class TxtParser(object):
                 cpos += 1
 
             if self.verbose:
-                print channel_position
+                print(channel_position)
             self.functions_desc[name]['clocks'] = func['clocks']  # list of active channels
 
             # self.timelengths = {0: 12, 1: 14}
@@ -208,7 +208,7 @@ class TxtParser(object):
                         cval = values[cpos]
                         output |= (cval << crank)
                 if self.verbose:
-                    print bin(output)
+                    print(bin(output))
 
                 outputs[islice] = output
 
@@ -331,7 +331,7 @@ class TxtParser(object):
         subname = sub_node['name']
         fullname = sub_node['comment']
         if self.verbose:
-            print "   name = ", subname
+            print("   name = ", subname)
             # print "   fullname = ", fullname
 
         sub = Subroutine()
@@ -385,12 +385,12 @@ class TxtParser(object):
         # Parse all subroutines
         self.parse_subroutines(result['subroutines'])
         if self.verbose:
-            print "SUBS", self.subroutines_names
+            print("SUBS", self.subroutines_names)
 
         # Parse all 'mains' 
         self.parse_mains(result['mains'])
         if self.verbose:
-            print "MAINS", self.mains_names
+            print("MAINS", self.mains_names)
         # we will use 0x340000 (now in pointers) to point to the right one
         # initializing Main pointer if does not exist in file
         if 'Main' not in self.pointers:

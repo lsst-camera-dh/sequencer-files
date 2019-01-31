@@ -11,7 +11,7 @@ class BidiMap(object):
         # works only from python 2.7 
         # self.reverse = {v: k for k, v in self.dictionary.iteritems()}
         self.reverse = {}
-        for k,v in self.dictionary.iteritems():
+        for k,v in self.dictionary.items():
             self.reverse[v] = k
         #
         self.dictionary.update(self.reverse)
