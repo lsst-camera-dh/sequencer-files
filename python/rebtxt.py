@@ -42,7 +42,7 @@ class TxtParser(object):
 
     def process_value(self, s):
         # now converts to FPGA clock cycles
-        if self.parameters.has_key(s):
+        if s in self.parameters:
             # now assuming this is a time parameter and therefore a tuple
             value, unit = self.parameters[s]
             # print "K lvalue = ", lvalue
@@ -196,14 +196,15 @@ class TxtParser(object):
 
                 values = timeslice[1]
 
-                for ck, cdesc in self.channels_desc.iteritems():
+                for ck in self.channels_desc:
+                    cdesc = self.channels_desc[ck]
                     cname = cdesc['name']
                     crank = cdesc['channel']
 
-                    if constants.has_key(cname):
+                    if cname in constants:
                         # that's a constant one
                         output |= (constants[cname] << crank)
-                    elif channel_position.has_key(cname):
+                    elif cname in channel_position:
                         cpos = channel_position[cname]
                         cval = values[cpos]
                         output |= (cval << crank)
@@ -443,7 +444,8 @@ def fromtxtfile(txtfile, verbose=True):
                             [v['name']
                              for v in channels_desc.values()])
 
-    for k, v in functions_desc.iteritems():
+    for k in functions_desc:
+        v = functions_desc[k]
         # re-index the function dictionary by function number
         functions[v['idfunc']] = v['function']
 

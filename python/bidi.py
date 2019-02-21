@@ -20,7 +20,7 @@ class BidiMap(object):
         return self.dictionary[k]
 
     def has_key(self, k):
-        return self.dictionary.has_key(k)
+        return (k in self.dictionary)
 
     def get(self, k, d=None):
         if self.has_key(k):

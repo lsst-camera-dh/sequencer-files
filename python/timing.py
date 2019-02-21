@@ -32,12 +32,12 @@ def breakout(seqfile, exptype):
         reprseq = seq.sequence(exptype, verbose=False)
 
         for l in reprseq:
-            print l
+            print(l)
 
     elif exptype in seq.functions_desc:
         f = seq.get_function(exptype)
-        print f
-        print "Total time: %d ns" % (f.total_time() * 10)
+        print(f)
+        print("Total time: %d ns" % (f.total_time() * 10))
 
 
 if __name__ == '__main__':

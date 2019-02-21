@@ -526,7 +526,7 @@ class Program_UnAssembled(object):
             subr = self.subroutines[subr_name]
             # alignment
             if current_addr > 0:
-                current_addr = (current_addr / alig + 1) * alig
+                current_addr = (current_addr // alig + 1) * alig
             subroutines_addr[subr_name] = current_addr
             result.subroutines[subr_name] = current_addr
             for instr in subr.instructions:
@@ -534,13 +534,12 @@ class Program_UnAssembled(object):
                 current_addr += 1
 
         # now setting addresses into JSR/JSREP instructions referring subroutine names
-        addrs = result.instructions.keys()
-        addrs.sort()
+        addrs = sorted(result.instructions.keys())
         for addr in addrs:
             instr = result.instructions[addr]
             # print addr, instr
             if instr.name in ['JSR', 'JSREP']:
-                if not (subroutines_addr.has_key(instr.subroutine)):
+                if instr.subroutine not in subroutines_addr:
                     raise ValueError("Undefined subroutine %s" %
                                      instr.subroutine)
                 # instr.subroutine = None
@@ -551,7 +550,7 @@ class Program_UnAssembled(object):
         for ptrname in self.seq_pointers:
             seq_pointer = self.seq_pointers[ptrname]
             if seq_pointer.pointer_type in ['MAIN', 'PTR_SUBR']:
-                if not (subroutines_addr.has_key(seq_pointer.target)):
+                if seq_pointer.target not in subroutines_addr:
                     raise ValueError("Pointer to undefined subroutine %s" %
                                      seq_pointer.target)
                 seq_pointer.value = subroutines_addr[seq_pointer.target]
@@ -571,7 +570,7 @@ class Program_UnAssembled(object):
 
         print(lines)
 
-        for iline in xrange(nlines):
+        for iline in range(nlines):
             print(iline + 1)
             line = lines[iline]
             print(line)
@@ -1147,11 +1146,11 @@ class Function(object):
         l1 = "slice\t duration (x10ns)\t\t "
         l2 = "                        \t\t "
 
-        for i in xrange(32):
+        for i in range(32):
             c = 32 - 1 - i
             if self.channels.has_key(c):
                 name = self.channels[c]
-                named = dict(zip(xrange(len(name)), list(name)))
+                named = dict(zip(range(len(name)), list(name)))
                 l0 += named.get(0, '|')
                 l1 += named.get(1, '|')
                 l2 += named.get(2, '|')
@@ -1163,7 +1162,7 @@ class Function(object):
         s += l0 + '\n' + l1 + '\n' + l2 + '\n'
 
         s += (73 * "-") + "\n"
-        for sl in xrange(16):
+        for sl in range(16):
             bit_str = "%032d" % int(bin(self.outputs.get(sl, 0x0))[2:])
             s += "%02d\t %8d\t\t\t %s\n" % (sl,
                                             self.timelengths.get(sl, 0),
@@ -1324,7 +1323,7 @@ class Function(object):
         Takes into account additionnal cycles at beginning and end.
         :return:
         """
-        return sum(self.timelengths.itervalues())+3
+        return sum([self.timelengths[t] for t in self.timelengths])+3
 
     def scope(self, channel):
         """
@@ -1367,7 +1366,7 @@ class Function(object):
         # Set the given function slices and outputs
         # function #0 -> special case, only the first slice has meaning
 
-        for sl in xrange(16):
+        for sl in range(16):
             slice_addr = slices_addr | sl
             duration = self.timelengths.get(sl, 0) & 0xffff
             if (function_id == 0) and (sl > 0):
