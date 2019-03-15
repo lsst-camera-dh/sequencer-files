@@ -10,4 +10,7 @@ become part of the standard testing suite, so they should be held in
 the same place. They will not produce actual images, only fakes.
 20180207: slowed down fast parallel clear to be compatible with REB5
 and power supplies capabilities
+20190315: set ASPIC clamp to 0, slowed down slow flush, added serial 
+flush to fast parallel flush, added purge for tearing fix before frame
+acquisition
 
