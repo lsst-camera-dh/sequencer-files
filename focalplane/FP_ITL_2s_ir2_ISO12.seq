@@ -2,7 +2,7 @@
 # Initially contains derivative of mid-2018 version 
 # Shutter bit is removed
 # Integrating with P1+P2 high (also added to Default state)
-# 3s file, expected ASPIC RC=6
+# change ISO1 and ISO2, keeping its sum
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000    # Number of rows of the sensor
@@ -14,14 +14,14 @@
     TimeP:          5000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
     FlushP:         5000 ns   # Fast parallel clear transfer time
-    ISO1:            330 ns   # Time between ASPIC clamp and first ramp
-    ISO2:            460 ns   # Time between ASPIC ramps
+    ISO1:            100 ns   # Time between ASPIC clamp and first ramp
+    ISO2:            420 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
-    BufferS:          90 ns   # Buffer for serial clock crossing
-    FlushS:          480 ns   # Base element of serial flush
-    RampTime:        610 ns   # ASPIC ramp time
+    BufferS:          70 ns   # Buffer for serial clock crossing
+    FlushS:          500 ns   # Base element of serial flush
+    RampTime:        320 ns   # ASPIC ramp time
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
-    TimeC:           200 ns   # clamp time
+    TimeC:           180 ns   # clamp time
 
 [clocks]  # clock channels
     P1:   8  # Parallel clock 1
@@ -64,7 +64,6 @@
     REP_SUBR    ExposureTime   5  # Repeat for exposure in units of 25 ms
     #- Reserved for use by CCS
     REP_SUBR    OpFlags        1  # 1=ITL 
-
 [functions]
     Default:  # Default state when not operating
       clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST
