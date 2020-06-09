@@ -5,7 +5,7 @@
 
 import os
 import sys
-import pyfits
+import astropy.io.fits as pyfits
 import numpy as np
 from matplotlib import pyplot as plt
 from matplotlib import colors as mplcol
@@ -25,16 +25,16 @@ def get_fits_raft(inputfile='', datadir=''):
         if '00_0_' in inputfile:  # new numbering scheme from eTraveler
             raftfits = [os.path.join(datadir, inputfile.replace("00_0", s + '_' + s[1:])) for s in seglist]
         elif '00_' in inputfile:
-            raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_')) for s in seglist]
+            raftfits = [os.path.join(datadir, inputfile.replace("00_", s + '_', 1)) for s in seglist]
         else:
-            raftfits = [os.path.join(datadir, inputfile.replace("00-", s + '-')) for s in seglist]
+            raftfits = [os.path.join(datadir, inputfile.replace("00-", s + '-', 1)) for s in seglist]
     # tree structure
     else:
         raftfits = []
         for segstr in seglist:
             d = os.path.join(datadir, 'S%s' % segstr)
             for f in os.listdir(d):
-                print f
+                print(f)
                 if f[-4:] == 'fits' and os.stat(os.path.join(d, f)).st_size > 1e6:
                     # one file per directory
                     raftfits.append(os.path.join(d, f))
@@ -77,7 +77,7 @@ def print_header_stats(fitsfile, recalc=False):
     String from statistics stored in extension headers.
     :return:
     """
-    print repr_stats(fitsfile, recalc=recalc)
+    print(repr_stats(fitsfile, recalc=recalc))
 
 
 def plothisto_overscan(fitsfile, ROIrows=slice(100, 1900), ROIcols=slice(540, 576)):
@@ -254,7 +254,7 @@ def plot_corrcoef_raft(raftfits, ROIrows=slice(10, 1990), ROIcols=slice(512, 521
     dataname = os.path.splitext(dataname)[0]
 
     a = corrcoef_raft(raftfits, ROIrows, ROIcols)
-    fig, ax = plt.subplots(figsize=(8, 8))
+    fig, ax = plt.subplots(figsize=(9, 9))
     cax = ax.imshow(a, cmap=plt.get_cmap('jet'), norm=mplcol.Normalize(vmax=0.5, clip=True), interpolation='none')
     if title:
         ax.set_title('Correlation for %s' % title)

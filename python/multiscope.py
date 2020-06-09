@@ -41,11 +41,11 @@ def get_scandata_raft(inputfile, datadir=''):
         if '00_0_' in inputfile:  # new numbering scheme from eTraveler
             raftfits = [os.path.join(datadir, inputfile.replace("00_0", s + '_' + s[1:])) for s in seglist]
         elif '00_' in inputfile:
-            raftfits = [inputfile.replace("00_", s + '_') for s in seglist]
+            raftfits = [inputfile.replace("00_", s + '_', 1) for s in seglist]
         elif 'S00' in inputfile:
-            raftfits = [inputfile.replace("S00", 'S' + s) for s in seglist]
+            raftfits = [inputfile.replace("S00", 'S' + s, 1) for s in seglist]
         else:
-            raftfits = [inputfile.replace("00-", s + '-') for s in seglist]
+            raftfits = [inputfile.replace("00-", s + '-', 1) for s in seglist]
         for f in raftfits:
             raftarrays.append(scope.get_scandata_fromfile(f, datadir))
     elif os.path.splitext(inputfile)[1] == ".dat":
