@@ -124,7 +124,7 @@ def plot_raft_allchans(raftarrays, seglist, suptitle=''):
         ax = axes[num // 3, num  % 3 ]
 
         # single CCD plot
-        for c in range(16):
+        for c in range(len(tmscope)):
             # image extensions are labeled as 'Segment00' in CCS
             # they are in extensions 1 to 16
             #print tmscope.shape
