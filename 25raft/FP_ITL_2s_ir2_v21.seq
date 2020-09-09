@@ -20,7 +20,7 @@
     FlushS:          500 ns   # Base element of serial flush
     RampTime:        320 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
-    SlowTimeP:    400000 ns   # 6 per row in SlowFlush for ~few sec/flush
+    SlowTimeP:    500000 ns   # 6 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:        300     # repeat count for pseudo clock invert (matching e2v's)
 
