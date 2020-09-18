@@ -95,7 +95,7 @@
          TimeP       = 0,  1,  1,  1,  1   #
          TimeP       = 0,  1,  0,  1,  1   #
          TimeP       = 1,  1,  0,  1,  1   # 35000
-         TimeP       = 1,  1,  0,  1,  1   # 40000
+         TimeP       = 1,  1,  0,  1,  0   # 40000
       constants:     S1=1, RST=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
@@ -152,6 +152,18 @@
          100 ns      = 0,  1,  0,  0   # +100 = 1810
       constants:     P1=1, P2=1, RST=1
 
+    SlowNoFlushPixel:  # Single pixel flush with 1/25 duty cycl
+      clocks:          RG, S1, S2, S3, CL
+      slices:
+         BufferS     = 1,  1,  1,  1,  0  #          70 ns
+         FlushS      = 1,  1,  1,  1,  0  # +500 =  570
+         BufferS     = 1,  1,  1,  1,  0  #  +70 =  640
+         FlushS      = 1,  1,  1,  1,  0  # +500 = 1140
+         200 ns      = 1,  1,  1,  1,  1  # +200 = 1340
+         BufferS     = 1,  1,  1,  1,  0  #  +70 = 1410
+         FlushS      = 1,  1,  1,  1,  0  # +500 = 1910
+         67730 ns    = 1,  1,  1,  1,  0  #      = 69640 ns
+      constants:     P1=1, P2=1, RST=1
 
     SlowFlushPixel:  # Single pixel flush with 1/25 duty cycl
       clocks:          RG, S1, S2, S3, CL
@@ -200,20 +212,20 @@
       slices:
          200 ns      = 1,  1,  0,  1,  1,  1,  0,  0   # (P1,P2)->P2 &
          200 ns      = 1,  0,  0,  1,  1,  1,  0,  0   # 2 serial shifts
-         200 ns      = 1,  0,  1,  1,  1,  1,  0,  0   #
-         200 ns      = 1,  0,  1,  0,  1,  1,  0,  0   #
-         200 ns      = 1,  1,  1,  0,  1,  1,  0,  0   #
-         200 ns      = 1,  1,  0,  0,  1,  1,  0,  0   #
-         200 ns      = 1,  1,  0,  1,  1,  1,  0,  0   #
+         200 ns      = 0,  0,  1,  1,  1,  1,  0,  0   #
+         200 ns      = 0,  0,  1,  0,  1,  1,  0,  0   #
+         200 ns      = 0,  1,  1,  0,  1,  1,  0,  0   #
+         200 ns      = 0,  1,  0,  0,  1,  1,  0,  0   #
+         200 ns      = 0,  1,  0,  1,  1,  1,  0,  0   #
          200 ns      = 1,  0,  0,  1,  1,  1,  0,  0   #
-         200 ns      = 1,  0,  1,  1,  1,  1,  0,  0   #
-         400 ns      = 1,  0,  1,  0,  1,  1,  0,  1   #
+         200 ns      = 0,  0,  1,  1,  1,  1,  0,  0   #
+         400 ns      = 0,  0,  1,  0,  1,  1,  0,  1   #
          200 ns      = 1,  1,  1,  0,  0,  1,  0,  0   # 2400
-         400000 ns   = 0,  1,  0,  0,  0,  1,  1,  0
-         400000 ns   = 0,  1,  0,  0,  0,  0,  1,  0
-         400000 ns   = 0,  1,  0,  0,  1,  0,  1,  0
-         400000 ns   = 0,  1,  0,  0,  1,  0,  0,  0
-         400000 ns   = 0,  1,  0,  0,  1,  1,  0,  0   #2.0002400 ms
+         400000 ns   = 1,  1,  0,  0,  0,  1,  1,  0
+         400000 ns   = 1,  1,  0,  0,  0,  0,  1,  0
+         400000 ns   = 1,  1,  0,  0,  1,  0,  1,  0
+         400000 ns   = 1,  1,  0,  0,  1,  0,  0,  0
+         400000 ns   = 1,  1,  0,  0,  1,  1,  0,  0   #2.002400 ms
       constants:    RST=1
 
 [subroutines]
@@ -258,7 +270,7 @@
 #
 
     FlushRegister:  # Flushing serial register 1 time
-        CALL    FastFlushPixel repeat(TotalCols)
+        CALL    FlushPixel repeat(TotalCols)
         RTS
 
     ReadFrame:  # Readout and acquisition of a CCD frame (window)
@@ -282,14 +294,9 @@
 #
 # Exposure operations -----------------------------------------------
 #
-    SlowSerialFlush:  # called infinite during integration (~1ms duration)
-        CALL    FastFlushPixel repeat(23)
-        CALL    Default        repeat(970)
-        RTS
-
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(TotalRows)
-        CALL    FastFlushPixel     repeat(TotalCols)
+        CALL    FlushPixel         repeat(TotalCols)
         CALL    Default            repeat(InvertCnt) # 1us/call
         RTS
 
