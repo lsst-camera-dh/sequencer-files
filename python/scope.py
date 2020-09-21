@@ -261,7 +261,7 @@ def scan_scope_display(dsifile, tmfile, displayamps=range(16), append=False, dat
     plt.show()
 
 
-def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', datadir='', loc='', display=True):
+def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', datadir='', loc='', display=True, outdir=''):
     """
     Display scan scope for a channel along with sequencer states.
     Can be given the name of the main used (will detect automatically the function used and the offset of the ADC),
@@ -330,7 +330,10 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
 
     readfile = os.path.basename(seqfile)
     plt.title("%s in %s for %s-channel %02d" % (readfunction, readfile, loc, c))
-    plt.savefig(os.path.join(datadir, "combinedscope-%s-%s-%02d.png" % (dataname, loc, c)))
+    if outdir:
+        plt.savefig(os.path.join(outdir, "combinedscope-%s-%s-%02d.png" % (dataname, loc, c)))
+    else:
+        plt.savefig(os.path.join(datadir, "combinedscope-%s-%s-%02d.png" % (dataname, loc, c)))
 
     if display:
         plt.show()
@@ -338,12 +341,14 @@ def combined_scope_display(dsifile, tmfile, seqfile, c, readout='ReadPixel', dat
         plt.close()
 
 
-def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16), title='', diff=False):
+def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16), title='', diff=False, outdir=''):
     """
     Displays several scans on the same plot for each (selected) channel of the CCD.
     :return:
     """
-
+    if outdir == '':
+        outdir = datadir
+        
     dataname = os.path.splitext(os.path.basename(scanlist[0]))[0]
     # number of plots to do
     ndisplay = len(scanlist)
@@ -389,17 +394,18 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         ax.grid(True)
 
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
+    
     if title:
         plt.suptitle(title, fontsize='x-large')
     if diff:
-        plt.savefig(os.path.join(datadir, "scandiff-%s.png" % dataname))
+        plt.savefig(os.path.join(outdir, "scandiff-%s.png" % dataname))
     else:
-        plt.savefig(os.path.join(datadir, "scancompare-%s.png" % dataname))
+        plt.savefig(os.path.join(outdir, "scancompare-%s.png" % dataname))
     plt.tight_layout()
     plt.show()
 
 
-def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displayamps=range(16)):
+def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displayamps=range(16), outdir=''):
     """
     Cut and fit plots accross image (designed for images acquired in scanning mode).
     If polynomfit is set to False, reverts to average and standard deviation.
@@ -462,7 +468,10 @@ def cut_scan_plot(scanfile, cutcolumns=[180], datadir='', polynomfit=True, displ
     else:
         plot_scan_dispersion(img, len(displayamps), title=rootname)
         plt.suptitle('Statistics for %s' % rootname, fontsize='large')
-        plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
+        if outdir:
+            plt.savefig(os.path.join(outdir, 'scanstats' + rootname + '.png'))
+        else:
+            plt.savefig(os.path.join(datadir, 'scanstats' + rootname + '.png'))
 
     plt.show()
 

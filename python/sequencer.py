@@ -1148,7 +1148,7 @@ class Function(object):
 
         for i in range(32):
             c = 32 - 1 - i
-            if self.channels.has_key(c):
+            if c in self.channels:
                 name = self.channels[c]
                 named = dict(zip(range(len(name)), list(name)))
                 l0 += named.get(0, '|')
@@ -1179,7 +1179,7 @@ class Function(object):
         else:
             c = channel
 
-        if self.timelengths.has_key(timeslice):
+        if timeslice in self.timelengths:
             state = int(self.outputs[timeslice] & (1 << c) != 0)
             return state
 

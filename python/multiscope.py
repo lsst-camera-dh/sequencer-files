@@ -73,23 +73,49 @@ def get_scandata_raft(inputfile, datadir=''):
     return raftarrays, seglist
 
 
-def raft_display_allchans(inputfile, datadir='', suptitle=''):
+def get_scandata_bot(raft, datadir):
+    lf = []
+    for f in os.listdir(datadir):
+        if raft in f:
+            lf.append(f)
+    lf = sorted(lf)
+    
+    seglist = []
+    raftarrays = []
+    for f in lf:
+        ccd = f.split('-')[2]
+        raftarrays.append(scope.get_scandata_fromfile(f, datadir))
+        seglist.append(ccd)
+        
+    return raftarrays, seglist
+
+
+def raft_display_allchans(inputfile, datadir='', suptitle='', outdir='', bot=False):
     """
     Builds up data from all raft files and display scans.
     :param datadir: optional, directory where data is stored
-    :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given. If empty, will scan datadir.
+    :param inputfile: the first file (for Reb0 or S00). Full path if datadir is not given. If empty, will scan datadir. If bot, raft in format 'Rxx'
     :param suptitle: personalized title
     :return:
     """
-    raftarrays, seglist = get_scandata_raft(inputfile, datadir)
-    if inputfile:
-        dataname = scope.get_rootfile(inputfile)
+    if bot:
+        raftarrays, seglist = get_scandata_bot(inputfile, datadir)
+        dataname = inputfile
     else:
-        dataname = os.path.split(datadir)[-1]
+        raftarrays, seglist = get_scandata_raft(inputfile, datadir)
+        if inputfile:
+            dataname = scope.get_rootfile(inputfile)
+        else:
+            dataname = os.path.split(datadir)[-1]
     if not suptitle:
         suptitle = dataname
-    outfile = os.path.join(datadir, "multiscope-%s.png" % dataname)
+    if outdir:
+        outfile = os.path.join(outdir, "multiscope-%s.png" % dataname)
+    else:
+        outfile = os.path.join(datadir, "multiscope-%s.png" % dataname)
+
     plot_raft_allchans(raftarrays, seglist, suptitle)
+    
     plt.savefig(outfile)
     plt.show()
 
