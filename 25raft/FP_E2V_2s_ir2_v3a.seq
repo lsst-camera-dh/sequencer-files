@@ -5,7 +5,7 @@
 # v3: Removed serial flush during integration, put all serial and RG high instead
 
 [constants]  # will be substituted in the code at compilation time, if used
-    SegRows:        2000    # Number of rows of the sensor
+    SegRows:        2002    # Number of rows of the sensor
     SegCols:         512    # Number of columns of the sensors
     SerCols:         522    # Size of serial register
     DetectorCols:    576    # Total number of columns in a full readout
@@ -73,7 +73,8 @@
         Default:  # Default state when not operating
       clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
       slices:
-         1 us        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500 us        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500 us        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
 
    TransferLine:  # Single line transfer
       clocks:          P1, P2, P3, P4
@@ -182,24 +183,11 @@
          BufferS     = 1,  1,  1,  0  # 900
       constants:     P2=1, P3=1, RST=1
 
-      SlowFlush:  # concurrent serial & parallel flush, (waiting pattern)
-      clocks:         RG, S1, S2, S3, P1, P2, P3, P4
+      SlowFlush:  # was serial&parallel flush, (disabled as default)
+      clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
       slices:
-         150000 ns   = 1,  0,  1,  0,  0,  1,  1,  0
-         150000 ns   = 0,  0,  0,  1,  0,  1,  1,  0
-         150000 ns   = 0,  1,  0,  0,  0,  1,  1,  0
-         150000 ns   = 0,  0,  1,  0,  0,  1,  1,  0
-         150000 ns   = 0,  0,  0,  1,  0,  1,  1,  0
-         150000 ns   = 0,  1,  0,  0,  0,  1,  1,  0
-         150000 ns   = 0,  0,  1,  0,  0,  1,  1,  0
-         150000 ns   = 0,  0,  0,  1,  0,  1,  1,  0
-         150000 ns   = 0,  1,  0,  0,  0,  1,  1,  0
-         150000 ns   = 1,  0,  1,  0,  0,  1,  1,  0
-         500000 ns   = 1,  0,  1,  0,  0,  0,  1,  1
-         500000 ns   = 1,  0,  1,  0,  1,  0,  0,  1
-         500000 ns   = 1,  0,  1,  0,  1,  1,  0,  0
-         500000 ns   = 0,  0,  1,  0,  0,  1,  1,  0
-     constants:     RST=1
+       500000 us     =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500000 us     =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
 
     ClkInvert: # State for clock inversion, nominal 1us
       clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
@@ -226,14 +214,6 @@
     BinnedFlushLine:  # for binned clearing
         CALL    TransferLine   repeat(@ParallelBin)
         CALL    FastFlushPixel repeat(DetectorCols)
-        RTS
-
-    WindowLineOld:  # Line readout
-        CALL    TransferLine
-        CALL    FastFlushPixel  repeat(@PreCols)
-        CALL    FlushPixel      # trigger is at the start of ReadPixel
-        CALL    ReadPixel       repeat(@ReadCols)
-        CALL    FastFlushPixel  repeat(@PostCols)
         RTS
 
     WindowLine:  # Line readout with split ROI and overscan

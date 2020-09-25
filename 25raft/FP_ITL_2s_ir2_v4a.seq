@@ -6,6 +6,7 @@
 #     Change FlushP to 6000
 #     Change TimeC to 200
 #     Update TransferLine, ReverseLine, ParallelFlush, SlowFlush
+# v4: removed serial register flush during integration and put all serial and RG high instead, to keep in line with e2v
 
 
 [constants]  # will be substituted in the code at compilation time, if used
@@ -64,7 +65,7 @@
     #-
     REP_SUBR    ShiftCount     1  # Number of shifts for pumping
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
-    REP_FUNC    FlushTime  50000  # Repeat count for FlushRegister() sub
+    REP_FUNC    FlushTime   1152  # Repeat count for FlushRegister() sub
     REP_SUBR    ExposureTime   5  # Repeat for exposure in units of 25 ms
     #- Reserved for use by CCS
     REP_SUBR    OpFlags        1  # 1=ITL 
@@ -156,16 +157,16 @@
          100 ns      = 0,  1,  0,  0   # +100 = 1810
       constants:     P1=1, P2=1, RST=1
 
-    SlowFlushPixel:  # Single pixel flush with 1/25 duty cycle
+    SlowNoFlushPixel:  # Single pixel flush with 1/25 duty cycle
       clocks:          RG, S1, S2, S3
       slices:
-         BufferS     = 1,  1,  0,  1   #          70 ns
-         FlushS      = 1,  0,  0,  1   # +500 =  570
-         BufferS     = 0,  0,  1,  1   #  +70 =  640
-         FlushS      = 0,  0,  1,  0   # +500 = 1140
-         BufferS     = 0,  1,  1,  0   #  +70 = 1210
-         FlushS      = 0,  1,  0,  0   # +500 = 1710
-         67730 ns    = 0,  1,  0,  0   #      = 69440 ns
+         BufferS     = 1,  1,  1,  1   #          70 ns
+         FlushS      = 1,  1,  1,  1   # +500 =  570
+         BufferS     = 1,  1,  1,  1   #  +70 =  640
+         FlushS      = 1,  1,  1,  1   # +500 = 1140
+         BufferS     = 1,  1,  1,  1   #  +70 = 1210
+         FlushS      = 1,  1,  1,  1   # +500 = 1710
+         67730 ns    = 1,  1,  1,  1   #      = 69440 ns
       constants:     P1=1, P2=1, RST=1
 
    FastFlushPixel:  # Single pixel fast flush, 1250 ns
@@ -179,11 +180,12 @@
          230 ns      = 0,  1,  0,  0  # +230 =  900
       constants:     P1=1, P2=1, RST=1
 
-    SlowFlush:  # was serial&parallel flush, (disabled as default)
+    SlowFlush:  # Simultaneous serial and parallel flush, slow (waiting pattern)
       clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST
       slices:
-       500 us        =  1,  1,  0,  1,  0,  1,  1,  0,   1
-       500 us        =  1,  1,  0,  1,  0,  1,  1,  0,   1
+       500000 us     =  1,  1,  0,  1,  0,  1,  1,  0,   1
+       500000 us     =  1,  1,  0,  1,  0,  1,  1,  0,   1
+
 
 [subroutines]
 #
@@ -204,6 +206,14 @@
     BinnedFlushLine:  # for binned clearing
         CALL    TransferLine   repeat(@ParallelBin)
         CALL    FastFlushPixel repeat(DetectorCols)
+        RTS
+
+    WindowLineOld:  # Line readout
+        CALL    TransferLine
+        CALL    FastFlushPixel  repeat(@PreCols)
+        CALL    FlushPixel      # trigger is at the start of ReadPixel
+        CALL    ReadPixel       repeat(@ReadCols)
+        CALL    FastFlushPixel  repeat(@PostCols)
         RTS
 
     WindowLine:  # Line readout with split ROI and overscan
@@ -288,7 +298,7 @@
         END
 
     Integrate:  # interruptible w/serial flushing
-        CALL    SlowFlushPixel repeat(infinity)
+        CALL    SlowNoFlushPixel repeat(infinity)
         END
 
     RowShiftF:  # forward row shift by ShiftCount

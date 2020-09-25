@@ -260,11 +260,12 @@
 #
 
     FlushRegister:  # Flush register & warm up signal chain
-        CALL    ReadPixel repeat(TotalCols)
+        CALL    ReadPixel  repeat(TotalCols)
         RTS
 
     ReadFrame:  # Readout and acquisition of a CCD frame (window)
         JSR     FlushLine       repeat(@PreRows)
+        CALL    FlushPixel      repeat(TotalCols)
         JSR     FlushRegister   repeat(@FlushCount)
         CALL    StartOfImage
         JSR     WindowLine      repeat(@ReadRows)
@@ -275,6 +276,7 @@
 
     PseudoFrame:  # Readout of a CCD frame (window) with no data output
         JSR     FlushLine       repeat(@PreRows)
+        CALL    FlushPixel      repeat(TotalCols)
         JSR     FlushRegister   repeat(@FlushCount)
         JSR     WindowLine      repeat(@ReadRows)
         JSR     FlushLine       repeat(@PostRows)
