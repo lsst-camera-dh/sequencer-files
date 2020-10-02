@@ -249,7 +249,7 @@
         CALL    EndOfImage
         RTS
 
-    PsuedoFrame:  # Readout of a CCD frame (window) with no data output
+    PseudoFrame:  # Readout of a CCD frame (window) with no data output
         JSR     FlushLine       repeat(@PreRows)
         JSR     FlushRegister
         JSR     WindowLine      repeat(@ReadRows)
@@ -308,8 +308,8 @@
         JSR     ReadFrame
         END
 
-    PsuedoRead: # readout with no data transfer
-        JSR     PsuedoFrame 
+    PseudoRead: # readout with no data transfer
+        JSR     PseudoFrame 
         END
 
 
