@@ -64,9 +64,9 @@
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
     REP_FUNC    FlushTime  50000  # Repeat count for FlushRegister() sub
     REP_SUBR    ExposureTime   5  # Repeat for exposure in units of 25 ms
+    REP_FUNC    SlowFlushCnt 4500000 # repeat count in units of ~70 us
     #- Reserved for use by CCS
     REP_SUBR    OpFlags        2  # 2=E2V 
-
 
 [functions]
         Default:  # Default state when not operating
@@ -305,9 +305,13 @@
         END
 
     Read:       # readout that produces data
+        CALL    SlowFlushPixel repeat(@SlowFlushCnt)
         JSR     ReadFrame
         END
 
     PseudoRead: # readout with no data transfer
         JSR     PseudoFrame 
         END
+
+
+

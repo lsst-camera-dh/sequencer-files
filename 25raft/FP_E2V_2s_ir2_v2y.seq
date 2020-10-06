@@ -281,7 +281,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    SlowFlush   repeat(infinity)
+        CALL Default     repeat(1)
         END
         
     Clear:      # clear only, high speed
@@ -311,3 +311,6 @@
     PseudoRead: # readout with no data transfer
         JSR     PseudoFrame 
         END
+
+
+

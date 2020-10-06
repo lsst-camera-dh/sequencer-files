@@ -312,6 +312,3 @@
     PseudoRead: # readout with no data transfer
         JSR     PseudoFrame 
         END
-
-
-

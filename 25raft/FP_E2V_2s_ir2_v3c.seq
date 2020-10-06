@@ -1,7 +1,8 @@
 # Strawman sequencer for discussion of full focal plane operation mode
 # Initially contains derivative of mid-2019 version 
 # Shutter bit is removed
-# Integrating with P2+P3 high (also added to Default state)
+# Integrating with P1+P2 high (also added to Default state)
+# v3: Removed serial flush during integration, put all serial and RG high instead
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2002    # Number of rows of the sensor
@@ -62,18 +63,20 @@
     #-
     REP_SUBR    ShiftCount     1  # Number of shifts for pumping
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
-    REP_FUNC    FlushTime  50000  # Repeat count for FlushRegister() sub
+    REP_FUNC    FlushTime   1152  # Repeat count for FlushRegister() sub
     REP_SUBR    ExposureTime   5  # Repeat for exposure in units of 25 ms
     #- Reserved for use by CCS
     REP_SUBR    OpFlags        2  # 2=E2V 
+    #- For StepAfterIntegrate
+    PTR_SUBR    AfterIntegrate ReadFrame
 
 
 [functions]
         Default:  # Default state when not operating
       clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
       slices:
-       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
-       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500 us        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500 us        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
 
    TransferLine:  # Single line transfer
       clocks:          P1, P2, P3, P4
@@ -159,16 +162,16 @@
          90 ns       = 1,  1,  1,  0    #  +90 = 1810
       constants:     P2=1, P3=1, RST=1
 
- SlowFlushPixel:  # Single pixel flush for serial reg at 25/sec
+ SlowNoFlushPixel:  # Single pixel flush for serial reg at 25/sec
       clocks:          RG, S1, S2, S3
       slices:
-         FlushS      = 1,  0,  1,  0    #  520
-         BufferS     = 1,  0,  1,  1    #  +80 =  600
-         FlushS      = 1,  0,  0,  1    # +520 = 1120
-         BufferS     = 1,  1,  0,  1    #  +80 = 1200
-         FlushS      = 1,  1,  0,  0    # +520 = 1720
-         BufferS     = 1,  1,  1,  0    #  +80 = 1800
-         67640 ns    = 0,  1,  1,  0    #      = 69440 ns
+         FlushS      = 1,  1,  1,  1    #  520
+         BufferS     = 1,  1,  1,  1    #  +80 =  600
+         FlushS      = 1,  1,  1,  1    # +520 = 1120
+         BufferS     = 1,  1,  1,  1    #  +80 = 1200
+         FlushS      = 1,  1,  1,  1    # +520 = 1720
+         BufferS     = 1,  1,  1,  1    #  +80 = 1800
+         67640 ns    = 1,  1,  1,  1    #      = 69440 ns
       constants:     P2=1, P3=1, RST=1
 
  FastFlushPixel:  # Single pixel flush, duration of 900 ns
@@ -182,11 +185,11 @@
          BufferS     = 1,  1,  1,  0  # 900
       constants:     P2=1, P3=1, RST=1
 
-    SlowFlush:  # was serial&parallel flush, disable as Default equiv
+      SlowFlush:  # was serial&parallel flush, (disabled as default)
       clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
       slices:
-       500000 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
-       500000 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500000 us     =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
+       500000 us     =  0,  1,  1,  0,  1,  1,  0,  1,  0,   1
 
     ClkInvert: # State for clock inversion, nominal 1us
       clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
@@ -263,7 +266,7 @@
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(DetectorRows)
         CALL    FastFlushPixel     repeat(DetectorCols)
-        CALL    ClkInvert          repeat(3000) # 1us/call
+        CALL    ClkInvert          repeat(300) # 1us/call
         RTS
 
     ClearCCDSlow:  # Clear CCD once well (will this work)
@@ -293,7 +296,7 @@
         END
 
     Integrate:  # interruptible w/serial flushing
-        CALL    SlowFlushPixel repeat(infinity)
+        CALL    SlowNoFlushPixel repeat(infinity)
         END
 
     RowShiftF:  # forward row shift by ShiftCount
@@ -310,4 +313,9 @@
 
     PseudoRead: # readout with no data transfer
         JSR     PseudoFrame 
+        END
+
+    IntegrateRead: # readout with no data transfer
+        CALL    SlowNoFlushPixel repeat(infinity)
+        JSR     @AfterIntegrate 
         END
