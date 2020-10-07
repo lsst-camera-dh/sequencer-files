@@ -312,6 +312,6 @@
         END
 
     IntegrateRead: # readout with no data transfer
-        CALL    SlowNoFlushPixel repeat(infinity)
+        CALL    SlowFlushPixel repeat(infinity)
         JSR     @AfterIntegrate 
         END
