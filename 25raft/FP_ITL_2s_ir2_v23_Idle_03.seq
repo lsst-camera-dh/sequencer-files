@@ -131,7 +131,7 @@
          RampTime    = 0,  1,  0,  0,  0,   0,  0,  1,   0   # +320 = 1810
        constants: P1=1,P2=1
 
-    ReadPixelQtr:  # Single pixel read
+    ReadPixelHalf:  # Single pixel read
       clocks:         RG, S1, S2, S3, CL, RST, RD, RU, TRG
       slices:
          BufferS     = 1,  1,  0,  1,  0,   0,  0,  0,   0   #   70 ns
@@ -144,7 +144,7 @@
          BufferS     = 0,  1,  1,  0,  0,   0,  0,  0,   0   # +70  = 1150
          ISO2        = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +340 = 1490
          RampTime    = 0,  1,  0,  0,  0,   0,  0,  1,   0   # +320 = 1810
-         5430 ns     = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +5430 = 7240
+         1810 ns     = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +1810 = 3620
        constants: P1=1,P2=1
 
     StartOfImage:  # Signals start of frame to be recorded
@@ -326,7 +326,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixelQtr   repeat(infinity)
+        CALL    ReadPixelHalf   repeat(infinity)
         END
         
     Clear:      # clear only, high speed

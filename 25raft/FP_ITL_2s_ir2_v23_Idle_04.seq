@@ -5,7 +5,7 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
-# v23_Idle_01: Idle() main calls ReadPixel(infinity) instead of SlowFlush
+# v23_Idle_04: Idle() main calls FlushPixelQtr(infinity) instead of SlowFlush
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000      # Number of rows of the sensor (unused)
@@ -160,6 +160,20 @@
          100 ns      = 1,  1,  0,  0,  0   # +100 = 1810
       constants:     P1=1, P2=1, RST=1
 
+    FlushPixelQtr:  # Single pixel flush, same duration as ReadPixel
+      clocks:          RG, S1, S2, S3, CL
+      slices:
+         BufferS     = 1,  1,  0,  1,  0   #          70 ns
+         FlushS      = 1,  0,  0,  1,  0   # +500 =  570
+         BufferS     = 1,  0,  1,  1,  0   #  +70 =  640
+         200 ns      = 1,  0,  1,  0,  1   # +200 =  840
+         300 ns      = 1,  0,  1,  0,  0   # +300 = 1140
+         BufferS     = 1,  1,  1,  0,  0   #  +70 = 1210
+         FlushS      = 1,  1,  0,  0,  0   # +500 = 1710
+         100 ns      = 1,  1,  0,  0,  0   # +100 = 1810
+         5430 ns     = 1,  1,  0,  0,  0   # +5430 = 7240
+      constants:     P1=1, P2=1, RST=1
+
     SlowNoFlushPixel:  # TroughClear with CL toggle w/timing to match
       clocks:          RG, S1, S2, S3, CL
       slices:
@@ -310,7 +324,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixel   repeat(infinity)
+        CALL    FlushPixelQtr repeat(infinity)
         END
         
     Clear:      # clear only, high speed
