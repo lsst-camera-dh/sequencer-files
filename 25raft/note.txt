@@ -14,35 +14,42 @@ But the main features to be optimized are:
 - number of times the serial register is flushed by doing 1 active flush followed by N ReadPixel() flushes (N=2 nominal)
   This has the effect of "warming up" the full data processing chain prior to readout and intended to help with bias drift (e2v).
 
-FP_E2V_2s_ir2_v2a.seq, FP_ITL_2s_ir2_v3a.seq
-
-Same as (v2,v3) from 9-raft except SlowFlush is disabled, (3000 us clkInvert), ~90 active serial flushes before readout.
-
-FP_E2V_2s_ir2_v3a.seq, FP_ITL_2s_ir2_v4a.seq
-
-Same as (v3,v4) from 9-raft except SlowFlush is disabled, (300 us clkInvert), ~2 active serial flushes before readout.
-
-FP_E2V_2s_ir2_v2b.seq, FP_ITL_2s_ir2_v3b.seq
-
-Was a one-off test of whether adding a "CALL Default repeat(100)" after SlowFlushPixel() in integrate would avoid dark corner issue (DCI).
-
-FP_E2V_2s_ir2_v2x.seq, FP_ITL_2s_ir2_v3x.seq
-
-Special one-off version with fixed length "integrate(N); readFrame();" triggered by DAQ (not CCS) showing no DCI.
-
-FP_E2V_2s_ir2_v2y.seq, FP_ITL_2s_ir2_v3y.seq
-
-Special one-off version with main #1 replaced with default to allow testing the old firmware on R34, R43 with old focal-plane.
-
-FP_E2V_2s_ir2_v2c.seq, FP_ITL_2s_ir2_v3c.seq
-
-These are intended for our next run (run4 still?, run4+?) if initial sanity checks pass.
-Main new feature is combined integrate(); readFrame() where the STEP instruction causes the transition from the integrate loop into the readFrame.  There will be no intermediate period between end of integrate and start of readout.   This should be equivalent to the (v2x,v3x) described above except integrate timing control by CCS instead of hard coded.  If dark corners appear here then something is wrong with the "STEP" mechanism or we are using it the wrong way.
-
-FP_E2V_2s_ir2_v3c.seq, FP_ITL_2s_ir2_v4c.seq
-
-Same as (v3c,v4c) except analog of (v2a,v4a)
-
 FP_E2V_2s_ir2_v22.seq, FP_ITL_2s_ir2_v22.seq
 
 This is same as v21 with support for combined integrate();readFrame().
+
+
+FP_E2V_2s_ir2_v23.seq, FP_ITL_2s_ir2_v23.seq
+
+These will be the nominal start for optrun3 with SlowNoFlushPixel() during integration, InvertCnt=3000 and FlushCount=10
+
+The next versions will (at least) include variations of what occurs during the Idle main and effect on bias stability in e2v, parallel timing and divisadero mitigation tests.
+
+===========================================
+Idle() flush optimization -- more properly this would be for the "mezzo" State between images during slewing or when waiting other relatively short duration waits.
+
+FP_E2V_2s_ir2_v23_Idle_01.seq, FP_ITL_2s_ir2_v23_Idle_01.seq
+
+Idle() main calls ReadPixel(infinity) instead of SlowFlush (no parallel transfers)
+
+FP_E2V_2s_ir2_v23_Idle_02.seq, FP_ITL_2s_ir2_v23_Idle_02.seq
+
+Idle() main calls FlushPixel(infinity) instead of SlowFlush
+
+FP_E2V_2s_ir2_v23_Idle_03.seq, FP_ITL_2s_ir2_v23_Idle_03.seq
+
+Idle() main calls ReadPixel(infinity) instead of SlowFlush but with a delay to give ~1/4 rate
+
+FP_E2V_2s_ir2_v23_Idle_04.seq, FP_ITL_2s_ir2_v23_Idle_04.seq
+
+Idle() main calls FlushPixel(infinity) instead of SlowFlush but with a delay to give ~1/4 rate
+
+===========================================
+Parallel transfer optimization -- adjustments to investigate full well effects
+
+FP_E2V_2s_ir2_v23_Par_2X.seq, FP_ITL_2s_ir2_v23_Par_2X.seq
+
+===========================================
+Divisadero/tearing hole management tests
+
+
