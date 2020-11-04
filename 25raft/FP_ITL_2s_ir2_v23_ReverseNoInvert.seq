@@ -291,7 +291,7 @@
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
-        CALL    ReversLine         repeat(TotalRows)
+        CALL    ClkNoInvert        repeat(81920) # 1us/call
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         RTS
 
