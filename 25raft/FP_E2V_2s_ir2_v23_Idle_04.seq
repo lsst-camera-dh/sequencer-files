@@ -5,7 +5,7 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
-# v23_Idle_04: Idle() main calls FlushPixelQtr(infinity) (1/4 speed) instead of SlowFlush
+# v23_Idle_04: Idle() main calls FlushPixelHalf(infinity) (1/4 speed) instead of SlowFlush
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:         2002      # Number of rows of each segment
@@ -165,7 +165,7 @@
          90 ns       = 1,  1,  1,  0,  0    #  +90 = 1810
       constants:     P2=1, P3=1, RST=1
 
-    FlushPixelQtr:  # Single pixel flush, duration to be same as ReadPixel
+    FlushPixelHalf:  # Single pixel flush, duration to be same as ReadPixel
       clocks:          RG, S1, S2, S3, CL
       slices:
          FlushS      = 1,  0,  1,  0,  0    #  520
@@ -175,7 +175,7 @@
          BufferS     = 1,  1,  0,  1,  0    #  +80 = 1200
          FlushS      = 1,  1,  0,  0,  0    # +520 = 1720
          90 ns       = 1,  1,  1,  0,  0    #  +90 = 1810
-         5430 ns     = 1,  1,  1,  0,  0    # +5430 = 7240
+         1800 ns     = 1,  1,  1,  0,  0    # +1800 = 3620
       constants:     P2=1, P3=1, RST=1
 
     SlowNoFlushPixel:  #  TroughClear with CL toggle w/timing to match
@@ -326,7 +326,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    FlushPixelQtr  repeat(infinity)
+        CALL    FlushPixelHalf  repeat(infinity)
         END
         
     Clear:      # clear only, high speed
