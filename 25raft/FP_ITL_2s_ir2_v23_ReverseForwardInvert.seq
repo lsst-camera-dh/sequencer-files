@@ -292,7 +292,7 @@
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
         CALL    ClkNoInvert        repeat(81920) # 1us/call
-        CALL    ClkNoInvert        repeat(40)    # 1us/call
+        CALL    ClkNoInvert        repeat(1600)    # 1us/call
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         RTS
 
