@@ -5,7 +5,6 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
-# v23_Idle_04: Idle() main calls FlushPixelHalf(infinity) instead of SlowFlush
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000      # Number of rows of the sensor (unused)
@@ -160,20 +159,6 @@
          100 ns      = 1,  1,  0,  0,  0   # +100 = 1810
       constants:     P1=1, P2=1, RST=1
 
-    FlushPixelHalf:  # Single pixel flush, same duration as ReadPixel
-      clocks:          RG, S1, S2, S3, CL
-      slices:
-         BufferS     = 1,  1,  0,  1,  0   #          70 ns
-         FlushS      = 1,  0,  0,  1,  0   # +500 =  570
-         BufferS     = 1,  0,  1,  1,  0   #  +70 =  640
-         200 ns      = 1,  0,  1,  0,  1   # +200 =  840
-         300 ns      = 1,  0,  1,  0,  0   # +300 = 1140
-         BufferS     = 1,  1,  1,  0,  0   #  +70 = 1210
-         FlushS      = 1,  1,  0,  0,  0   # +500 = 1710
-         100 ns      = 1,  1,  0,  0,  0   # +100 = 1810
-         1800 ns     = 1,  1,  0,  0,  0   # +1800 = 3620
-      constants:     P1=1, P2=1, RST=1
-
     SlowNoFlushPixel:  # TroughClear with CL toggle w/timing to match
       clocks:          RG, S1, S2, S3, CL
       slices:
@@ -306,6 +291,8 @@
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
+        CALL    ClkNoInvert        repeat(81920) # 1us/call
+        CALL    ClkNoInvert        repeat(8000)    # 1us/call
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         RTS
 
@@ -324,7 +311,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    FlushPixelHalf repeat(infinity)
+        CALL    SlowFlush   repeat(infinity)
         END
         
     Clear:      # clear only, high speed

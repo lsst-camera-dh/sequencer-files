@@ -5,7 +5,6 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
-# v23_Idle_03: Idle() main calls ReadPixelHalf(infinity) instead of SlowFlush
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:         2002      # Number of rows of each segment
@@ -135,22 +134,6 @@
          ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410 
          RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    # +320 = 1730
          BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    #  +80 = 1810
-      constants:      P2=1, P3=1
-
-    ReadPixelHalf:  # Single pixel read 
-      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
-      slices:
-         TimeS        = 1,  0,  1,  0,  0,   0,  0,  0,   1    # 140
-         BufferS2S3   = 1,  0,  1,  1,  0,   1,  0,  0,   0    # +130 =  270
-         BufferS3     = 0,  0,  0,  1,  0,   1,  0,  0,   0    #  +70 =  340
-         TimeC        = 0,  0,  0,  1,  1,   1,  0,  0,   0    # +220 =  560
-         ISO1         = 0,  0,  0,  1,  0,   0,  0,  0,   0    # +130 =  690
-         RampTime     = 0,  0,  0,  1,  0,   0,  1,  0,   0    # +320 = 1010
-         BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0    #  +80 = 1090
-         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410 
-         RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    # +320 = 1730
-         BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    #  +80 = 1810
-         1810 ns      = 0,  1,  1,  0,  0,   0,  0,  0,   0    # +1810 = 3620
       constants:      P2=1, P3=1
 
     StartOfImage:  # Signals start of frame to be recorded (5000 ns)
@@ -311,6 +294,8 @@
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
+        CALL    ReverseLine        repeat(TotalRows)
+        CALL    TransferLine       repeat(200)
         CALL    ClkInvert          repeat(InvertCnt) # 1us/call
         RTS
 
@@ -329,7 +314,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixelHalf   repeat(infinity)
+        CALL    SlowFlush   repeat(infinity)
         END
         
     Clear:      # clear only, high speed
