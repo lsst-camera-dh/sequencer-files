@@ -343,7 +343,7 @@
     IntegrateRead: # readout with no data transfer
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
-        CALL    ClkNoInvert        repeat(0) # (81920) # 1us/call
+        #CALL    ClkNoInvert        repeat(0) # (81920) # 1us/call
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         CALL    Default            repeat(1000)
         CALL    SlowNoFlushPixel repeat(infinity)

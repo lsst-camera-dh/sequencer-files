@@ -345,11 +345,6 @@
         END
 
     IntegrateRead: # readout with no data transfer
-        CALL    SlowNoFlushPixel repeat(infinity)
-        JSR     @AfterIntegrate 
-        END
-
-    IntegrateRead: # readout with no data transfer
         CALL    ParallelFlush      repeat(TotalRows) #  ends P2,P3,S1,S2,S3,RG,RST
         CALL    FlushPixel         repeat(TotalCols) #  starts/ends P2,P3,S2,RST / P2,P3,S1,S2,RG,RST 
         CALL    ReverseLine        repeat(20)        #  starts/ends P2,P3,S1,S2,S3,RG,RST / P2,P3,S1,S2,S3,RG,RST
