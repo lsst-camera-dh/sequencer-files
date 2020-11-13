@@ -113,18 +113,18 @@
       constants:     S1=1, S2=1, RST=1
 
      ForwardFlush:  # Single line transfer based flush
-      clocks:          P1, P2, P3, P4, RG
+      clocks:          P1, P2, P3, P4
       slices:
-         BufferP     =  0,  1,  1,  0,  1  #  2400
-         OverlapP    =  0,  1,  1,  1,  1  # +1900 =  4300
-         TimeP       =  0,  0,  1,  1,  1  # +7000 = 11300
-         OverlapP    =  1,  0,  1,  1,  1  # +1900 = 13200
-         TimeP       =  1,  0,  0,  1,  1  # +7000 = 20200
-         OverlapP    =  1,  1,  0,  1,  1  # +1900 = 22100
-         TimeP       =  1,  1,  0,  0,  1  # +7000 = 29100
-         OverlapP    =  1,  1,  1,  0,  0  # +1900 = 31000
-         TimeP       =  0,  1,  1,  0,  0  # +7000 = 38000
-         2000 ns     =  0,  1,  1,  0,  0  # +2000 = 40000
+         BufferP     =  0,  1,  1,  0
+         OverlapP    =  0,  1,  1,  1
+         TimeP       =  0,  0,  1,  1
+         OverlapP    =  1,  0,  1,  1
+         TimeP       =  1,  0,  0,  1
+         OverlapP    =  1,  1,  0,  1
+         TimeP       =  1,  1,  0,  0
+         OverlapP    =  1,  1,  1,  0
+         TimeP       =  0,  1,  1,  0
+         2000 ns     =  0,  1,  1,  0
       constants: S1=1, S2=1, S3=1, RG=1, RST=1
 
     ParallelFlush: # One line transfer with serial clocks high to flush it
@@ -325,7 +325,7 @@
 #
     ClearCCD:  # Clear CCD once (fast)
         CALL    ForwardFlush      repeat(TotalRows)
-        CALL    FlushPixel         repeat(TotalCols)
+        CALL    FlushPixel        repeat(TotalCols)
         CALL    ClkInvert          repeat(InvertCnt) # 1us/call
         RTS
 
