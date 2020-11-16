@@ -5,7 +5,6 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
-# v23_Idle_03: Idle() main calls ReadPixelDelay(infinity) instead of SlowFlush
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:         2002      # Number of rows of each segment
@@ -14,10 +13,10 @@
     TotalCols:        576      # Total number of columns in a full readout
     TotalRows:       2048      # Total number of rows in a full readout
     TotalRowsHalf:   1024      # Total number of rows in a binned readout
-    TimeP:          14000 ns   # Base time element of parallel transfers 
-    OverlapP:        3800 ns   # Overlap at three phases in parallel transfer
+    TimeP:           7000 ns   # Base time element of parallel transfers 
+    OverlapP:        1900 ns   # Overlap at three phases in parallel transfer
     BufferP:         2400 ns   # Parallel transfer buffer time
-    FlushP:          4500 ns   # Fast parallel clear transfer time
+    FlushP:          6000 ns   # Fast parallel clear transfer time
     TimeS:            140 ns   # Base of serial xfers (for single phase up)
     TimeSS:          6000 ns   # Base of serial xfers in SlowFlush
     BufferS:           80 ns   # Buffer for serial clock crossing
@@ -85,32 +84,47 @@
      TransferLine:  # Single line transfer (RG TBV)
       clocks:          P1, P2, P3, P4, RG
       slices:
-         4800 ns     =  0,  1,  1,  0,  1  #  4800
-         OverlapP    =  0,  1,  1,  1,  1  # +3800
-         TimeP       =  0,  0,  1,  1,  1  # +14000
-         OverlapP    =  1,  0,  1,  1,  1  # +3800
-         TimeP       =  1,  0,  0,  1,  1  # +14000
-         OverlapP    =  1,  1,  0,  1,  1  # +3800
-         TimeP       =  1,  1,  0,  0,  1  # +14000
-         OverlapP    =  1,  1,  1,  0,  0  # +3800
-         TimeP       =  0,  1,  1,  0,  0  # +14000
-         4000 ns     =  0,  1,  1,  0,  0  # +4000
+         BufferP     =  0,  1,  1,  0,  1  #  2400
+         OverlapP    =  0,  1,  1,  1,  1  # +1900 =  4300
+         TimeP       =  0,  0,  1,  1,  1  # +7000 = 11300
+         OverlapP    =  1,  0,  1,  1,  1  # +1900 = 13200
+         TimeP       =  1,  0,  0,  1,  1  # +7000 = 20200
+         OverlapP    =  1,  1,  0,  1,  1  # +1900 = 22100
+         TimeP       =  1,  1,  0,  0,  1  # +7000 = 29100
+         OverlapP    =  1,  1,  1,  0,  0  # +1900 = 31000
+         TimeP       =  0,  1,  1,  0,  0  # +7000 = 38000
+         2000 ns     =  0,  1,  1,  0,  0  # +2000 = 40000
       constants:     S1=1, S2=1, RST=1
 
     ReverseLine:  # Single line transfer in reverse direction
       clocks:          P1, P2, P3, P4, RG
       slices:
-         4800 ns     =  0,  1,  1,  0,  1  #  4800
-         OverlapP    =  1,  1,  1,  0,  1  # +3800
-         TimeP       =  1,  1,  0,  0,  1  # +14000
-         OverlapP    =  1,  1,  0,  1,  1  # +3800
-         TimeP       =  1,  0,  0,  1,  1  # +14000
-         OverlapP    =  1,  0,  1,  1,  1  # +3800
-         TimeP       =  0,  0,  1,  1,  1  # +14000
-         OverlapP    =  0,  1,  1,  1,  1  # +3800
-         TimeP       =  0,  1,  1,  0,  1  # +14000
-         4000 ns     =  0,  1,  1,  0,  0  # +4000
-      constants:     S1=1, S2=1, RST=1
+         BufferP     =  0,  1,  1,  0,  1  #  2400
+         OverlapP    =  1,  1,  1,  0,  1  # +1900 =  4300
+         TimeP       =  1,  1,  0,  0,  1  # +7000 = 11300
+         OverlapP    =  1,  1,  0,  1,  1  # +1900 = 13200
+         TimeP       =  1,  0,  0,  1,  1  # +7000 = 20200
+         OverlapP    =  1,  0,  1,  1,  1  # +1900 = 22100
+         TimeP       =  0,  0,  1,  1,  1  # +7000 = 29100
+         OverlapP    =  0,  1,  1,  1,  1  # +1900 = 31000
+         TimeP       =  0,  1,  1,  0,  1  # +7000 = 38000
+         2000 ns     =  0,  1,  1,  0,  1  # +2000 = 40000
+      constants:     S1=1, S2=1, S3=1, RST=1
+
+    ReverseClearLine:  # Single line transfer in reverse dir with ser shutter (e & h)
+      clocks:          P1, P2, P3, P4, RG
+      slices:
+         BufferP     =  0,  1,  1,  0,  1  #  2400
+         OverlapP    =  1,  1,  1,  0,  1  # +1900 =  4300
+         TimeP       =  1,  1,  0,  0,  1  # +7000 = 11300
+         OverlapP    =  1,  1,  0,  1,  1  # +1900 = 13200
+         TimeP       =  1,  0,  0,  1,  1  # +7000 = 20200
+         OverlapP    =  1,  0,  1,  1,  1  # +1900 = 22100
+         TimeP       =  0,  0,  1,  1,  1  # +7000 = 29100
+         OverlapP    =  0,  1,  1,  1,  1  # +1900 = 31000
+         TimeP       =  0,  1,  1,  0,  1  # +7000 = 38000
+         2000 ns     =  0,  1,  1,  0,  1  # +2000 = 40000
+      constants:     S3=1, RST=1 # (--+) may shift any signal in s register from handoff reg.
 
     ParallelFlush: # One line transfer with serial clocks high to flush it
       clocks:          P1, P2, P3, P4
@@ -135,22 +149,6 @@
          ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410 
          RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    # +320 = 1730
          BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    #  +80 = 1810
-      constants:      P2=1, P3=1
-
-    ReadPixelDelay:  # Single pixel read 
-      clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
-      slices:
-         TimeS        = 1,  0,  1,  0,  0,   0,  0,  0,   1    # 140
-         BufferS2S3   = 1,  0,  1,  1,  0,   1,  0,  0,   0    # +130 =  270
-         BufferS3     = 0,  0,  0,  1,  0,   1,  0,  0,   0    #  +70 =  340
-         TimeC        = 0,  0,  0,  1,  1,   1,  0,  0,   0    # +220 =  560
-         ISO1         = 0,  0,  0,  1,  0,   0,  0,  0,   0    # +130 =  690
-         RampTime     = 0,  0,  0,  1,  0,   0,  1,  0,   0    # +320 = 1010
-         BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0    #  +80 = 1090
-         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410 
-         RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    # +320 = 1730
-         BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    #  +80 = 1810
-         4430 ns      = 0,  1,  1,  0,  0,   0,  0,  0,   0    # +4430 = 6240
       constants:      P2=1, P3=1
 
     StartOfImage:  # Signals start of frame to be recorded (5000 ns)
@@ -239,6 +237,12 @@
       slices:
           500 ns     =  0,  0,  0,  0,  1,  1,  0,  1,  0,  1
           500 ns     =  0,  0,  0,  0,  1,  1,  0,  1,  0,  1
+
+    SerSidestepOvlp: # Transition state between serial sidestep and other states
+      clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
+      slices:
+          500 ns     =  0,  1,  1,  0,  0,  1,  1,  1,  0,  1
+          500 ns     =  0,  1,  1,  0,  0,  1,  1,  1,  0,  1
 
 [subroutines]
 #
@@ -329,7 +333,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixelDelay   repeat(infinity)
+        CALL    SlowFlush   repeat(infinity)
         END
         
     Clear:      # clear only, high speed
@@ -361,7 +365,14 @@
         END
 
     IntegrateRead: # readout with no data transfer
-        CALL    SlowNoFlushPixel repeat(infinity)
-        JSR     @AfterIntegrate 
+        CALL    ParallelFlush      repeat(TotalRows) #  ends P2,P3,S1,S2,S3,RG,RST
+        CALL    FlushPixel         repeat(1728)      #  starts/ends P2,P3,S2,RST / P2,P3,S1,S2,RG,RST 
+        CALL    SerSidestepOvlp    repeat(1)         #  starts/ends P2,P3,S2,S3,RG,RST
+        CALL    ReverseClearLine   repeat(1000)      #  starts/ends P2,P3,S3,RG,RST
+        CALL    SerSidestepOvlp    repeat(1)         #  starts/ends P2,P3,S2,S3,RG,RST
+        CALL    ClkInvert          repeat(InvertCnt) #  starts/ends S1,S2,RG,RST / S1,S2,RG,RST
+        CALL    Default            repeat(1000)      #  100 us, starts/ends P2,P3,S1,S2,RG,RST,CL / P2,P3,S1,S2,RG,RST,CL
+        CALL    SlowNoFlushPixel   repeat(infinity)  #  starts P2,P3,S1,S2,S3,RG,RST / P2,P3,S1,S2,S3,RG,RST 
+        JSR     @AfterIntegrate                      #  starts P2,P3,S2,RST
         END
 

@@ -16,7 +16,7 @@
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
     TimeP:          5000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
-    FlushP:         3750 ns   # Fast parallel clear transfer time
+    FlushP:         5000 ns   # Fast parallel clear transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
     ISO2:            340 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers

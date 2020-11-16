@@ -342,9 +342,9 @@
 
     IntegrateRead: # readout with no data transfer
         CALL    ParallelFlush      repeat(TotalRows)
-        CALL    FlushPixel         repeat(TotalCols)
+        CALL    FlushPixel         repeat(1728)
         CALL    ClkNoInvert        repeat(1)     # sync with SerSidestepOvlp on E2Vs
-        CALL    ClkNoInvert        repeat(800)   # (81920) # 1us/call
+        CALL    ClkNoInvert        repeat(40000) # (81920) # 1us/call
         CALL    ClkNoInvert        repeat(1)     # sync with SerSidestepOvlp on E2Vs
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         CALL    Default            repeat(1000)

@@ -5,6 +5,7 @@
 # v21: corrected SlowFlush, use SlowNoFlush integrate
 # v22: new IntegrateRead stepping main
 # v23: Integrate:SlowNoFlushPixel(), InvertCnt:3000, FlushCount:10
+# v23_Idle_01: Idle() main calls ReadPixelQtr(infinity) instead of SlowFlush at ~1/4 read rate
 
 [constants]  # will be substituted in the code at compilation time, if used
     SegRows:        2000      # Number of rows of the sensor (unused)
@@ -13,7 +14,7 @@
     TotalCols:       576      # Total number of columns in a full readout
     TotalRows:      2048      # Total number of rows in a full readout
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
-    TimeP:          5000 ns   # Base time element of parallel transfers 
+    TimeP:         10000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
     FlushP:         5000 ns   # Fast parallel clear transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
@@ -26,7 +27,7 @@
     TimeC:           200 ns   # clamp time
     SlowTimeP:    800000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
-    InvertCnt:      3000      # repeat count for pseudo clock invert (matching e2v's)
+    InvertCnt:      5000      # repeat count for pseudo clock invert (matching e2v's)
 
 [clocks]  # clock channels
     P1:   8  # Parallel clock 1
@@ -104,6 +105,19 @@
          TimeP       = 1,  1,  0,  0,  0   # 40000
       constants:     S1=1, RST=1
 
+    ForwardFlush:  # Single line transfer, padded to match e2v
+      clocks:          P1, P2, P3
+      slices:
+         TimeP       = 0,  1,  0,  # +5000 =  5000
+         TimeP       = 0,  1,  1,  # +5000 = 10000
+         TimeP       = 0,  0,  1,  # +5000 = 15000
+         TimeP       = 1,  0,  1,  # +5000 = 20000
+         TimeP       = 1,  0,  0,  # +5000 = 25000
+         TimeP       = 1,  1,  0,  # +5000 = 30000
+         TimeP       = 1,  1,  0,  # +5000 = 35000
+         TimeP       = 1,  1,  0,  # +5000 = 40000
+      constants: S1=1, S2=1, S3=1, RG=1, RST=1
+
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
       clocks:          P1, P2, P3
       slices:
@@ -128,6 +142,22 @@
          BufferS     = 0,  1,  1,  0,  0,   0,  0,  0,   0   # +70  = 1150
          ISO2        = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +340 = 1490
          RampTime    = 0,  1,  0,  0,  0,   0,  0,  1,   0   # +320 = 1810
+       constants: P1=1,P2=1
+
+    ReadPixelDelay:  # Single pixel read
+      clocks:         RG, S1, S2, S3, CL, RST, RD, RU, TRG
+      slices:
+         BufferS     = 1,  1,  0,  1,  0,   0,  0,  0,   0   #   70 ns
+         TimeS       = 1,  0,  0,  1,  0,   0,  0,  0,   0   # +120 =  190
+         BufferS     = 0,  0,  1,  1,  0,   0,  0,  0,   1   # +70  =  260
+         TimeS       = 0,  0,  1,  0,  0,   1,  0,  0,   0   # +120 =  380
+         TimeC       = 0,  0,  1,  0,  1,   1,  0,  0,   0   # +200 =  580
+         ISO1        = 0,  0,  1,  0,  0,   0,  0,  0,   0   # +180 =  760
+         RampTime    = 0,  0,  1,  0,  0,   0,  1,  0,   0   # +320 = 1080
+         BufferS     = 0,  1,  1,  0,  0,   0,  0,  0,   0   # +70  = 1150
+         ISO2        = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +340 = 1490
+         RampTime    = 0,  1,  0,  0,  0,   0,  0,  1,   0   # +320 = 1810
+         4430 ns     = 0,  1,  0,  0,  0,   0,  0,  0,   0   # +4430 = 6240
        constants: P1=1,P2=1
 
     StartOfImage:  # Signals start of frame to be recorded
@@ -289,7 +319,7 @@
 # Exposure operations -----------------------------------------------
 #
     ClearCCD:  # Clear CCD once (fast)
-        CALL    ParallelFlush      repeat(TotalRows)
+        CALL    ForwardFlush       repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
         RTS
@@ -309,7 +339,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    SlowFlush   repeat(infinity)
+        CALL    ReadPixelDelay   repeat(infinity)
         END
         
     Clear:      # clear only, high speed
@@ -341,13 +371,6 @@
         END
 
     IntegrateRead: # readout with no data transfer
-        CALL    ParallelFlush      repeat(TotalRows)
-        CALL    FlushPixel         repeat(TotalCols)
-        CALL    ClkNoInvert        repeat(1)     # sync with SerSidestepOvlp on E2Vs
-        CALL    ClkNoInvert        repeat(800)   # (81920) # 1us/call
-        CALL    ClkNoInvert        repeat(1)     # sync with SerSidestepOvlp on E2Vs
-        CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
-        CALL    Default            repeat(1000)
         CALL    SlowNoFlushPixel repeat(infinity)
         JSR     @AfterIntegrate 
         END
