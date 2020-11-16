@@ -13,11 +13,13 @@
     SerCols:          522      # Size of serial register
     TotalCols:        576      # Total number of columns in a full readout
     TotalRows:       2048      # Total number of rows in a full readout
+    FastRows:         200      # Number of rows to flush at higher rate
     TotalRowsHalf:   1024      # Total number of rows in a binned readout
     TimeP:          14000 ns   # Base time element of parallel transfers 
     OverlapP:        3800 ns   # Overlap at three phases in parallel transfer
     BufferP:         2400 ns   # Parallel transfer buffer time
     FlushP:          6000 ns   # Fast parallel clear transfer time
+    FastFlushP:      4500 ns   # Fast Fast parallel clear transfer time
     TimeS:            140 ns   # Base of serial xfers (for single phase up)
     TimeSS:          6000 ns   # Base of serial xfers in SlowFlush
     BufferS:           80 ns   # Buffer for serial clock crossing
@@ -94,7 +96,7 @@
          TimeP       =  1,  1,  0,  0,  1  # +14000
          OverlapP    =  1,  1,  1,  0,  0  # +3800
          TimeP       =  0,  1,  1,  0,  0  # +14000
-         4000 ns     =  0,  1,  1,  0,  0  # +4000 = 80000
+         4000 ns     =  0,  1,  1,  0,  0  # +4000
       constants:     S1=1, S2=1, RST=1
 
     ReverseLine:  # Single line transfer in reverse direction
@@ -109,7 +111,7 @@
          TimeP       =  0,  0,  1,  1,  1  # +14000
          OverlapP    =  0,  1,  1,  1,  1  # +3800
          TimeP       =  0,  1,  1,  0,  1  # +14000
-         4000 ns     =  0,  1,  1,  0,  0  # +4000 = 80000
+         4000 ns     =  0,  1,  1,  0,  0  # +4000
       constants:     S1=1, S2=1, RST=1
 
     ParallelFlush: # One line transfer with serial clocks high to flush it
@@ -120,6 +122,16 @@
          FlushP      = 1,  0,  0,  1  # 18000
          FlushP      = 1,  1,  0,  0  # 24000
          FlushP      = 0,  1,  1,  0  # 30000
+      constants: S1=1, S2=1, S3=1, RG=1, RST=1
+
+    ParallelFlushFast: # One line transfer with serial clocks high to flush it
+      clocks:          P1, P2, P3, P4
+      slices:
+         FastFlushP      = 0,  1,  1,  0  # 6000
+         FastFlushP      = 0,  0,  1,  1  # 12000
+         FastFlushP      = 1,  0,  0,  1  # 18000
+         FastFlushP      = 1,  1,  0,  0  # 24000
+         FastFlushP      = 0,  1,  1,  0  # 30000
       constants: S1=1, S2=1, S3=1, RG=1, RST=1
 
     ReadPixel:  # Single pixel read 
@@ -310,6 +322,7 @@
 #
     ClearCCD:  # Clear CCD once (fast)
         CALL    ParallelFlush      repeat(TotalRows)
+        CALL    ParallelFlushFast  repeat(FastRows)
         CALL    FlushPixel         repeat(TotalCols)
         CALL    ClkInvert          repeat(InvertCnt) # 1us/call
         RTS

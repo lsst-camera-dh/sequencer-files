@@ -82,14 +82,14 @@
     TransferLine:  # Single line transfer
       clocks:          P1, P2, P3, RG, S2
       slices:
-         TimeP       = 0,  1,  0,  1,  1   #
-         TimeP       = 0,  1,  1,  1,  1   #
-         TimeP       = 0,  0,  1,  1,  1   #
-         TimeP       = 1,  0,  1,  1,  1   #
-         TimeP       = 1,  0,  0,  1,  1   #
-         TimeP       = 1,  1,  0,  1,  1   #
-         TimeP       = 1,  1,  0,  0,  1   #
-         TimeP       = 1,  1,  0,  0,  0   # 80000
+         TimeP       = 0,  1,  0,  1,  1   # +5000 =  5000
+         TimeP       = 0,  1,  1,  1,  1   # +5000 = 10000
+         TimeP       = 0,  0,  1,  1,  1   # +5000 = 15000
+         TimeP       = 1,  0,  1,  1,  1   # +5000 = 20000
+         TimeP       = 1,  0,  0,  1,  1   # +5000 = 25000
+         TimeP       = 1,  1,  0,  1,  1   # +5000 = 30000
+         TimeP       = 1,  1,  0,  0,  1   # +5000 = 35000
+         TimeP       = 1,  1,  0,  0,  0   # +5000 = 40000
       constants:     S1=1, RST=1
 
     ReverseLine:  # Single line transfer in the reverse direction
@@ -101,8 +101,8 @@
          TimeP       = 0,  0,  1,  1,  1   #
          TimeP       = 0,  1,  1,  1,  1   #
          TimeP       = 0,  1,  0,  1,  1   #
-         TimeP       = 1,  1,  0,  1,  1   #
-         TimeP       = 1,  1,  0,  0,  0   # 80000
+         TimeP       = 1,  1,  0,  1,  1   # 35000
+         TimeP       = 1,  1,  0,  0,  0   # 40000
       constants:     S1=1, RST=1
 
     ParallelFlush: # Single line transfer with all serial register clocks high to flush it
@@ -309,6 +309,7 @@
         CALL    ParallelFlush      repeat(TotalRows)
         CALL    FlushPixel         repeat(TotalCols)
         CALL    ClkNoInvert        repeat(InvertCnt) # 1us/call
+        CALL    ClkNoInvert        repeat(4500) # 1us/call to match e2v PFD but 0.5 us off
         RTS
 
     ClearCCDSlow:  # Clear CCD once well (will this work)
