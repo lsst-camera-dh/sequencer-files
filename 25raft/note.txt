@@ -1,0 +1,55 @@
+Sequencers, sequencers, sequencers -- what is what?
+These are listed below as pairs (e2v, itl) that have been used for various runs and tests.
+
+FP_E2V_2s_ir2_v20.seq, FP_ITL_2s_ir2_v20.seq
+
+These were for run4 and the E2V version has the IDLE_FLUSH mode error that is akin to pocket-pumping but otherwise what we intended.  The main changes since run3 were to implement the CL toggling to manage ASPIC temperatures and is similar to the (v3,v4) from the Fall but used the active serial flushing during integration.
+
+FP_E2V_2s_ir2_v21.seq, FP_ITL_2s_ir2_v21.seq
+
+These are intended for the continuation of run4 with the IDLE_FLUSH issue fixed, the non-active serial flushing (trough-mode), and other updates including a change in the ITL default state.
+
+But the main features to be optimized are:
+- clock invert time at end of clear (nominal 300 us)
+- number of times the serial register is flushed by doing 1 active flush followed by N ReadPixel() flushes (N=2 nominal)
+  This has the effect of "warming up" the full data processing chain prior to readout and intended to help with bias drift (e2v).
+
+FP_E2V_2s_ir2_v22.seq, FP_ITL_2s_ir2_v22.seq
+
+This is same as v21 with support for combined integrate();readFrame().
+
+
+FP_E2V_2s_ir2_v23.seq, FP_ITL_2s_ir2_v23.seq
+
+These will be the nominal start for optrun3 with SlowNoFlushPixel() during integration, InvertCnt=3000 and FlushCount=10
+
+The next versions will (at least) include variations of what occurs during the Idle main and effect on bias stability in e2v, parallel timing and divisadero mitigation tests.
+
+===========================================
+Idle() flush optimization -- more properly this would be for the "mezzo" State between images during slewing or when waiting other relatively short duration waits.
+
+FP_E2V_2s_ir2_v23_Idle_01.seq, FP_ITL_2s_ir2_v23_Idle_01.seq
+
+Idle() main calls ReadPixel(infinity) instead of SlowFlush (no parallel transfers)
+
+FP_E2V_2s_ir2_v23_Idle_02.seq, FP_ITL_2s_ir2_v23_Idle_02.seq
+
+Idle() main calls FlushPixel(infinity) instead of SlowFlush
+
+FP_E2V_2s_ir2_v23_Idle_03.seq, FP_ITL_2s_ir2_v23_Idle_03.seq
+
+Idle() main calls ReadPixel(infinity) instead of SlowFlush but with a delay to give ~1/4 rate
+
+FP_E2V_2s_ir2_v23_Idle_04.seq, FP_ITL_2s_ir2_v23_Idle_04.seq
+
+Idle() main calls FlushPixel(infinity) instead of SlowFlush but with a delay to give ~1/4 rate
+
+===========================================
+Parallel transfer optimization -- adjustments to investigate full well effects
+
+FP_E2V_2s_ir2_v23_Par_2X.seq, FP_ITL_2s_ir2_v23_Par_2X.seq
+
+===========================================
+Divisadero/tearing hole management tests
+
+
