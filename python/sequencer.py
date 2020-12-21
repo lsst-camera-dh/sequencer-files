@@ -1148,7 +1148,7 @@ class Function(object):
 
         for i in range(32):
             c = 32 - 1 - i
-            if c in self.channels:
+            if c in self.channels.dictionary:
                 name = self.channels[c]
                 named = dict(zip(range(len(name)), list(name)))
                 l0 += named.get(0, '|')

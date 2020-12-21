@@ -38,6 +38,12 @@ def breakout(seqfile, exptype):
         f = seq.get_function(exptype)
         print(f)
         print("Total time: %d ns" % (f.total_time() * 10))
+        
+        
+def function_time(seqfile, funcname):
+    seq = rebtxt.Sequencer.fromtxtfile(seqfile, verbose=False)
+    func = seq.functions_desc[funcname]['function']
+    return func.total_time()
 
 
 if __name__ == '__main__':

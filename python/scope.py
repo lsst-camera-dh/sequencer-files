@@ -363,14 +363,14 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
             continue
     print("Found %d scan files to display" % ndisplay)
     # plot
-    fig, axes = plt.subplots(nrows=(len(displayamps) + 3)/4, ncols=4, figsize=(14, 9))
+    fig, axes = plt.subplots(nrows=(len(displayamps) + 3)//4, ncols=4, figsize=(14, 9))
 
     # color scheme
     color_idx = [plt.cm.jet(i) for i in np.linspace(0, 1, ndisplay)]
 
     for c in range(len(displayamps)):  # channels to display
         # subplot
-        ax = axes[c / 4, c % 4]
+        ax = axes[c // 4, c % 4]
 
         if diff:
             for i in range(1, ndisplay):  # scan files for a channel
@@ -392,7 +392,7 @@ def compare_scope_display(scanlist, labellist, datadir='', displayamps=range(16)
         #ax.set_xlabel('Time increment (10 ns)')
         #ax.set_ylabel('Scan (ADU)')
         ax.grid(True)
-
+    
     ax.legend(bbox_to_anchor=(1.05, 0), loc='lower left', borderaxespad=0.)
     
     if title:
