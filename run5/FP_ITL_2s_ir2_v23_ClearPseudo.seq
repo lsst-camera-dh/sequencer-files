@@ -316,6 +316,10 @@
         JSR     ClearCCD    repeat(@ClearCount)
         END
 
+    ClearSlow:  # clear only, low speed (full scrub)
+        JSR     ClearCCDSlow    repeat(@ClearCount)
+        END
+
     ClearPseudo: # Clear Pseudo, high speed
         JSR     ClearCCD    repeat(@ClearCount)
         JSR     PseudoFrame
@@ -324,10 +328,6 @@
     PseudoClear: # Clear Pseudo, high speed
         JSR     PseudoFrame
         JSR     ClearCCD    repeat(@ClearCount)
-        END
-
-    ClearSlow:  # clear only, low speed (full scrub)
-        JSR     ClearCCDSlow    repeat(@ClearCount)
         END
 
     Integrate:  # interruptible w/serial flushing
