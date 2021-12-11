@@ -22,7 +22,7 @@
     TimeSS:         6000 ns   # Base of serial xfers in SlowFlush
     BufferS:          70 ns   # Buffer for serial clock crossing
     FlushS:          500 ns   # Base element of serial flush
-    RampTime:        290 ns   # ASPIC ramp time
+    RampTime:        420 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
     SlowTimeP:    800000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
@@ -309,7 +309,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixel	repeat(infinity)
+        CALL    SlowFlush   repeat(infinity)
         END
         
     Clear:      # clear only, high speed

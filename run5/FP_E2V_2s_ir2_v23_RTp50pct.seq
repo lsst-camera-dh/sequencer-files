@@ -22,7 +22,7 @@
     BufferS:           80 ns   # Buffer for serial clock crossing
     BufferS2S3:       130 ns   # Longer buffer for S2S3 serial clock crossing
     BufferS3:          70 ns   # Shorter buffer for S3 alone to compensate
-    RampTime:         290 ns   # ASPIC ramp time
+    RampTime:         470 ns   # ASPIC ramp time
     TimeC:            220 ns   # ASPIC Clamp time
     ISO1:             130 ns   # Time for ASPIC clamp/reset to start of RD
     ISO2:             320 ns   # Time between S3 down and start of ASPIC RU
@@ -312,7 +312,7 @@
         END
 
     Idle:       # Slow flushing on infinite loop
-        CALL    ReadPixel	repeat(infinity)
+        CALL    SlowFlush   repeat(infinity)
         END
         
     Clear:      # clear only, high speed
