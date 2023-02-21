@@ -241,7 +241,7 @@
         RTS
 
     UnderLine:  # Line readout with split ROI and overscan
-        CALL    default         repeat(56000) # wait for the same time period as Transfer Line
+        CALL    Default         repeat(56000) # wait for the same time period as Transfer Line
         CALL    FlushPixel      repeat(1)  # for transferring first pixel
         CALL    ReadPixel       repeat(@UnderCols)
         CALL    FastFlushPixel  repeat(@PreCols)
