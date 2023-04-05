@@ -44,6 +44,7 @@
     TRG: 12  # ADC sampling trigger
     SOI: 13  # Start of image
     EOI: 14  # End of image
+    PAT: 16  # Reset of Pattern Generator (test mode)
 
 [pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
     #- parameters defining serial readout (columns)
@@ -73,10 +74,10 @@
 
 [functions]
     Default:  # Default state when not operating
-      clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST
+      clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST, PAT
       slices:
-       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
-       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
+       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1,   0
+       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1,   0
 
     TransferLine:  # Single line transfer
       clocks:          P1, P2, P3, RG, S2
@@ -131,11 +132,11 @@
        constants: P1=1,P2=1
 
     StartOfImage:  # Signals start of frame to be recorded
-      clocks:         SOI
+      clocks:         SOI, PAT
       slices:
-        4800 ns     = 0  # lets ADC finish previous conversion and transfer
-        100 ns      = 1
-        100 ns      = 0
+        4800 ns     = 0,   0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1,   1
+        100 ns      = 0,   0
       constants:    P1=1, P2=1, S1=1, RST=1, RG=1
 
     EndOfImage:  # Signals end of frame to be recorded
