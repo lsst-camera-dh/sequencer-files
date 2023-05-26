@@ -15,7 +15,7 @@
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
     TimeP:          7000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
-    FlushP:         5000 ns   # Fast parallel clear transfer time
+    FlushP:         2500 ns   # Fast parallel clear transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
     ISO2:            340 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
@@ -44,6 +44,7 @@
     TRG: 12  # ADC sampling trigger
     SOI: 13  # Start of image
     EOI: 14  # End of image
+    PAT: 16  # Reset of Pattern Generator (test mode)
 
 [pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
     #- parameters defining serial readout (columns)
@@ -70,13 +71,16 @@
     REP_SUBR    OpFlags        1  # 1=ITL 
     #- For StepAfterIntegrate
     PTR_SUBR    AfterIntegrate ReadFrame
+    #- Guider Specific Function Parameters
+    REP_FUNC    PreRowsG       0  # Number of rows to discard before
+    REP_FUNC    PostRowsG   2000  # Number of rows discard after
 
 [functions]
     Default:  # Default state when not operating
-      clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST
+      clocks:          P1, P2, P3, S1, S2, S3, RG, CL, RST, PAT
       slices:
-       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
-       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
+       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1,   0
+       500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1,   0
 
     TransferLine:  # Single line transfer
       clocks:          P1, P2, P3, RG, S2
@@ -131,11 +135,11 @@
        constants: P1=1,P2=1
 
     StartOfImage:  # Signals start of frame to be recorded
-      clocks:         SOI
+      clocks:         SOI, PAT
       slices:
-        4800 ns     = 0  # lets ADC finish previous conversion and transfer
-        100 ns      = 1
-        100 ns      = 0
+        4800 ns     = 0,   0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1,   1
+        100 ns      = 0,   0
       constants:    P1=1, P2=1, S1=1, RST=1, RG=1
 
     EndOfImage:  # Signals end of frame to be recorded
@@ -275,6 +279,17 @@
         CALL    EndOfImage
         RTS
 
+    ReadGFrame:  # Readout and acquisition of a CCD frame (window)
+        CALL    ParallelFlush   repeat(@PreRowsG)
+        JSR     FlushRegister   repeat(2)
+        CALL    StartOfImage
+        JSR     WindowLine      repeat(@ReadRows)
+        CALL    ParallelFlush   repeat(@PostRowsG)
+        CALL    FastFlushPixel  repeat(TotalCols)
+        JSR     WindowLine      repeat(@OverRows)
+        CALL    EndOfImage
+        RTS
+
     PseudoFrame:  # Readout of a CCD frame (window) with no data output
         JSR     FlushLine       repeat(@PreRows)
         CALL    FlushPixel      repeat(TotalCols)
@@ -336,6 +351,10 @@
         JSR     ReadFrame
         END
 
+    ReadGuider:       # readout that produces data
+        JSR     ReadGFrame
+        END
+
     PseudoRead: # readout with no data transfer
         JSR     PseudoFrame 
         END
@@ -345,3 +364,6 @@
         JSR     @AfterIntegrate 
         END
 
+    Default:    # Infinite Nothingness
+        CALL    Default   repeat(infinity)
+        END
