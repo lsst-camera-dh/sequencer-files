@@ -15,7 +15,8 @@
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
     TimeP:          7000 ns   # Base time element of parallel transfers 
     BufferP:         100 ns   # Parallel transfer buffer time
-    FlushP:         2500 ns   # Fast parallel clear transfer time
+    FlushP:         5000 ns   # Fast parallel clear transfer time
+    FlushPG:        2500 ns   # Fast parallel guider row transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
     ISO2:            340 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
@@ -117,6 +118,17 @@
          FlushP      = 1,  0,  1   # +5000 = 20000
          FlushP      = 1,  0,  0   # +5000 = 25000
          FlushP      = 1,  1,  0   # +5000 = 30000
+      constants: S1=1, S2=1, S3=1, RG=1, RST=1
+
+    ParallelFlushG: # Guider Single line transfer with all serial register clocks high to flush it
+      clocks:          P1, P2, P3
+      slices:
+         FlushPG     = 0,  1,  0   # +2500 nominal
+         FlushPG     = 0,  1,  1
+         FlushPG     = 0,  0,  1
+         FlushPG     = 1,  0,  1
+         FlushPG     = 1,  0,  0
+         FlushPG     = 1,  1,  0
       constants: S1=1, S2=1, S3=1, RG=1, RST=1
 
     ReadPixel:  # Single pixel read
@@ -280,11 +292,11 @@
         RTS
 
     ReadGFrame:  # Readout and acquisition of a CCD frame (window)
-        CALL    ParallelFlush   repeat(@PreRowsG)
+        CALL    ParallelFlushG  repeat(@PreRowsG)
         JSR     FlushRegister   repeat(2)
         CALL    StartOfImage
         JSR     WindowLine      repeat(@ReadRows)
-        CALL    ParallelFlush   repeat(@PostRowsG)
+        CALL    ParallelFlushG  repeat(@PostRowsG)
         CALL    FastFlushPixel  repeat(TotalCols)
         JSR     WindowLine      repeat(@OverRows)
         CALL    EndOfImage
