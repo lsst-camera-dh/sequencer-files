@@ -13,7 +13,7 @@
     TotalCols:       576      # Total number of columns in a full readout
     TotalRows:      2048      # Total number of rows in a full readout
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
-    TimeP:          7000 ns   # Base time element of parallel transfers 
+    TimeP:          7000 ns   # Base time element of parallel transfers
     BufferP:         100 ns   # Parallel transfer buffer time
     FlushP:         5000 ns   # Fast parallel clear transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
@@ -68,7 +68,7 @@
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
     REP_SUBR    FlushCount     10 # Repeat count for FlushRegister() sub
     #- Reserved for use by CCS
-    REP_SUBR    OpFlags        1  # 1=ITL 
+    REP_SUBR    OpFlags        1  # 1=ITL
     #- For StepAfterIntegrate
     PTR_SUBR    AfterIntegrate ReadFrame
 
@@ -312,7 +312,7 @@
     Idle:       # Slow flushing on infinite loop
         CALL    ReadPixel   repeat(infinity)
         END
-        
+
     Clear:      # clear only, high speed
         JSR     ClearCCD    repeat(@ClearCount)
         END
@@ -338,11 +338,11 @@
         END
 
     PseudoRead: # readout with no data transfer
-        JSR     PseudoFrame 
+        JSR     PseudoFrame
         END
 
     IntegrateRead: # readout with no data transfer
         CALL    SlowNoFlushPixel repeat(infinity)
-        JSR     @AfterIntegrate 
+        JSR     @AfterIntegrate
         END
 

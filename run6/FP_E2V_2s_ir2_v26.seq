@@ -13,7 +13,7 @@
     TotalCols:        576      # Total number of columns in a full readout
     TotalRows:       2048      # Total number of rows in a full readout
     TotalRowsHalf:   1024      # Total number of rows in a binned readout
-    TimeP:           9800 ns   # Base time element of parallel transfers 
+    TimeP:           9800 ns   # Base time element of parallel transfers
     OverlapP:        2660 ns   # Overlap at three phases in parallel transfer
     BufferP:         2400 ns   # Parallel transfer buffer time
     FlushP:          6000 ns   # Fast parallel clear transfer time
@@ -47,7 +47,6 @@
     TRG: 12  # ADC sampling trigger
     SOI: 13  # Start of image
     EOI: 14  # End of image
-    PAT: 16  # Reset of Pattern Generator (test mode)
 
 [pointers]  # can define a pointer to a function or to a repetition number (for subroutines or functions)
     #- parameters defining serial readout (columns)
@@ -71,16 +70,16 @@
     REP_SUBR    PumpNumber   1000 # Number of parallel pumps
     REP_SUBR    FlushCount     10 # Number of serial reg flushes before readout
     #- Reserved for use by CCS
-    REP_SUBR    OpFlags        2  # 2=E2V 
+    REP_SUBR    OpFlags        2  # 2=E2V
     #- For StepAfterIntegrate
     PTR_SUBR    AfterIntegrate ReadFrame
 
 [functions]
      Default:  # Default state when not operating
-      clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST, PAT
+      clocks:          P1, P2, P3, P4, S1, S2, S3, RG, CL, RST
       slices:
-       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1,  0
-       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1,  0
+       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1
+       500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1
 
      TransferLine:  # Single line transfer (RG TBV)
       clocks:          P1, P2, P3, P4, RG
@@ -122,7 +121,7 @@
          FlushP      = 0,  1,  1,  0  # 30000
       constants: S1=1, S2=1, S3=1, RG=1, RST=1
 
-    ReadPixel:  # Single pixel read 
+    ReadPixel:  # Single pixel read
       clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
       slices:
          TimeS        = 1,  0,  1,  0,  0,   0,  0,  0,   1    # 140
@@ -132,17 +131,17 @@
          ISO1         = 0,  0,  0,  1,  0,   0,  0,  0,   0    # +130 =  690
          RampTime     = 0,  0,  0,  1,  0,   0,  1,  0,   0    # +320 = 1010
          BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0    #  +80 = 1090
-         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410 
+         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    # +320 = 1410
          RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    # +320 = 1730
          BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    #  +80 = 1810
       constants:      P2=1, P3=1
 
     StartOfImage:  # Signals start of frame to be recorded (5000 ns)
-      clocks:         SOI, PAT
+      clocks:         SOI
       slices:
-        4800 ns     = 0,   0  # lets ADC finish previous conversion and transfer
-        100 ns      = 1,   1
-        100 ns      = 0,   0
+        4800 ns     = 0  # lets ADC finish previous conversion and transfer
+        100 ns      = 1
+        100 ns      = 0
       constants:    P2=1, P3=1, S1=1, S2=1, RG=1
 
     EndOfImage:  # Signals end of frame to be recorded (5000 ns)
@@ -315,7 +314,7 @@
     Idle:       # Slow flushing on infinite loop
         CALL    ReadPixel   repeat(infinity)
         END
-        
+
     Clear:      # clear only, high speed
         JSR     ClearCCD    repeat(@ClearCount)
         END
@@ -341,11 +340,11 @@
         END
 
     PseudoRead: # readout with no data transfer
-        JSR     PseudoFrame 
+        JSR     PseudoFrame
         END
 
     IntegrateRead: # readout with no data transfer
         CALL    SlowNoFlushPixel repeat(infinity)
-        JSR     @AfterIntegrate 
+        JSR     @AfterIntegrate
         END
 
