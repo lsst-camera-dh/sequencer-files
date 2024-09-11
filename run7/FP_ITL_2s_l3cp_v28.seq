@@ -25,7 +25,7 @@
     FlushS:          500 ns   # Base element of serial flush
     RampTime:        380 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
-    SlowTimeP:    800000 ns   # 5 per row in SlowFlush for ~few sec/flush
+    SlowTimeP:    400000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:      3000      # repeat count for pseudo clock invert (matching e2v's)
 
@@ -222,10 +222,15 @@
          200 ns      = 1,  0,  1,  0,  1,  1,  0,  1   #  200 ns  =
          TimeSS      = 1,  1,  1,  0,  1,  1,  0,  0   # xxxx ns  =
          SlowTimeP   = 1,  1,  1,  0,  0,  1,  0,  0
+         SlowTimeP   = 1,  1,  1,  0,  0,  1,  0,  0
+         SlowTimeP   = 1,  1,  1,  0,  0,  1,  1,  0
          SlowTimeP   = 1,  1,  1,  0,  0,  1,  1,  0
          SlowTimeP   = 1,  1,  1,  0,  0,  0,  1,  0
+         SlowTimeP   = 1,  1,  1,  0,  0,  0,  1,  0
          SlowTimeP   = 1,  1,  1,  0,  1,  0,  1,  0
-         SlowTimeP   = 1,  1,  1,  0,  1,  0,  0,  0   # 5*STP+5*TSS+200
+         SlowTimeP   = 1,  1,  1,  0,  1,  0,  1,  0
+         SlowTimeP   = 1,  1,  1,  0,  1,  0,  0,  0
+         SlowTimeP   = 1,  1,  1,  0,  1,  0,  0,  0   # 10*STP+5*TSS+200
       constants:    RST=1
 
     ClkNoInvert: # Matching e2v but w/out inversion, 1us
