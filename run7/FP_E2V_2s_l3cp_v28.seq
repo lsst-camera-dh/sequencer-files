@@ -29,7 +29,7 @@
     ISO2:             320 ns   # Time between S3 down and start of ASPIC RU
     FlushS:           520 ns   # Base serial flushing (to match ReadPixel)
     clockperiod:       10 ns   # FPGA clock period (required by the interpreter)
-    SlowTimeP:    1000000 ns   # 4 per row in SlowFlush for ~few sec/flush
+    SlowTimeP:     500000 ns   # 8 per row in SlowFlush for ~few sec/flush
     InvertCnt:       3000      # repeat count for clock invert (1 us/call)
 
 [clocks]  # clock channels
@@ -226,10 +226,14 @@
          200 ns       = 1,  0,  0,  1,  0,  1,  1,  0,  1   #   +200 ns = 18200
          TimeSS       = 1,  1,  0,  1,  0,  1,  1,  0,  0   #  +6000 ns = 24200
          TimeSS       = 1,  1,  0,  0,  0,  1,  1,  0,  0   #  +6000 ns = 30200
-         SlowTimeP    = 1,  1,  1,  0,  0,  0,  1,  1,  0   #  +4*SlowTimeP
+         SlowTimeP    = 1,  1,  1,  0,  0,  0,  1,  1,  0   #  +8*SlowTimeP
+         SlowTimeP    = 1,  1,  1,  0,  0,  0,  1,  1,  0
+         SlowTimeP    = 1,  1,  1,  0,  1,  0,  0,  1,  0
          SlowTimeP    = 1,  1,  1,  0,  1,  0,  0,  1,  0
          SlowTimeP    = 1,  1,  1,  0,  1,  1,  0,  0,  0
-         SlowTimeP    = 1,  1,  1,  0,  0,  1,  1,  0,  0   # 4*STP+5*TSS+200
+         SlowTimeP    = 1,  1,  1,  0,  1,  1,  0,  0,  0
+         SlowTimeP    = 1,  1,  1,  0,  0,  1,  1,  0,  0
+         SlowTimeP    = 1,  1,  1,  0,  0,  1,  1,  0,  0   # 8*STP+5*TSS+200
       constants:    RST=1
 
     ClkInvert: # State for clock inversion, nominal 1us
