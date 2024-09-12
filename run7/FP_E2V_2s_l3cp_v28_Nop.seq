@@ -116,17 +116,8 @@
          2800 ns     =  0,  1,  1,  0,  0  #
       constants:     S1=1, S2=1, RST=1
 
+ 
     ParallelFlush: # One line transfer with serial clocks high to flush it
-      clocks:          P1, P2, P3, P4
-      slices:
-         FlushP      = 0,  1,  1,  0  # 6000
-         FlushP      = 0,  0,  1,  1  # 12000
-         FlushP      = 1,  0,  0,  1  # 18000
-         FlushP      = 1,  1,  0,  0  # 24000
-         FlushP      = 0,  1,  1,  0  # 30000
-      constants: S1=1, S2=1, S3=1, RG=1, RST=1
-
-    ParallelFlushNop: # One line transfer with serial clocks high to flush it
       clocks:         P1, P2, P3, P4, S3
       slices:
          FlushP      = 0,  1,  1,  0,  1  # 6000
@@ -137,7 +128,6 @@
          BufferS     = 1,  1,  0,  0,  1  # 24160
          FlushP      = 0,  1,  1,  0,  1  # 30160
       constants: S1=1, S2=1, RG=1, RST=1
-
 
 
     ParallelFlushG: # Guider One line transfer with serial clocks high to flush it
@@ -342,11 +332,6 @@
         CALL    ClkInvert          repeat(InvertCnt) # 1us/call
         RTS
 
-    ClearCCDNop:  # Clear CCD once (fast) with No pocket filling  
-        CALL    ParallelFlushNop   repeat(TotalRows)
-        CALL    FlushPixel         repeat(TotalCols)
-        CALL    ClkInvert          repeat(InvertCnt) # 1us/call
-        RTS
 
     ClearCCDSlow:  # Clear CCD once well (will this work)
         JSR     BinnedFlushLine    repeat(@BinnedParLen)
@@ -370,10 +355,7 @@
         JSR     ClearCCD    repeat(@ClearCount)
         END
 
-    ClearNop:   # clear only, high speed, No pocket filling
-        JSR     ClearCCDNop  repeat(@ClearCount)
-        END
-
+ 
     ClearSlow:  # clear only, low speed (full scrub)
         JSR     ClearCCDSlow    repeat(@ClearCount)
         END
