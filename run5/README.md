@@ -19,3 +19,8 @@ FC100.seq
 * IDLE\_FLUSH
 AsIF.seq
 
+* different ISO2 timing to explore longer readout
+ISO2_*.seq
+
+* longer delay before AD conversion trigger
+FP_ITL_2s_ir2_v26_ADdelay.seq

@@ -2,7 +2,7 @@
 import math
 import re
 
-with open('FP_ITL_2s_ir2_v26.seq') as f:
+with open('FP_E2V_2s_ir2_v26.seq') as f:
 	lines = f.readlines()
 
 p=re.compile(r'(\d*) ns')
