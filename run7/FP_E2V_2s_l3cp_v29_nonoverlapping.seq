@@ -13,7 +13,7 @@
     TotalCols:        576      # Total number of columns in a full readout
     TotalRows:       2048      # Total number of rows in a full readout
     TotalRowsHalf:   1024      # Total number of rows in a binned readout
-    TimeP:          12495 ns   # Base time element of parallel transfers
+    TimeP:          12460 ns   # Base time element of parallel transfers
     BufferP:         2400 ns   # Parallel transfer buffer time
     FlushP:          6000 ns   # Fast parallel clear transfer time
     FlushPG:         2700 ns   # Fast parallel clear transfer time
