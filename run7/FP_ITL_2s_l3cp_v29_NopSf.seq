@@ -20,7 +20,8 @@
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
     ISO2:            340 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
-    TimeSS:         6000 ns   # Base of serial xfers in SlowFlush
+    TimeSE2V:        140 ns   # Base element of serial transfers (mach e2v time) 
+    TimeSS:         6000 ns   # Base of serial xfers in SlowFlush 
     BufferS:          70 ns   # Buffer for serial clock crossing
     BufferSE2V:       80 ns   # Buffer for serial clock crossing (mach e2v time)
     FlushS:          500 ns   # Base element of serial flush
@@ -112,24 +113,24 @@
 
 
     ParallelFlush: # One line transfer with serial clocks high to flush it
-      clocks:          P1, P2, P3, S3
+      clocks:          P1, P2, P3, S1 , S2 , S3
       slices:
-         FlushP      = 0,  1,  0 , 1  # +5000 =  5000
-         BufferSE2V  = 0,  1,  0 , 0  # +  80 =  5080
-         FlushP      = 0,  1,  1 , 0  # +5000 = 10080
-         FlushP      = 0,  0,  1 , 0  # +5000 = 15080
-         FlushP      = 1,  0,  1 , 0  # +5000 = 20080
-         FlushP      = 1,  0,  0 , 0  # +5000 = 25080
-         BufferSE2V  = 1,  0,  0 , 1  # +  80 = 25160
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25240
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25320
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25400
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25480
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25560
-         BufferSE2V  = 1,  1,  0 , 1  # +  80 = 25640
-         FlushP      = 1,  1,  0 , 1  # +5000 = 30640
-      constants: S1=1, S2=1, RG=1, RST=1
+         FlushP      = 0,  1,  0 , 1 , 1 , 1  # +5000 =  5000
+         BufferSE2V  = 0,  1,  0 , 1 , 1 , 0  # +  80 =  5080
+         FlushP      = 0,  1,  1 , 1 , 1 , 0  # +5000 = 10080
+         FlushP      = 0,  0,  1 , 1 , 1 , 0  # +5000 = 15080
+         FlushP      = 1,  0,  1 , 1 , 1 , 0  # +5000 = 20080
+         FlushP      = 1,  0,  0 , 1 , 1 , 0  # +5000 = 25080
+         TimeSE2V    = 1,  0,  0 , 1 , 0 , 0  # + 140 = 25220
+         BufferSE2V  = 1,  0,  0 , 1 , 0 , 1  # +  80 = 25300
+         TimeSE2V    = 1,  0,  0 , 0 , 0 , 1  # + 140 = 25440
+         BufferSE2V  = 1,  0,  0 , 0 , 1 , 1  # +  80 = 25520
+         TimeSE2V    = 1,  0,  0 , 0 , 1 , 0  # + 140 = 25660
+         BufferSE2V  = 1,  0,  0 , 1 , 1 , 0  # +  80 = 25740
+         FlushP      = 1,  1,  0 , 1 , 1 , 1  # +5000 = 30740
+      constants:  RG=1, RST=1
 
+ 
 
     ParallelFlushG: # Guider Single line transfer with all serial register clocks high to flush it
       clocks:          P1, P2, P3
