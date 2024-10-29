@@ -22,7 +22,7 @@
     TimeS:           120 ns   # Base element of serial transfers
     TimeSS:         6000 ns   # Base of serial xfers in SlowFlush
     BufferS:          70 ns   # Buffer for serial clock crossing
-    BufferSE2V:       80 ns   # Buffer for serial clock crossing (mach e2v time)
+    BufferSE2V:      370 ns   # Buffer for serial clock crossing (mach e2v time)
     FlushS:          500 ns   # Base element of serial flush
     RampTime:        380 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
@@ -115,13 +115,13 @@
       clocks:          P1, P2, P3, S3
       slices:
          FlushP      = 0,  1,  0 , 1  # +5000 =  5000
-         BufferSE2V  = 0,  1,  0 , 0  # +  80 =  5080
-         FlushP      = 0,  1,  1 , 0  # +5000 = 10080
-         FlushP      = 0,  0,  1 , 0  # +5000 = 15080
-         FlushP      = 1,  0,  1 , 0  # +5000 = 20080
-         FlushP      = 1,  0,  0 , 0  # +5000 = 25080
-         660 ns      = 1,  0,  0 , 1  # +  80 = 25160
-         FlushP      = 1,  1,  0 , 1  # +5000 = 30160
+         BufferSE2V  = 0,  1,  0 , 1  # + 370 =  5370 
+         FlushP      = 0,  1,  1 , 1  # +5000 = 10370
+         FlushP      = 0,  0,  1 , 1  # +5000 = 15370
+         FlushP      = 1,  0,  1 , 1  # +5000 = 20370
+         FlushP      = 1,  0,  0 , 1  # +5000 = 25370
+         BufferSE2V  = 1,  0,  0 , 1  # + 370 = 25740
+         FlushP      = 1,  1,  0 , 1  # +5000 = 30740
       constants: S1=1, S2=1, RG=1, RST=1
 
 
