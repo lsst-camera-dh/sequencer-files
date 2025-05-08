@@ -79,7 +79,7 @@
     REP_FUNC    PreRowsG       0  # Number of rows to discard before
     REP_FUNC    PostRowsG   2002  # Number of rows discard after
     #- Parameters used for idle clear
-    REP_SUBR    ClearCount   100  # Repeat count for Clear main
+    REP_SUBR    ClearRows    100  # Repeat count for Clear main
 
 [functions]
      Default:  # Default state when not operating
@@ -329,10 +329,6 @@
         JSR     WindowLine      repeat(@OverRows)
         RTS
 
-    ClearFrame:  # Readout of a CCD frame (window) with no data output
-        JSR     WindowLine      repeat(@ClearRows)
-        RTS
-
 #
 # Exposure operations -----------------------------------------------
 #
@@ -350,6 +346,10 @@
 
      NoOp:  # Dummy for no readout
         CALL Default     repeat(1)
+        RTS
+
+    ClearFrame:  # Readout of a CCD frame (window) with no data output
+        JSR     WindowLine      repeat(@ClearRows)
         RTS
 
 [mains]
