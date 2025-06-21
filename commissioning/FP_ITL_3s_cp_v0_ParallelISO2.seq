@@ -18,14 +18,14 @@
     FlushP:         5000 ns   # Fast parallel clear transfer time
     FlushPG:        2250 ns   # Fast parallel guider row transfer time
     ISO1:            180 ns   # Time between ASPIC clamp and first ramp
-    ISO2:            420 ns   # Time between ASPIC ramps
+    ISO2:            400 ns   # Time between ASPIC ramps
     TimeS:           120 ns   # Base element of serial transfers
     TimeSS:         6000 ns   # Base of serial xfers in SlowFlush
     BufferS:          70 ns   # Buffer for serial clock crossing
     BufferRG:         20 ns   # Offset RG Up from start of pixel read
     BufferSE2V:      370 ns   # Buffer for serial clock crossing (mach e2v time)
     FlushS:          500 ns   # Base element of serial flush
-    RampTime:        560 ns   # ASPIC ramp time
+    RampTime:        620 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
     SlowTimeP:    400000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)

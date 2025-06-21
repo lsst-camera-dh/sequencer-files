@@ -25,7 +25,7 @@
     BufferRG:         20 ns   # Offset RG Up from start of pixel read
     BufferSE2V:      370 ns   # Buffer for serial clock crossing (mach e2v time)
     FlushS:          500 ns   # Base element of serial flush
-    RampTime:        600 ns   # ASPIC ramp time
+    RampTime:        620 ns   # ASPIC ramp time
     TimeC:           200 ns   # clamp time
     SlowTimeP:    400000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
