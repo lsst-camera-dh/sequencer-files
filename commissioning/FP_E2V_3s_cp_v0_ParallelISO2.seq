@@ -16,16 +16,16 @@
     TotalRowsHalf:   1024      # Total number of rows in a binned readout
     TimeP:          14000 ns   # Base time element of parallel transfers
     OverlapP:        3800 ns   # Overlap at three phases in parallel transfer
-    BufferP:         4800 ns   # Parallel transfer buffer time
+    BufferP:          500 ns   # Parallel transfer buffer time
     FlushP:          6000 ns   # Fast parallel clear transfer time
     FlushPG:         2700 ns   # Fast parallel clear transfer time
     TimeS:            140 ns   # Base of serial xfers (for single phase up)
     TimeSS:          6000 ns   # Base of serial xfers in SlowFlush
     BufferS:           80 ns   # Buffer for serial clock crossing
     BufferS2S3:       130 ns   # Longer buffer for S2S3 serial clock crossing
-    BufferRG:          20 ns   # Offset RG Down by - BufferRGp ns in respect of S2 down in pixel read 
+    BufferRGn:         20 ns   # Offset RG Down by - BufferRGn ns in respect of S2 down in pixel read 
     BufferS3:          70 ns   # Shorter buffer for S3 alone to compensate
-    RampTime:         570 ns   # ASPIC ramp time
+    RampTime:         560 ns   # ASPIC ramp time
     TimeC:            220 ns   # ASPIC Clamp time
     ISO1:             130 ns   # Time for ASPIC clamp/reset to start of RD
     ISO2:             380 ns   # Time between S3 down and start of ASPIC RU
@@ -101,7 +101,7 @@
          TimeP       =  1,  1,  0,  0,  1  #
          OverlapP    =  1,  1,  1,  0,  0  #
          TimeP       =  0,  1,  1,  0,  0  #
-         4000 ns     =  0,  1,  1,  0,  0  #
+         8300 ns     =  0,  1,  1,  0,  0  #
       constants:     S1=1, S2=1, RST=1
 
     ReverseLine:  # Single line transfer in reverse direction
@@ -152,9 +152,9 @@
     ReadPixel:  # Single pixel read
       clocks:          RG, S1, S2, S3, CL, RST, RD, RU, TRG
       slices:
-         BufferRG     = 1,  0,  1,  0,  0,   0,  0,  0,   0     
          TimeS        = 1,  0,  1,  0,  0,   0,  0,  0,   1     
          BufferS2S3   = 1,  0,  1,  1,  0,   1,  0,  0,   0     
+         BufferRGn    = 0,  0,  1,  1,  0,   1,  0,  0,   0    
          BufferS3     = 0,  0,  0,  1,  0,   1,  0,  0,   0     
          TimeC        = 0,  0,  0,  1,  1,   1,  0,  0,   0    
          ISO1         = 0,  0,  0,  1,  0,   0,  0,  0,   0    
@@ -162,7 +162,7 @@
          BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0    
          ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0    
          RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0    
-         BufferS      = 0,  1,  1,  0,  0,   0,  0,  0,   0    
+         100 ns       = 0,  1,  1,  0,  0,   0,  0,  0,   0    
       constants:      P2=1, P3=1
 
     StartOfImage:  # Signals start of frame to be recorded (5000 ns)
