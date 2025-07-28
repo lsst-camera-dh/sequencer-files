@@ -71,6 +71,9 @@
     REP_SUBR    OpFlags        1  # 1=ITL
     #- For StepAfterIntegrate
     PTR_SUBR    AfterIntegrate ReadFrame
+    #- Parameters used for idle clear
+    REP_SUBR    ClearRows    100  # Repeat count for Clear main
+
 
 [functions]
     Default:  # Default state when not operating
@@ -285,7 +288,11 @@
         JSR     WindowLine      repeat(@OverRows)
         RTS
 
+    ClearFrame:  # Readout of a CCD frame (window) with no data output
+        JSR     WindowLine      repeat(@ClearRows)
+        RTS
 
+#
 #
 # Exposure operations -----------------------------------------------
 #
@@ -344,5 +351,9 @@
     IntegrateRead: # readout with no data transfer
         CALL    SlowNoFlushPixel repeat(infinity)
         JSR     @AfterIntegrate
+        END
+
+    ClearRead: # readout with no data transfer, for idle clearing
+        JSR     ClearFrame
         END
 
