@@ -13,17 +13,17 @@
     TotalCols:       576      # Total number of columns in a full readout
     TotalRows:      2048      # Total number of rows in a full readout
     TotalRowsHalf:  1024      # Total number of rows in a binned readout
-    TimeP:          10938 ns   # Base time element of parallel transfers
-    BufferP:         157 ns   # Parallel transfer buffer time
-    FlushP:         7813 ns   # Fast parallel clear transfer time
-    ISO1:            282 ns   # Time between ASPIC clamp and first ramp
-    ISO2:            532 ns   # Time between ASPIC ramps
-    TimeS:           188 ns   # Base element of serial transfers
-    TimeSS:         9375 ns   # Base of serial xfers in SlowFlush
-    BufferS:          110 ns   # Buffer for serial clock crossing
-    FlushS:          782 ns   # Base element of serial flush
-    RampTime:        594 ns   # ASPIC ramp time
-    TimeC:           313 ns   # clamp time
+    TimeP:         10940 ns   # Base time element of parallel transfers
+    BufferP:         160 ns   # Parallel transfer buffer time
+    FlushP:         7810 ns   # Fast parallel clear transfer time
+    ISO1:            280 ns   # Time between ASPIC clamp and first ramp
+    ISO2:            530 ns   # Time between ASPIC ramps
+    TimeS:           190 ns   # Base element of serial transfers
+    TimeSS:         9380 ns   # Base of serial xfers in SlowFlush
+    BufferS:         110 ns   # Buffer for serial clock crossing
+    FlushS:          780 ns   # Base element of serial flush
+    RampTime:        590 ns   # ASPIC ramp time
+    TimeC:           310 ns   # clamp time
     SlowTimeP:    1250000 ns   # 5 per row in SlowFlush for ~few sec/flush
     clockperiod:      6 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:      3000      # repeat count for pseudo clock invert (matching e2v's)
