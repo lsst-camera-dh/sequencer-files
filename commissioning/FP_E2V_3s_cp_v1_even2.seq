@@ -108,7 +108,7 @@
     ReverseLine:  # Single line transfer in reverse direction 
       clocks:          P1, P2, P3, P4, RG  
       slices:                              #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
-         3360 ns     =  0,  1,  1,  0,  1  #      3330 ns     #3330   ,    333 #  3334.4 ,  521
+         3330 ns     =  0,  1,  1,  0,  1  #      3330 ns     #3330   ,    333 #  3334.4 ,  521
          OverlapP    =  1,  1,  1,  0,  1  #      2656 ns     #2660   ,    266 #  2656   ,  415
          TimeP       =  1,  1,  0,  0,  1  #      9800 ns     #9800   ,    980 #  9804.8 , 1532
          OverlapP    =  1,  1,  0,  1,  1  #      2656 ns     #2660   ,    266 #  2656   ,  415
