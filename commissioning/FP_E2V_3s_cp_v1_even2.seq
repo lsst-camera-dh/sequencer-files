@@ -90,8 +90,8 @@
        500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1
        500 ns        =  0,  1,  1,  0,  1,  1,  0,  1,  1,   1
 
-     TransferLine:  # Single line transfer (RG TBV)
-      clocks:          P1, P2, P3, P4, RG   #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
+     TransferLine:  # Single line transfer (RG TBV)   #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
+      clocks:          P1, P2, P3, P4, RG   
       slices:
          BufferP     =  0,  1,  1,  0,  1  #       500 ns     #500  ns,     50 #  505.6  ,   79    
          OverlapP    =  0,  1,  1,  1,  1  #      2656 ns     #2660   ,    266 #  2656   ,  415 
