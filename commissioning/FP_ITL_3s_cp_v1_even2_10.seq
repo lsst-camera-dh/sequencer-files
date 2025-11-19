@@ -9,7 +9,6 @@
 # 3s_cp_v1_even2 : even sequencer for a ~3s readout and 10ns or 6.4ns clocking 
 
 [constants]  # will be substituted in the code at compilation time, if used
-    clockperiod:      10 ns   # FPGA clock period (required by the interpreter)
     SegRows:        2000      # Number of rows of the sensor (unused)
     SegCols:         509      # Number of columns of the sensors (unused)
     SerCols:         512      # Size of serial register (unused)

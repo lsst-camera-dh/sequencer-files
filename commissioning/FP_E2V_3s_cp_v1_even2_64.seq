@@ -9,7 +9,6 @@
  
 
 [constants]  # will be substituted in the code at compilation time, if used
-    clockperiod:      6.4 ns   # FPGA clock period (required by the interpreter)
     SegRows:         2002      # Number of rows of each segment
     SegCols:          512      # Number of columns of each segment
     SerCols:          522      # Size of serial register
@@ -33,7 +32,7 @@
     ISO1:             128 ns   # Time for ASPIC clamp/reset to start of RD
     ISO2:             380 ns   # Time between S3 down and start of ASPIC RU
     FlushS:           520 ns   # Base serial flushing (to match ReadPixel)
-    clockperiod:       10 ns   # FPGA clock period (required by the interpreter)
+    clockperiod:      6.4 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:       3000      # repeat count for clock invert (1 us/call)
 
 [clocks]  # clock channels

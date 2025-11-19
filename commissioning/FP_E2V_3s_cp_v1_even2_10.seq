@@ -9,7 +9,6 @@
  
 
 [constants]  # will be substituted in the code at compilation time, if used
-    clockperiod:       10 ns   # FPGA clock period (required by the interpreter)
     SegRows:         2002      # Number of rows of each segment
     SegCols:          512      # Number of columns of each segment
     SerCols:          522      # Size of serial register
