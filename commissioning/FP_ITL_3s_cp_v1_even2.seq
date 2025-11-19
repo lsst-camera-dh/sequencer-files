@@ -88,9 +88,9 @@
        500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
        500 ns        =  1,  1,  0,  1,  1,  0,  1,  1,   1
 
-    TransferLine:  # Single line transfer   #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle    
+    TransferLine:  # Single line transfer   
       clocks:          P1, P2, P3, RG, S2
-      slices:
+      slices:                              #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle   
          TimeP       = 0,  1,  0,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094     
          TimeP       = 0,  1,  1,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094 
          TimeP       = 0,  0,  1,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094 
@@ -102,8 +102,8 @@
       constants:     S1=1, RST=1           #=56000            #56000 ,   5600  # 56012.8 ,  8752   | even 
 
     ReverseLine:  # Single line transfer in the reverse direction
-      clocks:          P1, P2, P3, RG, S2    #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
-      slices:
+      clocks:          P1, P2, P3, RG, S2      
+      slices:                              #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle
          TimeP       = 1,  1,  0,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094   
          TimeP       = 1,  0,  0,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094   
          TimeP       = 1,  0,  1,  1,  1   # +7000            #7000  ,    700  #  7001.6 ,  1094   
@@ -141,10 +141,10 @@
          FlushPG     = 1,  1,  0                 # +2250 n      # 2250   ,   225   #  2252.8  , 352
       constants: S1=1, S2=1, S3=1, RG=1, RST=1   # =13500       # 13500  ,  1350   #  13516.8 , 2112 | even 
 
-    ReadPixel:  # Single pixel read                         #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
+    ReadPixel:  # Single pixel read                         
       clocks:         RG, S1, S2, S3, CL, RST, RD, RU, TRG
-      slices:
-         BufferRG    = 0,  1,  0,  0,  0,   0,  0,  0,   0   #   19           # 20   ,  2      #    19.2  ns;  3   | even    
+      slices:                                                #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
+         BufferRG    = 0,  1,  0,  0,  0,   0,  0,  0,   0   #   19           # 20   ,  2      #    19.2  ns;  3   | even  
          BufferS     = 1,  1,  0,  1,  0,   0,  0,  0,   0   # + 70           # 70   ,  7      #    70.4   ;  11   |
          TimeS       = 1,  0,  0,  1,  0,   0,  0,  0,   0   # +120           # 120  , 12      #    121.6  ;  19   |
          BufferS     = 0,  0,  1,  1,  0,   0,  0,  0,   1   # + 70           # 70   ,  7      #    70.4   ;  11   |
@@ -173,22 +173,22 @@
         100 ns      = 0
       constants:    P1=1, P2=1, S1=1, RST=1, RG=1
 
-    FlushPixel:  # Single pixel flush, same duration as ReadPixel   #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
+    FlushPixel:  # Single pixel flush, same duration as ReadPixel   
       clocks:          RG, S1, S2, S3, CL
-      slices:
-         BufferS     = 1,  1,  0,  1,  0   #                               70 ns      # 70ns  ,  7     #  70.4   , 11
-         FlushS      = 1,  0,  0,  1,  0   #                              +500        # 500   ,  50    #  505.6  , 79 
-         BufferS     = 1,  0,  1,  1,  0   #                              +70         #  70   ,  7     #  70.4   , 11
-         210 ns      = 1,  0,  1,  0,  1   #                              +210        # 210   ,  21    #  211.2  , 33 
-         294 ns      = 1,  0,  1,  0,  0   #                              +294        # 300   ,  30    #  294.4  , 46
-         BufferS     = 1,  1,  1,  0,  0   #                               +70        #  70   ,  7     #  70.4   , 11
-         FlushS      = 1,  1,  0,  0,  0   #                              +500        # 500   ,  50    #  505.6  , 79
-         100 ns      = 1,  1,  0,  0,  0   #                              +100        # 100   ,  10    #  102.4  , 16
-      constants:     P1=1, P2=1, RST=1                              # =   +1814 ns    # 1820  , 182    # 1830.4  , 286  | even
+      slices:                               #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
+         BufferS     = 1,  1,  0,  1,  0   #       70 ns      # 70ns  ,  7     #  70.4   , 11
+         FlushS      = 1,  0,  0,  1,  0   #      500         # 500   ,  50    #  505.6  , 79 
+         BufferS     = 1,  0,  1,  1,  0   #       70         #  70   ,  7     #  70.4   , 11
+         210 ns      = 1,  0,  1,  0,  1   #       210        # 210   ,  21    #  211.2  , 33 
+         294 ns      = 1,  0,  1,  0,  0   #       294        # 300   ,  30    #  294.4  , 46
+         BufferS     = 1,  1,  1,  0,  0   #        70        #  70   ,  7     #  70.4   , 11
+         FlushS      = 1,  1,  0,  0,  0   #       500        # 500   ,  50    #  505.6  , 79
+         100 ns      = 1,  1,  0,  0,  0   #       100        # 100   ,  10    #  102.4  , 16
+      constants:     P1=1, P2=1, RST=1     # =   +1814 ns    # 1820  , 182    # 1830.4  , 286  | even
       
     SlowNoFlushPixel:  # TroughClear with CL toggle w/timing to match
-      clocks:          RG, S1, S2, S3, CL  #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
-      slices:
+      clocks:          RG, S1, S2, S3, CL  
+      slices:                             #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
          BufferS     = 1,  1,  1,  1,  0  #  +70             # 70     , 7      #    70.4  ,  11     
          FlushS      = 1,  1,  1,  1,  0  # +500             # 500   ,   50    #   505.6  ,  79
          BufferS     = 1,  1,  1,  1,  0  #  +70             # 70     , 7      #    70.4  ,  11
@@ -200,8 +200,8 @@
       constants:     P1=1, P2=1, RST=1    #= 69651           # 69660 ,  6966   # 69670.4  , 10886  | even     
 
     SlowFlushPixel:  # Single pixel flush|TroughClear at 40ms/576 pix
-      clocks:          RG, S1, S2, S3, CL        #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
-      slices:
+      clocks:          RG, S1, S2, S3, CL       
+      slices:                              #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
          BufferS     = 1,  1,  0,  1,  0         #  +70             # 70     , 7      #    70.4  ,  11
          FlushS      = 1,  0,  0,  1,  0         # +500             # 500   ,   50    #   505.6  ,  79
          BufferS     = 1,  0,  1,  1,  0         #  +70             # 70     , 7      #    70.4  ,  11
@@ -213,8 +213,8 @@
       constants:     P1=1, P2=1, RST=1           #= 69651           # 69660 ,  6966   # 69670.4  , 10886  | even     
 
     FastFlushPixel:  # Single pixel fast flush
-      clocks:          RG, S1, S2, S3            #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle 
-      slices:
+      clocks:          RG, S1, S2, S3            
+      slices:                             #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
          BufferS     = 1,  1,  0,  1             #  +70             # 70     , 7      #    70.4  ,  11
          224 ns      = 1,  0,  0,  1             # +224             # 230    , 23     #    224   ,  35
          BufferS     = 0,  0,  1,  1             #  +70             # 70     , 7      #    70.4  ,  11
