@@ -144,7 +144,7 @@
     ReadPixel:  # Single pixel read                         
       clocks:         RG, S1, S2, S3, CL, RST, RD, RU, TRG
       slices:                                                #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
-         BufferRG    = 0,  1,  0,  0,  0,   0,  0,  0,   0   #   19           # 20   ,  2      #    19.2  ns;  3   | even  
+         BufferRG    = 0,  1,  0,  0,  0,   0,  0,  0,   0   #   19           # 20   ,  2      #    19.2 ns;  3    | even
          BufferS     = 1,  1,  0,  1,  0,   0,  0,  0,   0   # + 70           # 70   ,  7      #    70.4   ;  11   |
          TimeS       = 1,  0,  0,  1,  0,   0,  0,  0,   0   # +120           # 120  , 12      #    121.6  ;  19   |
          BufferS     = 0,  0,  1,  1,  0,   0,  0,  0,   1   # + 70           # 70   ,  7      #    70.4   ;  11   |
