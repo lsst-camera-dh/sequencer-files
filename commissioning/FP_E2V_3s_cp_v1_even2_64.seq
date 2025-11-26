@@ -31,7 +31,7 @@
     RampTime:         614 ns   # ASPIC ramp time
     TimeC:            220 ns   # ASPIC Clamp time
     ISO1:             128 ns   # Time for ASPIC clamp/reset to start of RD
-    ISO2:             380 ns   # Time between S3 down and start of ASPIC RU
+    ISO2:             377 ns   # Time between S3 down and start of ASPIC RU
     FlushS:           518 ns   # Base serial flushing (to match ReadPixel)
     clockperiod:      6.4 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:       3000      # repeat count for clock invert (1 us/call)
@@ -161,8 +161,8 @@
          TimeC        = 0,  0,  0,  1,  1,   1,  0,  0,   0     # 220       #   220  , 22   # 224.    ,  35   | 
          ISO1         = 0,  0,  0,  1,  0,   0,  0,  0,   0     # 128       #   130  , 13   # 128.    ,  20   |        v
          RampTime     = 0,  0,  0,  1,  0,   0,  1,  0,   0     # 614       #   620  , 62   # 614.4   ,  96   | even  ^v
-         BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0     #  76       #    80  ,  8   #  76.8   ,  12   | even   ^
-         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0     # 380       #   380  , 38   # 384.    ,  60   |        v
+         BufferS      = 0,  1,  0,  1,  0,   0,  0,  0,   0     #  79       #    80  ,  8   #  83.2   ,  13   | even   ^
+         ISO2         = 0,  1,  0,  0,  0,   0,  0,  0,   0     # 377       #   380  , 38   # 377.6   ,  59   |        v
          RampTime     = 0,  1,  0,  0,  0,   0,  0,  1,   0     # 614       #   620  , 62   # 614.4   ,  96   | even  ^v
          100 ns       = 0,  1,  1,  0,  0,   0,  0,  0,   0     # 100       #   100  , 10   # 102.4   ,  16   | even  ^v
       constants:      P2=1, P3=1                                #=2481      #  2500  ,250   # 2496.0  , 390   | = even
