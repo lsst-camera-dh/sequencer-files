@@ -23,7 +23,7 @@
     FlushPGs:        2660 ns   # Fast parallel clear transfer time (shorter time , for the last seq equiv to the first ) 
     TimeS:            140 ns   # Base of serial xfers (for single phase up)
     TimeSS:          6000 ns   # Base of serial xfers in SlowFlush
-    BufferS:           76 ns   # Buffer for serial clock crossing
+    BufferS:           79 ns   # Buffer for serial clock crossing
     BufferSP:          80 ns   # Buffer for serial clock crossing
     BufferS2S3:       120 ns   # Longer buffer for S2S3 serial clock crossing
     BufferRGn:         19 ns   # Offset RG Down by - BufferRGn ns in respect of S2 down in pixel read 
@@ -32,7 +32,7 @@
     TimeC:            220 ns   # ASPIC Clamp time
     ISO1:             128 ns   # Time for ASPIC clamp/reset to start of RD
     ISO2:             380 ns   # Time between S3 down and start of ASPIC RU
-    FlushS:           520 ns   # Base serial flushing (to match ReadPixel)
+    FlushS:           518 ns   # Base serial flushing (to match ReadPixel)
     clockperiod:       10 ns   # FPGA clock period (required by the interpreter)
     InvertCnt:       3000      # repeat count for clock invert (1 us/call)
 
@@ -186,51 +186,51 @@
     FlushPixel:  # Single pixel flush, duration to be same as ReadPixel  
       clocks:          RG, S1, S2, S3, CL
       slices:                                     #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycl
-         FlushS      = 1,  0,  1,  0,  0          #  520     ns     # 520  ,      52 #  524.8 ,     82
-         BufferS     = 1,  0,  1,  1,  0          #   76            #  80  ,       8 #   76.8 ,     12
-         200 ns      = 1,  0,  0,  1,  1          #  200            # 200  ,      20 #  204.8 ,     32 
-         320 ns      = 1,  0,  0,  1,  0          #  320            # 320  ,      32 #  320   ,     50
-         BufferS     = 1,  1,  0,  1,  0          #   76            #  80  ,       8 #   76.8 ,     12 
-         FlushS      = 1,  1,  0,  0,  0          #  520            # 520  ,      52 #  524.8 ,     82 
-         100 ns      = 1,  1,  1,  0,  0          #  100            # 100  ,      10 #  102.4 ,     16
-      constants:     P2=1, P3=1, RST=1            #=1812            #1820  ,     182 #  1830.4,    286 | even 
+         FlushS      = 1,  0,  1,  0,  0          #  518          #   520 ,     52 #   518.4 ,      81
+         BufferS     = 1,  0,  1,  1,  0          #   79          #    80 ,      8 #    83.2 ,      13
+         200 ns      = 1,  0,  0,  1,  1          #  200          #   200 ,     20 #   204.8 ,      32 
+         320 ns      = 1,  0,  0,  1,  0          #  320          #   320 ,     32 #   320   ,      50
+         BufferS     = 1,  1,  0,  1,  0          #   79          #    80 ,      8 #    83.2 ,      13 
+         FlushS      = 1,  1,  0,  0,  0          #  518          #   520 ,     52 #   518.4 ,      81 
+         100 ns      = 1,  1,  1,  0,  0          #  100          #   100 ,     10 #   102.4 ,      16
+      constants:     P2=1, P3=1, RST=1            #=1814          #  1820 ,    182 #  1830.4 ,     286 | even 
 
     SlowNoFlushPixel:  #  TroughClear with CL toggle w/timing to match
       clocks:          RG, S1, S2, S3, CL     
       slices:                                 #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle  
-         FlushS      = 1,  1,  1,  1,  0      #   520          #   520 ,     52 #   524.8 ,      82     
-         BufferS     = 1,  1,  1,  1,  0      #   76           #  80  ,       8 #    76.8 ,      12 
-         FlushS      = 1,  1,  1,  1,  0      #   520          #   520 ,     52 #   524.8 ,      82
-         200 ns      = 1,  1,  1,  1,  1      #   200          # 200  ,      20 #   204.8 ,      32 
-         BufferS     = 1,  1,  1,  1,  0      #    76          #  80  ,       8 #    76.8 ,      12 
-         FlushS      = 1,  1,  1,  1,  0      #   520          #   520 ,     52 #   524.8 ,      82
-         BufferS     = 1,  1,  1,  1,  0      #    76          #  80  ,       8 #    76.8 ,      12 
+         FlushS      = 1,  1,  1,  1,  0      #   518          #   520 ,     52 #   518.4 ,      81      
+         BufferS     = 1,  1,  1,  1,  0      #    79          #    80 ,      8 #    83.2 ,      13
+         FlushS      = 1,  1,  1,  1,  0      #   518          #   520 ,     52 #   518.4 ,      81
+         200 ns      = 1,  1,  1,  1,  1      #   200          #   200 ,     20 #   204.8 ,      32 
+         BufferS     = 1,  1,  1,  1,  0      #    79          #    80 ,      8 #    83.2 ,      13
+         FlushS      = 1,  1,  1,  1,  0      #   518          #   520 ,     52 #   518.4 ,      81
+         BufferS     = 1,  1,  1,  1,  0      #    79          #    80 ,      8 #    83.2 ,      13
          67660 ns    = 1,  1,  1,  1,  0      # 67660          # 67660 ,   6766 # 67660.8 ,   10572
-      constants:     P2=1, P3=1, RST=1        #=69648 ns       # 69660 ,   6966 # 69670.4 ,   10886 | even 
+      constants:     P2=1, P3=1, RST=1        #=69651 ns       # 69660 ,   6966 # 69670.4 ,   10886 | even 
 
     SlowFlushPixel:  # Single pixel flush|TroughClear at ~ 40ms/576 pix
       clocks:          RG, S1, S2, S3, CL     
       slices:                               #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle
-         FlushS      = 1,  0,  1,  0,  0    #   520           #   520 ,     52 #   524.8 ,      82 
-         BufferS     = 1,  0,  1,  1,  0    #   76            #  80  ,       8 #    76.8 ,      12 
-         FlushS      = 1,  0,  0,  1,  0    #   520           #   520 ,     52 #   524.8 ,      82 
-         200 ns      = 1,  0,  0,  1,  1    #  200            # 200  ,      20 #   204.8 ,      32 
-         BufferS     = 1,  1,  0,  1,  0    #   76            #  80  ,       8 #    76.8 ,      12 
-         FlushS      = 1,  1,  0,  0,  0    #   520           #   520 ,     52 #   524.8 ,      82 
-         BufferS     = 1,  1,  1,  0,  0    #   76            #  80  ,       8 #    76.8 ,      12 
+         FlushS      = 1,  0,  1,  0,  0    #   518           #   520 ,     52 #   518.4 ,      81 
+         BufferS     = 1,  0,  1,  1,  0    #    79           #    80 ,      8 #    83.2 ,      13
+         FlushS      = 1,  0,  0,  1,  0    #   518           #   520 ,     52 #   518.4 ,      81 
+         200 ns      = 1,  0,  0,  1,  1    #   200           #   200 ,     20 #   204.8 ,      32 
+         BufferS     = 1,  1,  0,  1,  0    #    79           #    80 ,      8 #    83.2 ,      13
+         FlushS      = 1,  1,  0,  0,  0    #   518           #   520 ,     52 #   518.4 ,      81 
+         BufferS     = 1,  1,  1,  0,  0    #    79            #   80 ,      8 #    83.2 ,      13
          67660 ns    = 1,  1,  1,  1,  0    # 67660           # 67660 ,   6766 # 67660.8 ,   10572
-      constants:     P2=1, P3=1, RST=1      #=69648 ns        # 69660 ,   6966 # 69670.4 ,   10886 | even
+      constants:     P2=1, P3=1, RST=1      #=69651 ns        # 69660 ,   6966 # 69670.4 ,   10886 | even
 
     FastFlushPixel:  # Single pixel flush, duration of 900 ns
       clocks:          RG, S1, S2, S3         
       slices:                               #  requested (ns) #10 ns , nbcycle #  6.4ns , nb cycle
-         217 ns      = 1,  0,  1,  0        # 217             # 220  ,      22 #   217.6 ,      34 
-         BufferS     = 1,  0,  1,  1        #   76            #  80  ,       8 #    76.8 ,      12
-         217 ns      = 1,  0,  0,  1        # 217             # 220  ,      22 #   217.6 ,      34
-         BufferS     = 1,  1,  0,  1        #   76            #  80  ,       8 #    76.8 ,      12
-         217 ns      = 1,  1,  0,  0        # 217             # 220  ,      22 #   217.6 ,      34
-         BufferS     = 1,  1,  1,  0        #   76            #  80  ,       8 #    76.8 ,      12
-      constants:     P2=1, P3=1, RST=1      #=8790 ns         # 900  ,      90 #   883.2 ,     138    | even     
+         211 ns      = 1,  0,  1,  0        # 211             # 220  ,      22 #  211.2 ,      33 
+         BufferS     = 1,  0,  1,  1        #  79             #  80  ,       8 #   83.2 ,      13 
+         211 ns      = 1,  0,  0,  1        # 211             # 220  ,      22 #  211.2 ,      33 
+         BufferS     = 1,  1,  0,  1        #  79             #  80  ,       8 #   83.2 ,      13 
+         211 ns      = 1,  1,  0,  0        # 211             # 220  ,      22 #  211.2 ,      33 
+         BufferS     = 1,  1,  1,  0        #  79             #  80  ,       8 #   83.2 ,      13 
+      constants:     P2=1, P3=1, RST=1      #=870 ns          # 900  ,      90 #  883.2 ,     138    | even     
 
 
      ClkInvert: # State for clock inversion, nominal 1us
