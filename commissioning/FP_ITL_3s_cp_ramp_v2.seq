@@ -199,7 +199,7 @@
         4800 ns     = 0  # lets ADC finish previous conversion and transfer
         100 ns      = 1
         100 ns      = 0
-      constants:    P1=1, P2=1, S1=1, CL=1, RST=1, RG=1
+      constants:    P1=1, P2=1, S1=1, RST=1, RG=1
 
     EndOfImage:  # Signals end of frame to be recorded
       clocks:         EOI
